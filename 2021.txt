@@ -1,0 +1,1074 @@
+2021 in Machine Learning
+
+As every year, here are some of the papers I read this year,
+covering topics such as copulas, convex and non-convex optimization,
+reinforcement learning, Shapley score, loss landscape,
+time series with missing data, neural ODEs, graphs,
+monotonic neural nets, linear algebra, variance matrices, etc.
+
+If you want a shorter reading list:
+
+  Reinforcement learning
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3554486
+  
+  ADMM
+  https://arxiv.org/abs/1909.10233
+
+  Copulas
+  https://link.springer.com/book/10.1007/978-3-030-13785-4
+
+If you want a longer list:
+
+  http://zoonek.free.fr/Ecrits/articles.pdf
+
+= 2022-01-09_2021_in_ML.png
+
+
+
+* Copulas
+
++ Vine copulas
+   
+Copulas measure the dependence between random variables, but,
+contrary to correlation, they do not depend on the marginal
+distributions, and can describe arbitrary dependence structures.
+
+Pairwise copulas are already widely used, and many models
+are available (Gaussian, Student, Gumbel, Clayton, etc.),
+but their generalizations to higher dimensions are not flexible enough:
+the Gaussian and Student copulas are only parametrized by
+a correlation matrix, and the Archimedean copulas are exchangeable.
+
+It is however possible to combine pairwise copulas
+to build more complex models.
+The two main constructions are hierarchical Archimedean copulas (HAC),
+and vine copulas (aka the pair copula construction, PCC).
+
+Vine copulas are surprisingly easy to interpret;
+R and Python software is readily available to fit them.
+
+  Analyzing Dependent Data with Vine Copulas
+  C. Czado (2019)
+  https://link.springer.com/book/10.1007/978-3-030-13785-4
+
+  Simulating copulas: stochastic models, sampling algorithms and applications
+  J.F. Mai and M. Scherer (2017)
+  https://www.worldscientific.com/worldscibooks/10.1142/10265
+
++ Applications of copulas
+   
+Applications include time series models
+(AR-like models, but using copulas to measure the dependence over time),
+factor models, risk measurement, etc.
+
+  https://www.mdpi.com/journal/econometrics/special_issues/copula_models
+
+  COPAR: multivariate time series modeling using copulas autoregressive model
+  E.C. Brechmann amd C. Czado (2012)
+  https://arxiv.org/abs/1203.3328
+
+  Dynamic copula methods in finance
+  U. Cherubini et al. (2012)
+  https://www.wiley.com/en-sg/Dynamic+Copula+Methods+in+Finance-p-9780470683071
+ 
+We start to see applications of vine copulas in finance,
+but they often boil down to "here is the minimum spanning tree
+estimated from the rank correlation instead of the linear correlation"
+(they tend to use Kendall's τ instead of the rank correlation,
+and the edges of the MST are labeled with pairwise copulas
+instead of just correlations).
+
+  Risk management with high-dimensional vine copulas: an analysis of the Euro Stoxx 50
+  E.C. Brechmann and C. Czado (2013)
+  https://mediatum.ub.tum.de/doc/1079276/1079276.pdf
+
+  ESG, risk and (tail) dependence
+  R. Bax  et al. (2021)
+  https://arxiv.org/abs/2105.07248
+
++ Copulas and neural networks
+
+If the parametric copulas are not enough, you can always use neural networks.
+
+  Implicit generative copulas
+  T. Janke et al. (2021)
+  https://arxiv.org/abs/2109.14567
+ 
+  Copulas as high-dimensional generative models: vine copula autoencoders
+  N. Tagasovska et al. (2019)
+  https://arxiv.org/abs/1906.05423
+   
++ Local Gaussian correlation
+
+We sometimes have the impression that correlation is not constant,
+and becomes larger for extreme observations.
+
+This is often measured with the tail dependence coefficient (TDC):
+the probability that one variable has an extreme value given that the other has.
+
+The local Gaussian correlation goes further, and lets the correlation vary
+depending on where you are in the distribution: it is not limited to the tails
+and can show, for instance, a different behaviour for positive and negative values.
+It is estimated by locally fitting non-centered Gaussian distributions to the data.
+
+  Introducing localgauss, an R package for estimating and visualizing local Gaussian correlation
+  C.D. Berensten et al. (2014)
+  https://www.jstatsoft.org/article/view/v056i12
+
+  Recognizing and visualizing copulas: an approach using local Gaussian approximation
+  G.D. Berentsen et al. (2014)
+  https://fam.tuwien.ac.at/events/eaj2014/c/stove_bard.pdf
+ 
+* Optimization 
+
++ Convex optimization
+   
+Convex, constrained optimization
+has become very easy, thanks to packages such as CVXR, cvxpy, ROI.
+The following papers present many examples,
+showing how useful those problems are.
+ 
+  CVXR an R package for disciplined convex optimization
+  A. Fu et al. (2020)
+  https://stanford.edu/~boyd/papers/cvxr_paper.html
+
+  ROI: an extensible R optimization infrastructure
+  S. Theußl et al. (2020)
+  https://www.jstatsoft.org/article/view/v094i15
+
+Those packages transform your optimization problem 
+to a form amenable to solvers. This is not limited 
+to simple mathematical operations (matrix multiplication, quadratic forms,
+logarithm, exponential, largest eigenvalue, etc.):
+some can also, automatically, discretize optimization problems involving 
+functions, probability distributions, differential operators, 
+integrals, and expectations.
+
+  A unifying modeling abstraction for infinite-dimensional optimization
+  J.L. Pulsipher et al. (2021)
+  https://arxiv.org/abs/2106.12689
+
++ Convex optimization and neural networks
+
+As always, it is possible to use a neural network
+to help solve optimization problems
+(train the network to generate a partial solution,
+complete it, and finish with a few gradient descent steps).
+ 
+  DC3: a learning method for optimization with hard constraints
+  P.L. Donti et al. (2021)
+  https://arxiv.org/abs/2104.12225
+
+This also works for combinatorial problems.
+
+  Solving mixed integer programs using neural networks
+  V. Nair et al.
+  https://arxiv.org/abs/2012.13349
+
+  Exact combinatorial optimization with graph convolutional neural networks
+  M. Gasse et al. (2019)
+  https://arxiv.org/abs/1906.01629
+ 
+Conversely, it is possible (with cvxpylayers)
+to put an optimization layer inside your neural network,
+in particular if you had a 2-step procedure,
+in which you were fitting some model,
+and using its output in an optimization problem.
+
+  Automatically learning compact quality aware surrogates for optimization problems
+  K. Wang et al. (2020)
+  https://arxiv.org/abs/2006.10815
+
++ Non-convex optimization and ADMM
+
+Non-convex optimization is becoming more widespread:
+in particular, you may want a non-convex penalty
+in your optimization problems –
+the traditional L¹ penalty is an approximation of the L⁰ penalty,
+but there are better (but non-convex) ones.
+
+Those optimization problems can be solved with
+the CCCP (convex concave procedure, or difference of convex (DC) algorithm)
+   
+  A unified algorithm for the non-convex penalized estimation: the ncpen package
+  D. Kim et al. (2020)
+  https://journal.r-project.org/archive/2021/RJ-2021-003/index.html
+
+or the ADMM algorithm, which is now very popular.
+
+  Machine learning optimization algorithms and portfolio allocation
+  S. Perrin and T. Roncalli (2019)
+  https://arxiv.org/abs/1909.10233  
+  
++ Optimization on a manifold
+   
+Constrained optimization on a Euclidean space 
+can often be reformulated as unconstrained optimization
+on a manifold (e.g., the Steifel manifold if you are looking 
+for an orthogonal matrix): the optimization can be performed entirely 
+inside the manifold – for instance, the gradient steps are performed 
+with parallel transport along a geodesic.
+
+  ManifoldOptim: an R interface to the ROPTLIB library for Riemannian manifold optimization
+  S.R. Martin et al. (2020)
+  https://arxiv.org/abs/1612.03930
+ 
++ Optimization pathologies  
+
+Some of the pleasant properties of convex optimization are actually... not true.
+
+  Curiosities and counterexamples in smooth convex optimization
+  J. Bolte and E. Pauwels (2020)
+  https://arxiv.org/abs/2001.07999
+
+* Reinforcement learning in finance
+
+Reinforcement learning seems to have become very popular in finance, 
+but most of the applications are a bit suspicious: 
+they use too little data for the conclusions to be convincing – 
+only a few assets, often just one, and features from prices alone.
+
+There are a few exceptions, though.
+For instance, we can combine many financial ratios, for thousands of stocks,
+to directly compute portfolio weights, maximizing some measure of performance, 
+such as the information ratio.
+(I developed a similar model a few years ago.)
+
+  AlphaPortfolio: direct construction through deep reinforcement learning and interpretable AI
+  L.W. Cong (2019)
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3554486
+
+This description may not sound like reinforcement learning,
+but this end-to-end approach is actually a "policy gradient" algorithm.
+
+  A universal end-to-end approach to portfolio optimization via deep learning
+  C. Zhang et al. (2021)
+  https://arxiv.org/abs/2111.09170
+
+  End-to-end risk budgeting portfolio optimization with neural networks
+  A.S. Uysal et al. (2021)
+  https://arxiv.org/abs/2107.04636?context=q-fin.CP
+
+  Integrating prediction in mean-variance portfolio optimization
+  A. Butler and R.H. Kwon (2021)
+  https://arxiv.org/abs/2102.09287
+
+The other credible application of reinforcement learning in finance 
+uses high-frequency data and limit-order-book features.
+
+  Multi-horizon forecasting for limit order books: novel deep learning approaches and hardware acceleration using intelligent processing units
+  Z. Zhang and S. Zohren (2021)
+  https://arxiv.org/abs/2105.10430
+
+  Deep reinforcement learning for active high-frequency trading
+  A. Briola et al.
+  https://arxiv.org/abs/2101.07107
+
+There are also applications in (long-term) financial planning.
+(I did something similar in 2013, without knowing it was called "reinforcement learning").
+   
+  Embracing advanced AI/ML to help investors achieve success: RL for financial goal planning
+  S. Mohammed et al.
+  https://arxiv.org/abs/2110.12003
+
+Several books on reinforcement learning in finance have appeared: here is one.
+
+  Foundations of reinforcement learning with applications in finance
+  A. Rao and T. Jelvis (2021)
+  https://stanford.edu/~ashlearn/RLForFinanceBook/book.pdf
+
+But my recommendation, for a (non-finance) reinforcement learning book,
+is still:
+
+  Deep Reinforcement Learning hands-on
+  M. Lapan (2018)
+
+* Explainable AI (XAI)
+
++ Shapley score
+   
+The Shapley score (I prefer to speak of Shapley "contributions")
+has become mainstream: it is now (one of) the standard way(s) of explaining any type of model.
+It decomposes the output (of a neural network, or anything)
+into a sum of contributions of the inputs.
+
+  Explaining by removing: a unified framework for model explanation
+  I.C. Covert et al. (2020)
+  https://arxiv.org/abs/2011.14878
+
+As always, there is neural network approach,
+useful if you want to repeatedly compute Shapley scores for the same model
+(but even if you want the contributions for a single sample,
+learning a neural network with many other samples may produce
+a better result than the traditional Monte Carlo approximation).
+
+  FastSHAP: Real-Time Shapley Value Estimation
+  N. Jethani et al. (2021)
+  https://arxiv.org/abs/2107.07436
+
+Plotting the Shapley contributions versus the values of the features
+may be insightful.
+
+  Understanding machine learning for diversified portfolio construction by explainable AI
+  M. Jaeger et al. (2020)
+
+For a list of software packages in R and Python to explain machine learning models, check:
+
+  Landscape of R packages for explainable artificial intelligence
+  S. Maksymiuk et al. (2021)
+  https://arxiv.org/abs/2009.13248
+
+The underlying theory is interesting: it is related to non-additive measures
+(Choquet integral) and submodular functions (Lovász extension).
+
+  Non-additive measures
+  V. Torra et al. (2014)
+  https://link.springer.com/book/10.1007/978-3-319-03155-2
+
+  Learning with submodular functions: a convex optimization perspective
+  F. Bach (2013)
+  https://arxiv.org/abs/1111.6453
+ 
++ Shapley score in finance
+
+Since the Shapley approach can decompose anything into a sum of contributions,
+this applies to measures of performance – and we can use the same approach
+for all measures, regardless of how they are defined
+(we do not need a separate approach for each of them).
+We can compute the contributions of the assets in the portfolio,
+
+  The Shapley decomposition for portfolio risk
+  S. Mussard and V. Terraza (2008)
+  http://gredi.recherche.usherbrooke.ca/wpapers/GREDI-0609.pdf
+
+or of features that can be turned on or off
+(inputs, constraints, penalties in the optimization objective, etc.)
+
+  Porfolio performance attribution via Shapley value
+  N. Moehle et al. (2021)
+  https://arxiv.org/abs/2102.05799
+ 
++ Explainable models
+
+Instead of interpreting models as an afterthought,
+some prefer to stick to models that are inherently interpretable,
+such as generalized models with interactions (GA²M, aka
+explainable boosting machines, EBM)
+
+  Accurate intelligible models with pairwise interactions
+  Y. Lou et al. (2013)
+
+  GAMI-Net: An Explainable Neural Network based on Generalized Additive Models with Structured Interactions
+  Z. Yang et al. (2020)
+  https://arxiv.org/abs/2003.07132
+
+GAM boosting,
+
+  Boosting Algorithms: Regularization, Prediction and Model Fitting
+  P. Bühlmann and T. Hothorn (2007)
+  https://projecteuclid.org/journals/statistical-science/volume-22/issue-4/Boosting-Algorithms-Regularization-Prediction-and-Model-Fitting/10.1214/07-STS242.full
+
+  Model-based Boosting in R
+  B. Hofner et al. (2014)
+  https://cran.r-project.org/web/packages/mboost/vignettes/mboost_tutorial.pdf
+
+or GAM-like neural networks.
+ 
+  Enhancing Explainability of Neural Networks through Architecture Constraints
+  Z. Yang et al. (2019)
+  https://arxiv.org/abs/1901.03838  
+
++ Monotonic neural nets
+
+An easy way of making neural networks interpretable by construction,
+with a prescribed interpretation, is to impose monotonicity constraints:
+this ensures that each variable is used in the direction we expect.
+
+The easiest way of doing this is to add a penalty
+whenever the sign of a gradient (on a training sample) is incorrect.
+
+  Monotonic trends in deep neural networks
+  A. Gupta at al. (2019)
+  https://arxiv.org/abs/1909.10662
+
+This only guarantees that the function learned by the neural network
+is monotonic in a neighbourbood of each training sample.
+To actually ensure that the function is monotonic, everywhere,
+we can train a neural network to look for an adversarial example
+or,
+even better, actually prove (mathematically) that the function is monotinic:
+if the neural network only uses ReLU activations,
+this is a satisfiability problem, which can be solved with MILP or SMT solvers.
+
+  Certified Monotonic Neural Networks
+  X. Liu et al. (2020)
+  https://arxiv.org/abs/2011.10219
+
+  Counterexample-guided learning of monotonic neural networks
+  A. Sivaraman et al. (2020)
+  https://arxiv.org/abs/2006.08852
+
+An older approach to monotonic neural network was to build them from monotonic blocks,
+but they were either too restrictive (positive weights and ReLU activations
+produce an increasing function, but it is always convex as well)
+or complex to implement (e.g., lattice networks).
+
+  Deep Lattice Networks and Partial Monotonic Functions
+  S. You (2017)
+  https://arxiv.org/abs/1709.06680
+ 
+* Training neural networks
+
++ Loss landscape
+   
+In the loss landscape of deep learning models,
+global minima are believed to form submanifolds:
+looking for a submanifold minimizing the loss function
+(a segment, a simplex, a Bézier curve, etc.)
+instead of just a point, helps generalization.
+
+  Loss surface simplexes for mode-connecting volumes and fast ensembling
+  G.W. Benton et al. (2021)
+  https://arxiv.org/abs/2102.13042
+ 
+  Learning neural network subspaces
+  M. Wortsman et al. (2021)
+  https://arxiv.org/abs/2102.10472
+
++ Double descent (interpolation regime)
+
+It was once believed that, as the complexity of the model increases,
+the (out-of-sample) performance first improved,
+as the model becomes complex enough to fit the data,
+and then degraded, as the model becomes complex enough to overfit the training data.
+But there is a third regime: when the model becomes complex enough to perfectly fit
+the training data (the interpolation regime), making it more complex will let the optimization
+find smoother models interpolating the data, and these models generalize better:
+this is the "double descent phenomenon".
+
+  Fit without fear: remarkable mathematical phenomena of deep learning through the prism of interpolation
+  M. Belkin (2021)
+  https://arxiv.org/abs/2105.14368
+
+  Surprises in high-dimensional ridgeless least squares interpolation
+  T. Hastie et al. (2020)
+  https://arxiv.org/abs/1903.08560
+
+* Missing data 
+
++ Multiple imputation
+   
+The two naive approaches to missing data are
+either to remove the observations with at least one missing value
+(potentially discarding a lot of valuable data)
+or to "impute" the missing values, by replacing them with their
+"most likely value" (e.g., the median of the observed values,
+or the prediction of a model to predict that variable given the other ones).
+
+These approaches are suboptimal and potentially very biased:
+imagine estimating the volatility of a time series of returns
+after replacing the missing returns with their median...
+
+Instead, one can replace the missing values,
+not with a value, but with a distribution.
+Since dealing with distributions instead of values is a bit tricky,
+one can use samples from those distributions instead;
+5 samples, i.e., generating 5 completed datasets,
+is often considered enough (multiple imputation).
+
+  mice: multiple imputation by chained equations in R
+  S. van Buuren and K. Groothuis-Oudshooin (2011)
+  https://www.jstatsoft.org/article/view/v045i03
+
+  Amelia II: a program for missing data
+  J. Honaker et al. (2011)
+  https://www.jstatsoft.org/article/view/v045i07
+
+  Mixtures, EM and missing data
+  B. Stewart (2017)
+  https://scholar.princeton.edu/sites/default/files/bstewart/files/lecture5_missing_slides.pdf
+
++ Time series with missing values
+   
+For time series, it is easy to impute univariate data
+
+  imputeTS: time series missing value imputation in R
+  S. Moritz and T. Batrz-Beielstein (2017)
+  https://journal.r-project.org/archive/2017/RJ-2017-009/index.html
+
+  Comparison of different methods for univariate time series imputation in R
+  S. Moritz et al. (2015)
+  https://arxiv.org/abs/1510.03924
+
+but mutivariate data complicates things.
+
+  Imputation, estimation and missing data in finance
+  G. DiCesare (2006)
+
+  What to do about missing values in time series cross-section data
+  J. Honaker and G. King (2010)
+  https://gking.harvard.edu/files/abs/pr-abs.shtml
+  
+A simple approach is to assume that the data is Gaussian (e.g., log-prices,
+assumed to follow a multivariate Gaussian random walk):
+the conditional Gaussian distribution formula then
+gives the distribution of the missing data given the observed data.
+This may not look scalable (the matrix to invert is very large),
+but it can be implemented efficiently with a Kalman filter.
+
+Equivalently, one can use Gaussian processes.
+
+  Gaussian process imputation of multiple financial time series
+  T. de Wolff et al. (2020)
+  https://arxiv.org/abs/2002.05789
+
+As always, there are also deep learning approaches. 
+
+  BRITS: bidirectional recurrent imputation for time series
+  W. Cao et al. (2018)
+  https://arxiv.org/abs/1805.10572
+
+  NAOMI: Non-autoregressive multiresolution sequence imputation
+  Y. Liu et al. (2019)
+  https://arxiv.org/abs/1901.10946
+
+  Multivariate time series imputation with generative adversarial networks
+  Y. Luo et al. (2018)
+  https://papers.nips.cc/paper/2018/hash/96b9bff013acedfb1d140579e2fbeb63-Abstract.html
+
+  Time series imputation and prediction with bidirectional generative adversarial networks
+  M. Gupta and R. Beheshti (2020)
+  https://arxiv.org/abs/2009.08900
+
++ Deep learning with missing values
+
+Deep learning usually assumes there are no missing values, but we can relax that assumption.
+   
+  Neumiss networks: differentiable programming for supervised learning with missing values
+  M. Le Morvan et al. (2020)
+  https://arxiv.org/abs/2007.01627
+ 
+* Ordinary differential equations (ODE) and neural networks
+
++ Invertible layers
+   
+As data moves through a neural network,
+irrelevant information is progressively discarded.
+This is sometimes intentional (if we want a yes/no answer),
+sometimes not (if we want to transform an image).
+
+Judicious use of skip-layer connections can make
+a network invertible, by construction. This
+is related to second-order differential equations
+(residual networks can be seen as a discretization of first-order ODEs).
+
+  Momentum residual networks
+  M.E. Sander et al. (2021)
+  https://arxiv.org/abs/2102.07870
+
+  Fully hyperbolic convolutional neural networks
+  K. Lensink et al. (2019)
+  https://arxiv.org/abs/1905.10484
+
+Normalizing flows are another way of making
+layers invertible.
+
+  Self-normalizing flows
+  T.A. Keller et al. (2020)
+  https://arxiv.org/abs/2011.07248
+
++ GNNs and ODEs
+
+Graph neural networks (GNN) aggregate the information from neighbouring nodes:
+they can be seen as the Euler discretization of a diffusion PDE (partial differential equation).
+Other discretizations (Runge-Kutta, implicit schemes, etc.) may perform better.
+
+  GRAND: graph neural diffusion
+  B.P. Chamberlain et al. (2021)
+  https://arxiv.org/abs/2106.10934
+
++ Identifiability
+
+Neural networks allow us to estimate a differential equation
+from observations but, with a single trajectory, the problem is ill-posed
+(but regularization helps).
+
+  Beyond prediction in neural ODEs: identification and interventions
+  H. Aliee et al. (2021)
+  https://arxiv.org/abs/2106.12430
+
++ Neural ODEs
+
+There are many variants of neural ODEs: NODE, CT-RNN, LTC, etc.
+   
+  Liquid time-constant networks
+  R. Hasani et al. (2021)
+  https://arxiv.org/abs/2006.04439
+
+* Graphs
+
++ DAG constraint
+
+It is not straightforward to process
+graphs with neural networks.
+For your model to output a graph,
+it suffices to output an adjacency matrix,
+but things become more complicated
+if you want to impose properties
+on that graph, for instance,
+to make it acyclic – those properties look combinatorial.
+
+It turns out to be surprisingly easy (both to state and prove):
+a directed graph is acyclic iff its adjacency matrix A satisfies
+trace( exp(A) ) = d.
+Since this is differentiable, it can be used as a constraint in the loss function.
+   
+  DAGs with NO TEARS: continuous optimization for structure learning
+  X. Zheng et al. (2018)
+  https://arxiv.org/abs/1803.01422
+  
+  Dynotears: structure learning from time series data
+  R. Pamfil et al. (2020)
+  https://arxiv.org/abs/2002.00498
+
++ Graph features: network portrait
+
+When processing complicated objects (time series, correlation matrices, graphs, etc.)
+with machine learning algorithms
+or deep learning models, we first transform them into a set of numbers of numbers
+("features"), summarizing one aspect of the object.
+
+For instance, for graph, the "network portrait" counts
+how many nodes have k n-hop neighbours,
+
+  An information-theoretic all-scales approach to comparing networks
+  J.P. Bagrow and E.M. Bollt (2019)
+  https://arxiv.org/abs/1804. 
+
+  Portraits of complex networks
+  J.P. Bagrow et al. (2007)
+  https://arxiv.org/abs/cond-mat/0703470
+  
+  Comparing methods for comparing networks
+  T. Tantardini et al. (2019)
+  https://www.nature.com/articles/s41598-019-53708-y
+
++ PGM
+
+Graphs (more precisely, probabilistic graphical models (PGMs), Bayesian networks)
+can be used to model the relations between a large number of variables,
+if we have some prior knowledge that each relation only involves a small numberr of variables. 
+
+  A probabilistic graphical model approach to model interconnectedness
+  A. Denev et al. (2017)  
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3078021
+
+Which variables are involved in which relations can be automatically
+inferred by processing text (news, etc.).
+  
+  Building probabilistic causal models using collective intelligence
+  O. Laudy et al. (2021)
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3808233
+
++ Networks
+
+If you need a reference for the study of networks,
+the following (700-page) book looks up-to-date and exhaustive;
+it is easy to read, and nicely illustrated.
+
+  The atlas for the aspiring network scientist
+  M. Coscia (2020)
+  https://arxiv.org/abs/2101.00863
+ 
+* Linear algebra
+
++ PCA
+
+Principal component analysis (PCA) is a well-known topic,
+and we would not expect any new development around it.
+
+  Principal component analysis: a review and recent developments
+  I.T. Jolliffe and J. Cadima (2016)
+  https://royalsocietypublishing.org/doi/pdf/10.1098/rsta.2015.0202
+
+When computing PCA 
+with time series, on a moving window, we would like the eigenvectors
+to change progressively. Even if the eigenvalues remain distinct,
+this can be problematic, because only the eigenspaces are well-defined:
+the eigenvectors can freely flip sign.
+Computing the PCA with an iterative procedure can help avoid that problem. 
+   
+  Iterated and exponentially weighted moving principal component analysis
+  P. Bilokon and D. Finkelstein (2021)
+  https://arxiv.org/abs/2108.13072
+  
+  Iterative refinement for symmetric eigenvalue decomposition
+  T. Ogita and K. Aishima (2018)
+  https://www.keisu.t.u-tokyo.ac.jp/data/2016/METR16-11.pdf
+
+There are several generalizations of PCA adapted to time series.
+For instance, one can diagonalize, not just the covariance matrix, but (jointly)
+several cross-covariance matrices, for several lags.
+The first dynamic principal component of a set of time series
+is the time series that allows the best reconstruction of all those time series,
+if we also use its lags.
+  
+  Dimension reduction for time series in a blind source separation context using R
+  K. Nordhausen et al. (2021)
+  https://www.jstatsoft.org/article/view/v098i15
+
+  gdpc: an R package for generalized dynamic principal components
+  D. Peña et al. (2020)
+  https://www.jstatsoft.org/article/view/v092c02
+
+  Generalized dynamic principal components
+  D. Peña and V.J. Yohai (2015)
+  http://halweb.uc3m.es/esp/Personal/personas/dpena/publications/ingles/2016JASA_yohai.pdf 
+
+Even though PCA is an archetypal unsupervised problem,
+there are supervised variants...
+
+  Dimension reduction in R
+  S. Weisberg (2002, 2015)
+  https://www.jstatsoft.org/article/view/v007i01
+
+There are sparse variants (adding an L¹ penalty is not quite enough),
+
+  Principal component analysis with sparse fused loading
+  J. Guo et al. (2010)
+  http://dept.stat.lsa.umich.edu/~jizhu/pubs/Guo-JCGS10.pdf
+
+and higher-dimensional variants (tensor decompositions).
+
+  TensorLy: tensor learning for Python
+  J. Kossaifi et al. (2019)
+  https://jmlr.org/papers/v20/18-277.html
+  https://github.com/tensorly/tensorly
+  
+  Tensor learning for regression
+  W. Guo and I. Patras (2012)
+  http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.676.870
+  
++ Sparse and parsimonious matrices
+
+To reduce the number of parameters needed to describe a matrix,
+we often assume it is approximately low-rank
+and use a truncated singular value decomposition (SVD),
+or that it is diagonal or block diagonal.
+We can combine those two ideas, and look for a block decomposition,
+with dense diagonal blocks and low-rank off-diagonal blocks.
+
+  Efficient scalable algorithms for hierarchically semiseparable matrices
+  S. Wang et al.
+  https://www.math.purdue.edu/~xiaj/parhss.pdf
+
+Random projections may provide good enough an approximation
+(Johnson-Lindenstrauss lemma).
+
+  Fast and accurate network embeddings via very sparse random projection
+  H. Chen et al. (2019)
+  https://arxiv.org/abs/1908.11512
+
+  Database-friendly random projections: Johnson-Lindenstrauss with binary coins
+  D. Achlioptas (2002)
+  http://cgi.di.uoa.gr/~optas/papers/jl.pdf
+  
++ Fused lasso
+
+The lasso penalty can be seen as forcing a group of predictors to have the same coefficient, zero.
+This can be generalized to several groups, all variables in the same group sharing the same coefficient. 
+   
+  Simultaneous supervised clustering and feature selection over a graph
+  X. Shen et al. (2012)
+  https://europepmc.org/articles/pmc3629856?pdf=render
+  
+* Variance matrices
+
+Finding good estimators of large variance or correlation matrices
+is a perennial problem in finance.
+  
++ Parametrizations
+
+When estimating a correlation matrix, as part of some optimization problem,
+it may be difficult to impose the "correlation matrix" constraint.
+Fortunately, there are (many) parametrizations of correlation matrices,
+which turn those problems into unconstrained optimization problems.
+
+  The most general methodology to create a valid correlation matrix for risk management and option pricing
+  R. Rebonato and P. Jäckel (1999)
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1969689
+
+  Unconstrained parametrization for variance covariance matrices
+  J.C. Pinheiro and D.M. Bates (1996)
+  http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.31.494
+
+The factor decomposition of variance matrices can be applied recursively,
+with smaller and smaller variance matrices: Vₙ₊₁ = βₙ vₙ βₙ' + Δₙ.
+
+  Heterotic risk models
+  Z. Kakushadze (2015)
+  https://arxiv.org/abs/1508.04883
+  
++ Graphs
+
+Graphs are often used to understand or simplify correlation matrices,
+for instance by considering the mimimum spanning tree (add edges, one by one,
+starting with the most important ones, but only if they do not introduce any cycle)
+and discarding all the correlations not associated with an edge.
+This can be generalized to other properties: planar graphs, triangulated graphs, etc.
+
+  Portfolio optimization with sparse multivariate modelling
+  P.F. Procacci and T. Aste (2021)
+  https://arxiv.org/abs/2103.15232
+
+The graph associated to a correlation matrix can also be used to define features
+which may help in forecasting future correlation.
+
+  Forecasting financial market structure from network features using machine learning
+  D. Castilho et al. (2021)
+  https://arxiv.org/abs/2110.11751
+
++ Constraints
+
+For more reliable estimates of (large) correlation matrices, 
+one can add constraints, 
+e.g., on the sparsity patterns of the precison matrix, 
+or the sign of the partial correlations. 
+
+The resulting optimization problems may no longer be convex, 
+but they are amenable to ADMM.
+   
+  Algorithms for learning graphs in financial markets
+  J.V.M. Cardoso et al. (2020)
+  https://arxiv.org/abs/2012.15410
+
+  Learning undirected graphs in financial markets
+  J.V.M. Cardodo and D.P. Palomar (2020)
+  https://arxiv.org/abs/2005.09958
+
+  Learning high-dimensional Gaussian graphical models under total positivity without adjustment of tuning parameters
+  Y. Wang et al. (2020)
+  https://arxiv.org/abs/1906.05159
+
++ Asynchronous estimators
+
+Estimating a covariance matrix from asynchronous data is much trickier. 
+
+Under Gaussian assumptions, we can model the data as a state space process
+(log-return time series form a multivariate Brownian motion)
+and use a Kalman filter.
+
+There are other approaches, which also try to remove microstructure noise.
+
+  High frequency covariance: a Julia package for estimating covariance matrices using high-frequency financial data
+  S. Baumann and M. Klymak (2021)
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3786912
+
+  On covariation estimation for multivariate continuous Itō semimartingales with noise in non-synchronous observation schemes
+  K. Christensen et al. (2011)
+  https://econ.au.dk/fileadmin/site_files/filer_oekonomi/Working_Papers/CREATES/2011/rp11_53.pdf
+
+  Estimating the quadratic covariation matrix from observations: local method of moments and efficiency
+  M. Bibinget et al. (2014)
+  https://arxiv.org/abs/1303.6146
+ 
++ Neural networks
+
+Neural networks can help estimate variance matrices, e.g.,
+to compute factor returns in a factor model (X=βF+ε),
+or, directly, to replace the factor model (X=ϕ(F)+ε).
+
+  Deep risk models: a deep learning solution for mining latent risk factors to improve covariance matrix estimation
+  H. Lin et al.
+  https://arxiv.org/abs/2107.05201
+   
+  Deep fundamental factor models
+  M.F. Dixon and N.G. Polson (2020)
+  https://arxiv.org/abs/1903.07677
+
+  Deep factor model
+  K. Nakagawa et al. (2018)  
+  https://arxiv.org/abs/1810.01278
+
++ Bayesian estimators
+
+The Black-Litterman framework combines two sources of information about a Gaussian distribution: 
+a prior, X∼N(μ,V), and some additional but incomplete information ("views"), w'X∼N(m,v).
+It has been extended in many ways, 
+for instance with views on volatilities, correlations, or other moments.
+
+  Conditional distribution in portfolio theory
+  E. Qian and S. Gorman (2001)
+  (paywall)
+
+  Fully flexible views: theory and practice
+  A. Meucci (2008)
+  https://arxiv.org/abs/1012.2848
+
+* Miscellaneous
+
++ Generative models in Finance
+
+Generative models, in particular GANs and conditional GANs,
+are now used to generate synthetic data in finance,
+in particular, (very low-dimensional) time series, correlation matrices,
+or limit-order books.
+
+  Towards realistic market simulations: a generative adversarial networks approach
+  A. Coletta et al. (2021)
+  https://arxiv.org/abs/2110.13287
+
+  Improving the robustness of trading strategy backtesting with Boltzmann machines and generative adversarial networks
+  E. Lezmi et al. (2020)
+  https://arxiv.org/abs/2007.04838
+
+  Matrix evolutions: synthetic correlations and explainable machine learning for constructing robust investment portfolios
+  J. Papenbrock et al. (2021)
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3663220
+
+  Generating realistic stock market order streams
+  J. Li et al. (2020)
+  https://arxiv.org/abs/2006.04212
+
+  Style transfer with time series: generating synthetic financial data
+  B. da Silva and S.S. Shi (2019)
+  https://arxiv.org/abs/1906.03232
+
+  Time series generative adversarial networks
+  J. Yoon et al. (2019)
+  https://arxiv.org/abs/2107.11098
+
+(Conditional) GANs can also be used for forecasting, in a Bayesian way:
+use the predictors as conditioning variables
+and generate several samples, to approximate a posterior distribution. 
+  
++ Risk measures
+
+There are many generalizations of value-at-risk (VaR) and expected shortfall (ES, or CVaR),
+allowing for several scenarios, i.e., several distributions for future asset prices
+(they appear, informally, in the Basel regulations).
+
+  Scenario-based risk evaluation
+  R. Wang and J.F. Ziegel (2018)
+  https://arxiv.org/abs/1808.07339
+
+  A framework for measures of risk under uncertainty
+  T. Fadina et al. (2021)
+  https://arxiv.org/abs/2110.10792
+
+Many risk measures can be defined as the minimum amount
+to invest in some reference asset (e.g., cash)
+to make the strategy considered "acceptable", in some sense (e.g., 
+so that its value, at some point in the future, be positive, with probability 
+above 99%).
+
+This can be generalized to assets other than cash, 
+and even to several assets. 
+
+  Risk measures beyond frictionless markets
+  M. Arduca and C. Munari (2021)
+  https://arxiv.org/abs/2111.08294
+
+  Online estimation and optimization of utility-based shortfall risk
+  A.S. Menon et al. (2021)
+  https://arxiv.org/abs/2111.08805
+
++ k-nearest neighbours
+
+The k-nearest neighbour classifier can be generalized (a weighted average of the k nearest neighbours),
+and extrapolated to k=0.
+
+  Extrapolation towards imaginary 0-nearest neighbour and its improved convergence rate
+  A. Okuno and H. Shimodaira (2020)
+  https://arxiv.org/abs/2002.03054
+
++ Mode and quantiles
+
+The mode tree is a simple plot to help assess the presence of several modes in univariate data.
+
+  multimode: an R package for mode assessment
+  J. Ameijeiras-Alonso et al. (2021)
+  https://www.jstatsoft.org/article/view/v097i09
+
+There are many multidimensional generalizations of the median.
+
+  Computing the Oja median in R: the package OjaNP
+  D. Fischer et al. (2020)
+  https://www.jstatsoft.org/article/view/v092i08
+
+Even in dimension 1, the notion of quantile can be generalized.
+
+  An axiomatization of Λ-quantiles
+  F. Bellini and I. Peri (2021)
+  https://arxiv.org/abs/2109.02360
+
++ Multipole methods
+
+The Barnes-Hut algorithm speeds up n-body simulations 
+by aggregating long-distance interactions. 
+The Fast Multipole Method (FMM) generalizes that 
+to arbitrary interactions (arbitrary kernels),
+but requires approximations specific to the kernel
+(a low-rank factorization of the off-diagonal blocks of the kernel matrix, i.e., of long-range interactions).
+
+  A short course on fast multipole methods
+  R. Beatson and L. Greengard (1997)
+  https://math.nyu.edu/~greengar/shortcourse_fmm.pdf
+
+With automatic differentiation, the computer can do the computations,
+and use the FMM for arbitrary kernels.
+
+  The fast kernel transform
+  J.P. Ryan et al.
+  https://arxiv.org/abs/2106.04487
+
++ Data envelopment analysis (DEA)
+
+Data envelopment analysis (DEA) is a way of measuring the ``distance''
+to the efficient frontier. 
+It is a very old topic, but it seems to re-emerge from time to time.
+   
+  A data envelopment analysis toolbox for Matlab
+  I.C. Álvarez et al. (2020)
+  https://www.jstatsoft.org/article/view/v095i03
+
++ Decentralized finance (DeFi) and cryptocurrencies
+
+Cryptocurrencies do not seem to lose any of their popularity,
+and blockchain technologies make 
+decentralized exchanges (automated market makers) possible:
+anyone can become a liquidity provider.
+   
+  The adoption of blockchain-based decentralized exchanges
+  A. Capponi and R. Jia (2021)
+  https://arxiv.org/abs/2103.08842
+
++ Compression with neural nets
+
+To compress and image, one can simply overfit a neural net (pixel coordinates ↦ RGB) to it.
+
+  COIN: Compression with implicit neural representation
+  E. Dupont et al. (2021)
+  https://arxiv.org/abs/2103.03123
+
++ Matrix profile of a time series
+
+When studying complicated objects, such as images, sounds, text, graphs, correlation matrices,
+we often summarize the information they contain with a few numbers: features.
+For time series, 
+the matrix profile is a recent addition to the long list of features:
+it is another time series, which keeps track, for each observation, of the distance 
+to the nearest observation.
+
+  tsmp: an R package for time series with matrix profile
+  F. Bischoff and P.P. Rodrigues (2020)
+  https://journal.r-project.org/archive/2020/RJ-2020-021/index.html
+
++ Causality
+
+Transfer entropy is a non-linear generalization of the Granger causality test,
+but it is difficult to estimate: there are better estimators than the naive ones.
+
+  NlinTS: an R package for causality detection in time series
+  Y. Hmamouche (2020)
+  https://journal.r-project.org/archive/2020/RJ-2020-016/index.html

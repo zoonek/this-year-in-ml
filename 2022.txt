@@ -1,0 +1,782 @@
+2022 in Machine Learning
+
+As every year, here is a list of what I have read and found interesting this year in machine learning.
+
+Several topics escaped the machine learning world
+and also appeared in mainstream news: generative models, with Dall-E 2 and stable diffusion,
+and transformers, with ChatGPT.
+
+Other topics, not in the mainstream news, include
+graph neural nets,
+causal inference,
+interpretable models,
+and optimization.
+
+If you want a longer reading list:
+
+  http://zoonek.free.fr/Ecrits/articles.pdf
+
+= 2022-12_2022_in_ML.jpg
+
+
+
+* Generative models
+
+There are four main types of generative models,
+able to create new text or new images.
+
+Generative adversarial networks (GAN) contain two models, a generator and a discriminator.
+The generator tries to generate real-looking data (e.g., an image),
+while the discriminator fights it, trying to distinguish between real data and generated data.
+
+Variational autoencoders (VAE) are auto-encoders:
+they take real data as input,
+convert it into a lower-dimensional latent representation (with an encoder),
+and try to recover the input from the latent representation (with a decoder).
+VAEs differ from traditional auto-encoders in two ways:
+they add noise to the latent representation, before attempting the reconstruction,
+and their loss has an additional term to encourage the latent representations
+to look like a Gaussian distribution.
+To generate new data from a VAE, it then suffices to take random Gaussian data in the latent space,
+and feed it to the decoder.
+
+Flow models learn a sequence of invertible transformations,
+to transform random data into real-looking data. 
+
+Diffusion models learn to denoise an image: by starting with white noise
+and denoising several times, you should end up with a real-looking image.
+
+  GLIDE: Towards photorealistic image generation and editing with text-guided diffusion models
+  A. Nichol et al.
+  https://arxiv.org/abs/2112.10741
+
+Those models have been very successful at generating images from a text prompt.
+Here are the main ones.
+
+DALL-E 2 first learns a joint embedding of images and captions (the CLIP model
+is trained with contrastive and outputs the similarity between an image and
+an candidate caption), then uses a diffusion (GLIDE, conditioned on the latent
+representation of the text) to generate the image.
+
+  Hierarchical Text-Conditional Image Generation with CLIP Latents
+  A. Ramesh et al. (2022)
+  https://paperswithcode.com/method/dall-e-2
+
+Contrary to Dall-E, Imagen uses a very large language model (T5-XXL),
+trained on text only, frozen;
+it is followed by a diffusion model, to generate a small image,
+and several super-resolution steps, both conditioned on the text
+latent representation.
+
+  Photorealistic text-to-image diffusion models with deep language understanding
+  C. Saharia et al. (2022)
+  https://imagen.research.google/
+
+Parti does not use diffusion, but transformers:
+it represents images as sequences of tokens,
+with a ViT-VQGAN (vision transformer, vector quantization, generative adversarial network).
+It uses a transformer (encoder and decoder) to convert the text into a sequence of visual tokens,
+and an image auto-encoder, with two ViTs.
+
+  Scaling Autoregressive Models for Content-Rich Text-to-Image Generation
+  J. Yu et al. (2022)
+  https://parti.research.google/
+
+In StableDiffusion, the diffusion (i.e., denoising)
+is not done in pixel space, but on the latent representation
+of the image (computed with a VAE).
+
+  High-Resolution Image Synthesis with Latent Diffusion Models
+  R. Rombach et al. (2021)
+  https://arxiv.org/abs/2112.10752
+
+StableDiffusion is publically available: you can run it on your own hardware
+(no programming required) with the following UI and models.
+The images above were generated with it.
+
+  https://github.com/AUTOMATIC1111/stable-diffusion-webui
+  https://rentry.org/sdmodels
+
+* Transformers
+
+Transformers are replacing task-specific modules,
+such as recurrent neural networks (LSTM, GRU) and convolution,
+not only for text, but also for images (ViT, vision transformer)
+and graphs (GAT, graph attention).
+
+An attention layer has 3 matrix inputs, Q, K, V;
+its output is computed as
+
+  output = softmax( Q K' ) V.
+
+(I omit the normalization constant √d,
+where d is the number of keys:
+it ensures that the scale of the activations remains around 1.)
+Contrary to most traditional layers, it does not compute a linear combination of its inputs, but a product.
+
+It is often a self-attention layer, i.e., the 3 inputs are computed from the same input:
+Q=W₁X, K=W₂X, V=W₃X.
+
+Attention layers can be interpreted as hash tables:
+Q is the query, K the keys of a look-up table, and V its values;
+if the query and keys are 1-hot encoded (row) vectors,
+the output (without the softmax) is the value corresponding to the query.
+
+Strictly speaking, what we described was the attention mechanism:
+a transformer is made of several self-attention blocks, run in parallel,
+followed by fully-connected layers, with normalization and residual connections,
+and its input is augmented with a positional encoding.
+
+Transformers are used to process sequences of tokens (often, from text,
+but you can use sequences of image patches, instead):
+the query and key matrices have one row per token and one column per channel;
+the product Q K' is then a square matrix, indexed by the token positions,
+which can be interpreted as
+"the attention token j in the output pays to token i from the input".
+
+  Pretrained transformers for text ranking: BERT and beyond
+  J. Lin at al. (book, 2021)
+  https://arxiv.org/abs/2010.06467
+
+  Decision transformer: reinforcement learning via sequence modeling
+  L. Chen et al. (2021)
+  https://arxiv.org/abs/2106.01345
+
+  Vector-quantized Image Modeling with Improved VQGAN
+  V. Yu et al. (2021)
+  https://arxiv.org/abs/2110.04627
+  
+  CrossViT: cross-attention multi-scale vision transformer for image classification
+  C.F. Chen et al. (2021)
+  https://arxiv.org/abs/2103.14899
+
+* Graphs
+
+When data is not purely numeric but has some additional structure,
+neural networks need to be adapted in some way, e.g., with tokenization and embeddings for text,
+or convolutions for images. Graphs are a little trickier.
+
+Graph neural networks (GNN) try to solve one of the following three tasks:
+given a (large) graph (e.g., a social network), forecast node or edge features;
+given a (large) graph, infer missing edges;
+given many (small) graphs (e.g., molecules), forecast graph features.
+Along the way, the network may compute a latent representation of the nodes, edges, or graphs.
+
+For an overview of the topic, check
+
+  Graph representation learning
+  W.L. Hamilton (2020)
+  https://www.cs.mcgill.ca/~wlh/grl_book/
+
++ Weisfeiler-Lehman (WL) graph isomorphism algorithm
+
+To detect if two graphs are isomorphic,
+the Weisfeiler-Lehman algorithm proceeds as follows:
+each node computes a hash of its features (if there are no features, just use "1"
+as feature for all nodes), then sends it to its neighbours;
+each node concatenates its hash with the hash of the multiset of the messages it received
+and uses it as its new feature; the process then iterates.
+If two graphs have a different multiset of hashes after the same number of steps,
+they are not isomorphic.
+While useful, this procedure fails to distinguish very simple graphs.
+
+Standard graph neural networks are only as powerful as the WL test.
+
+It is possible to increase the power of this test, and the power of graph neural nets,
+by considering k-tuples of nodes (instead of nodes)
+
+  Weisfeiler and Leman go sparse: towards scalable higher-order graph embeddings
+  C. Morris et al. (2020)
+  https://arxiv.org/abs/1904.01543
+
+  SpeqNets: sparsity-aware permutation-equivariant graph networks
+  C. Morris et al. (2022)
+  https://arxiv.org/abs/2203.13913
+
+or by adding structural features (e.g., the number of small subgraphs of each type containing a given node or edge),
+
+  Improving graph neural network expressivity via subgraph isomorphism counting
+  G. Bouritsas et al.
+  https://arxiv.org/abs/2006.09252
+
+or by dropping nodes (exhaustively if the graphs are small -- you end up with sets of graphs)
+  
+  A theoretical comparison of graph neural network extensions
+  P.A. Papp and R. Wattenhofer (2022)
+  https://arxiv.org/abs/2201.12884
+
++ Aggregation
+
+A GNN can aggregate the messages a node receives in different ways:
+sum, mean and max, are common choices.
+
+  Sorted pooling in convolutional networks for one-shot learning
+  H. András (2020)
+  https://arxiv.org/abs/2007.10495
+
+But which is best?
+It is actually preferable to have all of them (PNA)
+
+  Principal neighbourhood aggregation for graph nets
+  G. Corso et al. (2020)
+  https://arxiv.org/abs/2004.05718
+
+or to learn the aggregation function(s) (LAF). 
+
+  Learning aggregation functions
+  G. Pellegrini et al. (2021)
+  https://arxiv.org/abs/2012.08482
+
+We can also build those aggregation functions (they just need to be permutation-invariant)
+as averages, over all possible orderings, of arbitrary (permutation-sensitive) functions (e.g., LSTM);
+to reduce the amount of computations,
+use a canonical ordering, or limit yourself to functions using only their first k arguments
+
+  Janossy pooling: learning deep permutation-invariant functions for variable-size inputs
+  R.L. Murphy et al. (2019)
+  https://arxiv.org/abs/1811.01900
+
++ Transformers
+
+Transformers (for text or images) rely on a positional encoding.
+For graphs, one could use the low-frequency eigenvectors of the Laplacian
+(which generalizes the sine and cosine, from grids to arbitrary graphs),
+complemented with a structural embedding.
+
+  A generalization of transformer networks to graphs
+  V. P. Dwivedi and X. Bresson (2021)
+  https://arxiv.org/abs/2012.09699
+
+  Rethinking graph transformers with spectral attention
+  D. Kreuzer et al. (2021)
+  https://arxiv.org/abs/2106.03893
+
+  Structure-aware transformer for graph representation learning
+  D. Chen et al. (2022)
+  https://arxiv.org/abs/2202.03036
+
++ Graph generation
+
+There are many models to generate random graphs:
+prescribed degree distribution, preferential attachment, small world, random dot product, copying model, etc.
+
+  Random dot product graph models for social networks
+  S.J. Young and E.R. Scheinerman
+  http://www.math.louisville.edu/~syoung/research/papers/waw07.pdf
+
+  Duplication models for biological networks
+  F. Chung et al. (2003)
+  https://people.math.sc.edu/lu/papers/bio-papers.pdf
+
+We can also use graph neural nets, and generate the Laplacian matrix
+(start with the eigenvalues, then the eigenvectors, and comvert the result to an adjacency matrix).
+
+  Spectre: spectral conditioning helps to overcome the expressivity limits of one-shot graph generators
+  K. Martinkus et al. (2022)
+  https://arxiv.org/abs/2204.01613
+
++ Knowledge graphs
+
+Knowledge graphs (KG) represent relations (edges) between entities (nodes) --
+think of entities as nouns and relations as verbs.
+
+One can learn an embedding of the entities as points in Euclidean space,
+and an embedding of the relations as transformations in that space:
+translations (this generalizes the equation "king - man + woman = queen"),
+rotations, etc. (there are many other).
+
+  Learning hierarchy-aware knowledge graph embeddings for link prediction
+  Z. Zhang et al. (2020)
+  https://arxiv.org/abs/1911.09419
+
+  Translating embeddings for modeling multi-relational data
+  A. Bordes et al. (2013)
+  https://papers.nips.cc/paper/2013/hash/1cecc7a77928ca8133fa24680a88d2f9-Abstract.html
+
+  RotatE: knowledge graph embedding by relational rotation in complex space
+  Z. Sun et al. (2019)
+  https://arxiv.org/abs/1902.10197
+
+* Causal inference
+
+We know that "correlation is not causation",
+but this is often just a reminder
+that we should not draw any unjustified conclusion from the data.
+What if we want to draw causal conclusions?
+
+It is actually possible, even from observational data alone,
+but fraught with pitfalls.
+In particular, we should "control for confounders",
+but controlling for too many variables can lead to incorrect conclusions --
+in complex situations, finding which variables to control and which not to,
+can be tricky.
+
+  Introduction to causal inference
+  B. Neal (2020)
+  https://www.bradyneal.com/causal-inference-course
+
+Causal models tend to be interpretable, and more robust to distribution shift
+(as long as the shift is limited to the distribution of the causes,
+and does not affect the causal mechanism itself).
+
+If you want to actually use those ideas, with your data,
+check the cdt package, to infer the structure of the causal graph
+(but I recommend you use domain knowledge to build the graph,
+and only then check if it is consistent with the data),
+and the DoWhy package, to assess the strength of each causal relation
+(it will automatically find an adjustement set: you do not have to worry about
+which variable to condition on and which not to).
+
+  Causal Discovery Toolbox: Uncovering causal relationships in Python
+  D. Kalainathan et al. (2020)
+  https://jmlr.org/papers/v21/19-187.html
+  https://github.com/FenTechSolutions/CausalDiscoveryToolbox
+
+  DoWhy: an end-to-end library for causal inference
+  A. Sharma and E. Kiciman
+  https://arxiv.org/abs/2011.04216
+  https://github.com/py-why/dowhy
+
+* Optimization
+
+The following (illustrated) book reviews the algorithms used to solve optimization problems.
+
+  Algorithms for optimization
+  M.J. Kochenderfer and T.A. Wheeler (2019)
+  https://algorithmsbook.com/optimization/
+
+"Decision making" is both a very old topic (expected utility maximization)
+and a new (hype-filled) one (reinforcement learning).
+    
+  Algorithms for decision making
+  M.J. Kochenderfer et al. (2022)
+  https://algorithmsbook.com/
+
+Bayesian optimization models the (expensive) objective function with a Gaussian process (GP),
+and uses this GP to decide where to next evaluate the function.
+    
+  Bayesian optimization
+  R. Garnett (2021)
+  https://bayesoptbook.com/
+
+Many optimization problems, convex or not, can be solved efficiently with ADMM or related methods
+
+  Efficient differentiable quadratic programming layers: an ADMM approach
+  A. Butler and R.H. Kwon (2021)
+  https://arxiv.org/abs/2112.07464
+    
+  A primer on monotone operator methods
+  A.K. Ryu and S. Boyd (2016)
+  https://web.stanford.edu/~boyd/papers/monotone_primer.html
+  
+  Conic optimization via operator splitting and homogeneous self-dual embedding
+  B. O'Donoghue et al. (2016)
+  https://web.stanford.edu/~boyd/papers/scs.html
+
+* Interpretable models and verified networks
+
+There are many ways of making machine learning models interpretable.
+
+The most straightforward approach is to use post hoc methods:
+fit any model you want, and try to interpret it, after the fact.
+But this is only a rationalization:
+it will find an explanation, regardless of what the model does --
+in particular, it is an explanation of the model,
+not of the true data generation process: if the model is bad,
+it is an explanation of something irrelevant and unrelated to reality.
+
+  General pitfalls of model-agnostic interpretation methods for machine learning models
+  C. Molnar et al. (2020)
+  https://arxiv.org/abs/2007.04131
+
+Another approach is to use models that are interpretable by construction.
+These could be simple models (linear models, generalized additive models (GAM),
+or GAMs estimated with neural nets).
+
+  GAIM: Enhancing explainability of neural networks through architecture constraints
+  Z. Yang et al. (2019)
+  https://arxiv.org/abs/1901.03838
+
+  GAMI-Net: an explainable neural network based on generalized additive models with structured interactions
+  Z. Yang et al. (2020)
+  https://arxiv.org/abs/2003.07132
+  
+One can even claim that ReLU networks are interpretable:
+indeed, they are locally linear.
+
+  Unwrapping the black box of deep ReLU networks: interpretability, diagnostics and simplification
+  A. Sudjianto et al. (2020)
+  https://arxiv.org/abs/2011.04041  
+
+Models can also be interpretable by construction if they use additional information. 
+In particular, we often know whether an input should have a positive or
+negative impact on the output (for instance, income
+has a positive impact on the probability of repayment of a loan):
+we can restrict ourselves to models with that monotonicity constraint,
+for instance, a linear regression with constraints on the signs of the coefficients,
+gradient boosting with a monotonicity constraint,
+or a neural network with a monotonicity constraint.
+
+We mentioned earlier that causal models were also interpretable, by construction. 
+
+For general models, once the model has been fitted,
+we may want a mathematical proof that the model does not do anything untoward,
+and that is is sufficiently robust (to adversarial examples): 
+for ReLU networks, this can often be reduced to a linear (mixed integer) program.
+
+  Evaluating robustness of neural networks with mixed integer programming
+  V. Tjeng et al. (2019)
+  https://arxiv.org/abs/1711.07356
+
+  Traversing the local polytopes of ReLU neural networks: a unified approach for network verification
+  S. Xu et al. (2021)
+  https://arxiv.org/abs/2111.08922
+
+* Tensors
+
+In deep learning, "tensors" are just arrays of numbers,
+without any mathematics attached to them: linear algebra is limited to matrices.
+But linear algebra can be generalized to higher-dimensional arrays.
+
+For instance, the singular value decomposition (SVD) can be generalized to tensors
+(in several ways): it provides a low-rank approximation, and can be used to compress
+large weight matrices.
+
+  Tensor decompositions and applications
+  T.G. Kolda and B.W. Bader (2009)
+  https://www.kolda.net/publication/TensorReview.pdf
+
+  Bayesian streaming sparse Tucker decomposition
+  S. Fang et al. (2021)
+  https://proceedings.mlr.press/v161/fang21b.html
+  
+  CoSTCo: a neural tensor completion model for sparse tensors
+  H. Liu et al. (2019)
+  https://liyaguang.github.io/papers/kdd19_CoSTCo.pdf
+  
+Similarly, the non-negative matrix factorization (NMF) can be generalized to higher-order tensors.
+
+  Applying separative non-negative matrix factorization to extra-financial data
+  P. Fogel et al. (2022)
+  https://arxiv.org/abs/2206.04350
+  https://github.com/paulfogel/NMTF
+
+Tensor decompositions also lead to function approximations,
+for instance by generalizing f(x,y) ≈ f(x̄,y) f(x,ȳ) / f(x̄,ȳ)
+to more points and more dimensions.
+
+  Fast high-dimensional integration using tensor networks
+  S. Cassel (2022)
+  https://arxiv.org/abs/2202.09780
+
+  Alternatives to deep neural networks in finance
+  A.V. Antonov and V.V. Piterbarg (2021)
+  https://ssrn.com/abstract=3958331
+    
+* Risk measures
+
++ Alternatives to correlation
+
+There are many alternatives to correlation: Chatterjee's (a variant of rank correlation),
+ϕₖ (another variant, which also detects non-monotonic relations),
+MIC (maximum information coefficient), distance correlation, HHG,
+HSIC (Hilbert-Schmidt independence criterion),
+Hoeffding's D, Blum-Kiefer-Rosenblatt's R, Bergsma-Dassios-Yanagimoto's τ*.
+
+  phi_k: A new correlation coefficient between categorical, ordinal and interval variables with Pearson characteristics
+  M. Baak et al. (2019)
+  https://arxiv.org/abs/1811.11440
+
+  A new coefficient of correlation
+  S. Chatterjee (2019)
+  https://arxiv.org/abs/1909.10140
+  On the power of Chatterjee's rank correlation
+  H. Shi et al. (2020)
+  https://arxiv.org/abs/2008.11619
+
++ Correlation matrices
+
+In optimization problems, when we are looking for a correlation matrix,
+we can replace the constraint "C is a correlation matrix" with a parametrization
+of the correlation matrix. There are many such parametrizations.
+
+  A new parametrization of correlation matrices
+  I. Archakov and P.R. Hansen (2020)
+  https://arxiv.org/abs/2012.02395
+
+Portfolio optimization requires a variance matrix,
+but it can be replaced by any other matrix measuring risk and similarity,
+such as higher (even) moments
+
+  Fat tails and optimal liability driven portfolios
+  J. Rosenzweig
+  https://arxiv.org/abs/2201.10846
+
+value-at-risk (VaR and CoVaR),
+
+  Optimal portfolio choice and stock centrality for tail risk events
+  C. Katsouris (2021)
+  https://arxiv.org/abs/2112.12031
+
+rank correlation, tail dependence, clustering coefficient, 
+
+  Portfolio optimization with idiosyncratic and systemic risks for financial networks
+  Y. Yang et al. (2021)
+  https://arxiv.org/abs/2111.11286
+
+local Gaussian correlation,
+
+  Introducing localgauss, an R package for estimating and visualizing local Gaussian correlation
+  G.D. Berensten et al. (2014)
+  https://www.jstatsoft.org/article/view/v056i12
+
+the inverse of a modified precision matrix
+(the precision matrix captures the conditional dependence structure
+for Gaussian distributions, but not for, say, Student distributions)
+
+  A generalized precision matrix for t-Student distributions in portfolio optimization
+  K. Bax et al. (2022)
+  https://arxiv.org/abs/2203.13740
+
+graph-based measures (correlation-weighted complete graph → node embedding → distances → similarities)
+
+  RPS: portfolio asset selection using graph-based representation learning
+  M.A. Fazli et al.
+  https://arxiv.org/abs/2111.15634
+  
++ Risk measures
+
+Risk used to be measured with standard deviation ("volatility"),
+a quantile (value-at-risk, VaR) or a conditional expectation (conditional value at risk, CVaR,
+aka expected shortfall, ES).
+There is now an avalanche of alternatives
+(this list is far from exhaustive): 
+drawdown at risk (VaR and CVaR, computed from the distribution of drawdowns instead of returns) [1],
+PELVE (to convert between VaR and CVaR) [2],
+CoVaR (VaR of one variable conditioned on another variable) [3,4],
+Semi-betas [5],
+certainty-equivalent and other risk measures defined from a utility function [6,7],
+elicitable statistics [8],
+entropic value-at-risk [9,10,11],
+distorsion risk measures [12],
+robust measures of risk [13,14,15],
+their confidence intervals [16],
+and many more [17,18,19].
+
+  [1] Drawdown beta and portfolio optimization  
+  R. Ding and S. Uryasev (2021)
+  http://uryasev.ams.stonybrook.edu/wp-content/uploads/2021/10/Drawdown_Portfolio_Optimization_Problems_and_Drawdown_Betas.pdf
+
+  [2] Probability equivalent level of value at risk and higher order expected shortfalls  
+  M. Barczy et al.
+  https://arxiv.org/abs/2202.09770
+  
+  [3] Vulnerability-CoVaR: investigating the crypto market
+  M. Waltz et al. (2022)
+  https://arxiv.org/abs/2203.10777
+  [4] Scenario-based risk evaluation
+  R. Wang and J.F. Ziegel
+  https://arxiv.org/abs/2203.10777
+  
+  [5] Realized semibetas: disentangling good and bad downside risks
+  T. Bollerslev et al.
+  http://public.econ.duke.edu/~ap172/BPQ_semibeta_2022_JFE.pdf
+  
+  [6] Optimal expected utility risk measures
+  S. Geissel et al. (2017)
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2651132
+  [7] Online estimation and optimization of utility-based shortfall risk
+  A.S. Menon et al.
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2651132
+  
+  [8] Sensitivity measures based on scoring functions
+  T. Fissler and S.M. Pesenti (2022)
+  https://arxiv.org/abs/2203.00460
+  
+  [9] Portfolio construction with Gaussian mixture returns and exponential utility via convex optimization
+  E. Luxenberg and S. Boyd (2022)
+  https://arxiv.org/abs/2205.04563
+  [10] Entropic portfolio optimization: a disciplined convex programming framework
+  D. Cajas (2021)
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3792520
+  [11] Optimal investment with risk controlled by weighted entropic risk measures
+  J. Xia (2021)
+  https://arxiv.org/abs/2112.02284
+  
+  [12] Multinomial backtesting of distortion risk measures
+  S. Bettels et al. (2022)
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4009731
+
+  [13] Model aggregation for risk evaluation and robust optimization
+  T. Mao et al. (2022)
+  https://arxiv.org/abs/2201.06370
+  [14] A framework for measures of risk under uncertainty
+  T. Fadina et al.
+  https://arxiv.org/abs/2110.10792
+  [15] Mean-covariance robust risk measurement
+  V.A. Nguyen et al. (2021)
+
+  [16] Influence functions for risk and performance estimators
+  S. Zhang et al. (2020)
+  https://arxiv.org/abs/2112.09959
+  [17] Cone-constrained monotone mean-variance portfolio selection under diffusion models
+  Y. Shen and B. Zou (2022)
+  https://arxiv.org/abs/2205.15905
+  [18] Distributionally robust end-to-end portfolio construction
+  G. Costa and G.NB. Iyengar (2022)
+  https://arxiv.org/abs/2206.05134
+  [19] Portfolio selection models based on interval-valued conditional value at risk (ICVaR) and empirical analysis
+  J. Zhang and K. Zhang (2022)
+  https://arxiv.org/abs/2201.02987
+  
+* Miscellaneous
+
++ Shapley values
+
+Shapley values can be computed slightly more efficiently than the definition suggests.
+
+  Portfolio performance attribution via Shapley value
+  N. Moehle et al. (2021)
+  https://arxiv.org/abs/2102.05799
+
++ Algorithmic game theory
+
+  Algorithmic game theory
+  T. Kesselheim (2020)
+  https://www.youtube.com/watch?v=4pQrz13x5FE&list=PLyzcvvgje7aD_DjpmhFzQ9DVS8zzhrgp6
+
++ Topological data analysis (TDA)
+
+Topological data analysis (TDA) studies clouds of points,
+by progressively fattening them (replacing them with balls of increasing diameters)
+and looking at how their Betti numbers (the number of connected components,
+the number of "disks", the number of "spheres", etc.)
+change.
+The resulting information can be represented in many ways:
+persistence barcode, persistence diagram, persistence landscape, persistence image, etc.
+
+  Persistence images: a stable vector representation of persistent homology
+  H. Adams et al. (2017)
+  https://jmlr.org/papers/v18/16-337.html
+
+Persistence diagrams, as a layer,
+can be used as regularizers (image reconstruction)
+or priors (generative models).
+
+  A topology layer for machine learning
+  R. Brüel-Gabrielsson et al. (2019)
+  https://arxiv.org/abs/1905.12200
+
++ Wasserstein embeddings
+
+A Wasserstein embedding is a mapping, from the set of images
+(or, more generally, probability distributions)
+to a Euclidean space,
+transforming the Wasserstein distance into the Euclidean distance;
+applications include interpolation (Wasserstein barycenter).
+
+  Learning Wasserstein embeddings
+  N. Courty et al. (2018)
+  https://arxiv.org/abs/1710.07457
+  
+  Set representation learning with generalized sliced-Wasserstein embeddings
+  N. Naderializadeh et al.
+  https://arxiv.org/abs/2103.03892
+  
++ Fractional derivatives
+
+Time series models (ARIMA, state space models, hidden markov models),
+deep learning models (recurrent neural networks)
+and ordinary differential equations
+all tend to have short memory.
+
+To address that common problem, they rely on different (but sometimes related) ideas: 
+fractional Brownian motion (Hurst exponent, for instance the "rough volatility" in finance) for time series,
+explicit memory (LSTM, GRU) for deep learning,
+and fractional derivatives for ODEs.
+
+  What lies between a function and its derivative
+  https://www.youtube.com/watch?v=2dwQUUDt5Is
+
+  The Hurst roughness exponent and its model-free estimation
+  X. Han and A. Schied (2021)
+  https://arxiv.org/abs/2111.10301
+
+  Rough volatility: fact or artefact
+  R. Cont and P. Das (2022)
+  https://arxiv.org/abs/2203.13820
+
+  Quantifying the impact of ecological memory on the dynamics of interacting communities
+  M. Khalighi et al. (2021)
+  https://www.biorxiv.org/content/10.1101/2021.09.01.458486v2
+   
++ Contrastive learning
+
+Contrastive learning learns a latent representation of the input
+by training with (one or more) positive samples (samples from the same class,
+or different augmentations of the same sample) and (one or more)
+negative samples (samples from a different class, or samples picked at random,
+in the unsupervised case).
+
+  Supervised contrastive learning
+  P. Khosla et al. (2020)
+  https://arxiv.org/abs/2004.11362
+
++ Meta models
+
+Deep learning models tend to produce point estimates:
+they give a single answer, with no confidence interval --
+they are absolutely confident in their output --
+they do not know when they do not know.
+
+Bayesian models address that problem by outputing a probability distribution
+instead of a point estimate.
+Meta-models offer an alternative and more straightforward solution:
+they forecast the error of another model.
+
+  Uncertainty prediction for deep sequential regression using meta models
+  J. Navrátil et al. (2020)
+  https://arxiv.org/abs/2007.01350
+
+  Confidence scoring using whitebox meta-models with linear classifiers
+  T. Chen et al. (2018)
+  https://arxiv.org/abs/1805.05396
+
+You can even have a meta-meta-model...
+
+  Learning prediction intervals for model performance
+  B. Elder et al. (2021)
+  https://arxiv.org/abs/2012.08625
+
++ PCA variants
+
+Instrumental PCA is a variant of PCA that
+allows the loadings to depend on exogenous variables.
+
+  A factor model for option returns
+  M. Büchner and B. Kelly (2021)
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3444232
+
++ Non-scalar activations
+
+The activations in a neural network do not have to be real numbers:
+they can be complex numbers, or vectors.
+
+  Vector neurons: a general framework for SO(3)-equivariant networks
+  C. Deng et al. (2021)
+  https://arxiv.org/abs/2104.12229
+
++ Stochastic gradient descent
+
+Plain stochastic gradient descent (SGD) is already regularized:
+the finite step size provides a regularization proportional to ‖∇ℓ‖²
+(when compared to the gradient flow, i.e., an infinitesimal step size).
+
+  On the origin of implicit regularization in stochastic gradient descent 
+  S.L. Smith et al. (2021)
+  https://arxiv.org/abs/2101.12176
+
+  Implicit gradient regularization
+  D.G.T. Barrett and B. Dherin (2021)
+  https://arxiv.org/abs/2009.11162
+

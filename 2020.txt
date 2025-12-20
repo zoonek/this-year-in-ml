@@ -1,0 +1,818 @@
+2020 in machine learning
+
+As every year, here is a list of the papers, books or courses I have found intersting this year:
+they cover
+causality, 
+alternatives to backpropagation (DFA, Hebbian learning),
+neural differential equations,
+mathematics done by computers,
+artificial general intelligence (AGI),
+explainable AI (XAI),
+fairness,
+transformers,
+group actions (equivariant neural networks),
+disentangled representations,
+discrete operations,
+manifolds, 
+topological data analysis, optimal transport,
+semi-supervised learning,
+and a few other topics.
+
+= 2021-01-01_2020_in_ML.png
+
+
+
+Given the very large number of papers published in machine learning, 
+this review cannot be objective: it is biased by my centers of interest 
+and the papers I stumbled upon.
+These are not necessarily papers published in 2020, but papers I have read in 2020.
+
+* Courses and books: causality, GANs, RL, unsupervised learning and meta-learning
+
+Let us start with a few books and courses I have found interesting:
+they give a much broader and more complete view of the topics they cover than isolated papers. 
+
++ Causal inference
+
+On paper, causal inference is not too difficult: 
+to measure the impact of a variable X on a variable Y, 
+write down the Bayesian network that links them and everything related to them, 
+cut all the incoming edges to X, and compute the conditional probability P[Y|X] on this new graph -- 
+it is often written P[Y|do(X)], to distinguish it from P[Y|X] on the initial graph.
+
+But how do we know that graph? What if there are unobserved variables? 
+When can we estimate this probability from observational data alone? 
+What if we only have two variables -- since the Bayesian networks X→Y and Y→X are equivalent, this seems hopeless?
+
+  Introduction to causal inference
+  B. Neal (2020)
+  https://www.bradyneal.com/causal-inference-course
+
+  Elements of causal inference
+  J. Peters et al. (2017)
+  http://web.math.ku.dk/~peters/elements.html
+
++ Generative additive networks (GANs)
+
+If you have never implemented a GAN, the following book explains the basics, with lots of detailed code examples -- 
+unfortunately, it stops just before Transformers.
+
+  Generative deep learning
+  D. Foster (2019)
+
++ Reinforcement learning
+
+Reinforcement learning is a rather complex topic, and it is easy to get overwhelmed by 
+the different algorithms and the minute (but vital) differences between them. 
+This book takes a concrete approach to the subject: each chapter covers a complete example,
+with detailed, commented code. 
+Contrary to most presentations, it does not start with dynamic programming,
+but with the "cross-entropy method" (CEM), which turns out to be much simpler.
+
+  Deep reinforcement learning hands-on
+  M. Lapan (2020)
+
++ More advanced courses
+
+If you are already familiar with deep learning, 
+the following can serve as second courses on this topic.
+
+  Deep unsupervised learning
+  P. Abbeel et al. (Berkeley, 2020)
+  https://sites.google.com/view/berkeley-cs294-158-sp20/home
+
+  Multitask and metalearning
+  C. Finn (Stanford, 2020)
+  https://cs330.stanford.edu/
+
+* Training neural networks: alternatives to back-propagation
+
+Neural networks are often trained with back-propagation: 
+by "propagating" the error of the network (from the loss function to the weights), 
+we can compute the gradient (of the loss function wrt the weights), 
+and use it to move the weights towards a better network. 
+
+Surprisingly, it is not the only way we can train a neural network. 
+
++ Direct feedback alignment (DFA) 
+
+With backpropagation, a layer receives the error (in the loss function) 
+multiplied by a product of matrices (the transposes of the weight matrices of the next layers). 
+Instead, direct feedback alignment (DFA) multiplies the error 
+by a fixed random matrix, so that all the layers can be processed at the same time. 
+
+This sounds like a bad idea, but the following seems to happen: 
+at first, the network does not learn anything, but tweaks the weights 
+so that these products by random matrices approximate the actual gradients
+("alignment"); only then does actual learning start.
+
+  The dynamics of learning with feedback alignment
+  M. Refinetti et al. (2020)
+  https://arxiv.org/abs/2011.12428
+
+DFA does not work well with CNNs 
+(we would need to add some constraint to the random matrices, to account for the translation invariance of the convolution filters), 
+but seems to work well with everything else.
+
+  Direct feedback alignment scales to modern deep learning tasks and architectures
+  J. Launay et al. (2020)
+  https://arxiv.org/abs/2006.12878
+
+They can be used to train networks with unknown, or even non-differentiable layers (e.g., a random layer, implemented in hardware).
+
+  Ignorance is bliss: adversarial robustness by design through analog computing and synaptic asymmetry
+  A. Cappelli (2020)
+  https://medium.com/@LightOnIO/ignorance-is-bliss-adversarial-robustness-by-design-with-lighton-opus-4f143fa629b
+  https://www.youtube.com/watch?v=busCxRukSwo  [in French]
+
++ Hebbian learning
+
+Hebbian learning is based on the principle "neurons that fire together wire together".
+It can be implemented, for instance, as 
+
+  weightᵢⱼ = wᵢⱼ + αᵢᵢ Hᵢⱼ
+  Hᵢⱼ = EWMA[ xᵢ(t) xⱼ(t) ]
+
+where wᵢⱼ and αᵢⱼ are learned.
+
+  Differentiable plasticity: training plastic neural networks with backpropagation
+  T. Miconi et al. (2018)
+  https://arxiv.org/abs/1804.02464
+
+  How metalearning could help us accomplish our grandest AI ambitions, and early, exotic steps in that direction
+  J. Clune (2019)
+  https://slideslive.com/38923101/how-metalearning-could-help-us-accomplish-our-grandest-ai-ambitions-and-early-exotic-steps-in-that-direction?ref=speaker-17019-latest
+
++ Information theory
+
+Here is yet another (local) alternative to back-propagation.
+
+  Putting an end to end-to-end
+  S. Löwe et al. (2019)
+  https://arxiv.org/abs/1905.11786
+
++ Variants of stochastic gradient descent (SGD)
+
+I will not mention the many variants of stochastic gradient descent 
+that continue to appear. They can often be classified as 
+variance reduction (SVRG), momentum, or pre-conditioning. 
+
++ Natural gradient and warped gradient
+
+We often assume that the parameters of neural networks are in Euclidean space, but this is a bold assumption -- 
+for instance, the space of univariate Gaussian distributions, N(μ,σ²), has a natural (non-flat) Riemannian structure ("statistical manifold").
+What if that parameter space were curved? Would gradient descent still be a good idea?
+The gradient should be modified into the so-called "natural gradient": practially, you just need to multiply the naive gradient
+by some matrix describing the curvature or (since it is difficult to compute, and very large), some approximation -- a "preconditioner".
+
+Instead of computing this preconditioner, you can have a neural network compute it (learn it) for you. 
+
+  Meta-learning with warped gradient descent
+  S. Flennerhag et al. (2019)
+  https://arxiv.org/abs/1909.00025
+
+  Beyond SGD: in search of a preconditioner
+  E. Hazan (2019)
+  https://slideslive.com/38922823/beyond-sgd-in-search-of-a-preconditioner
+  
++ Averaging vs ensembling
+
+There are two(*) ways of aggregating models: 
+you can average their weights, or average their forecasts ("ensembling"). 
+Which is better?
+
+The answer depends on the models you are averaging.
+If the models are around the same local extremum of the loss function, 
+averaging the weights make sense, and is usually preferable. 
+This is the case, for instance, if you average models during training, à la Cesàro.
+On the contrary, if the models are unrelated, if they are around different local extrema of the loss function,
+for instance, if they were trained starting from different random initializations, 
+averaging the weights does not make sense (you would end up between local extrema): 
+it is then preferable to average the forecasts. 
+
+  Deep ensembles: a loss landscape perspective
+  S. Fort et al. (2019)
+  https://arxiv.org/abs/1912.02757
+
+  Bridging the gap between constant step size stochastic gradient descent and Markov chains
+  A. Dieuleveut (2017)
+  https://arxiv.org/abs/1707.06386
+
+Since ensembling is very useful but time-consuming, there are tricks to build ensembles 
+from a single optimization: 
+for instance, by using a cyclic learning rate and keeping the local extrema, 
+or changing the weights in the direction of the smallest eigenvalues of the Hessian of the loss
+
+  Snapshot ensembles: train 1, get M for free
+  G. Huang et al. (2017)
+  https://arxiv.org/abs/1704.00109
+
+  Detecting extrapolation with local ensembles
+  D. Madras et al. (2019)
+  https://arxiv.org/abs/1910.09573
+
+(*) There is a third way: you can also stack models, i.e., use the output of one model as additional input to the other.
+
+* Neural ODEs, deep equilibrium models, NTK, normalizing flows
+
++ Neural ODEs
+
+Residual networks (ResNets) use layers of the form x ↦ f(x) + x.
+They are uncannily similar to the Euler discretization of ordinary differential equations (ODE), x ↦ x + f(t,x)δt.
+Infinitely deep residual nets can be interpreted (and trained) as differential equations: 
+to learn a mapping u↦v, neural ODEs find a vector field f whose integration
+gives the desired function.
+
+  ẋ = f(x)
+  x(0) = u
+  x(1) = v
+
+Rather than the papers, which can be technical, I recommend to look at the torchdyn tutorial.
+
+  TorchDyn: A Neural Differential Equations Library
+  M. Poli et al. (2020)
+  https://github.com/DiffEqML/torchdyn
+
+  Stable neural flows
+  S. Massaroli et al. (2020)
+  https://arxiv.org/abs/2003.08063
+
+  Dissecting neural ODEs 
+  S. Massaroli et al. (2020)
+  https://arxiv.org/abs/2002.08071
+
++ Deep equilibrium models
+
+There are other inifinite-depth neural networks: deep equilibrium models iterate the same layer to compute its fixed points.
+There is no need to unroll the iterations: in the forward pass, we can use a solver for f(x₁,x₂) = x₁, and in the backward pass, 
+we can differentiate with the implicit function theorem.
+
+  Deep equilibrium models
+  S. Bai et al. (2019)
+  https://arxiv.org/abs/1909.01377
+
++ Neural tangent kernel
+
+Besides infinite-depth networks, there are also infinite-width ones: the neural tangent kernel (NTK).
+
+  Tensor programs I: wide feedforward or recurrent networks of any architecture are Gaussian processes
+  G. Yang (2019)
+  https://arxiv.org/abs/1910.12478
+
+  Tensor programs II: neural tangent kernel for any architecture
+  G. Yang (2020)
+  https://arxiv.org/abs/2006.14548
+
+  Neural tangent kernel: convergence and generalization in neural nets
+  A. Jacot et al. (2018)
+  https://arxiv.org/abs/1806.07572
+
++ Normalizing flows
+
+For some applications, we may want invertible layers, 
+to be able to apply them in either direction -- for instance, to deform a standard Gaussian distribution into the data distribution. 
+
+For linear maps, this can easily be achieved with triangular matrices with non-zero diagonal entries; 
+but the idea can be generalized to non-linear maps, e.g., x[i+1] ← x[i+1] + f(x[1:i]).
+(This is also explained in P. Abbeel's Deep unsupervised learning course mentioned above.) 
+
+  Coupling-based invertible neural networks are universal diffeomorphism approximators
+  T. Teshima et al. (2020)
+  https://arxiv.org/abs/2006.11469
+
+  Reformer: the efficient transformer
+  N. Kitaev et al. (2020)
+  https://arxiv.org/abs/2001.04451
+
+* Deep learning, mathematics and computer code
+
+Mathematics is often about proofs and (sometimes) non-numeric computations: 
+since those tasks are discrete, they do not seem directly amenable to deep learning.
+
++ Symbolic mathematics
+
+However, by looking at a formula as text, we can train NLP models to perform some types of computation. 
+For instance, to integrate a function (there is no guarantee that the result is correct but, in this case, 
+it is easy to check; in case of a failure, the deep learning model can provide other candidate answers).
+
+  Deep learning for symbolic mathematics
+  G. Lample and F. Charton (2019)
+  https://arxiv.org/abs/1912.01412
+
++ Mathematical proofs
+
+A mathematical proof is a sequence of deductions, akin to a path in a maze: 
+reinforcement learning (RL) can help navigate through it.
+[I am still not convinced that proof assistants are suitable for human use, though -- at least, not yet.]
+
+  Generative language modeling for automated theorem proving
+  S. Polu and I. Sutskever (2020)
+  https://arxiv.org/abs/2009.03393
+
+The maze analogy becomes even more striking if you put mathematical statements in a "latent space"
+and navigate through it.
+
+  Mathematical reasoning in latent space
+  D. Lee et al. (2019)
+  https://arxiv.org/abs/1909.11851
+
++ Experimental mathematics
+
+Those topics remind me of "experimental mathematics": 
+under some not-so-outlandish assumptions, 
+it is possible to find, and sometimes even to prove a formula
+by evaluating it, numerically, on a few examples. 
+
+  Integer relation detection
+  D.H. Bailey (2000)
+  http://www.cs.fsu.edu/~lacher/courses/COT4401/notes/cise_v2_i1/integer.pdf
+
+  Ten problems in experimental mathematics
+  D.H. Bailey et al. (2006)
+  https://carma.newcastle.edu.au/resources/jon/Preprints/Papers/Published-InPress/TenProblems/maa-galleys.pdf
+
+  A=B
+  M. Petkovšek Et al. (1997)
+  https://www2.math.upenn.edu/~wilf/AeqB.html
+
++ Compiler optimization
+
+That kind of formula manipulation, with NLP or RL, 
+can also be used by compilers, to transform the code provided into  equivalent but faster code. 
+
+  Learning heuristics for quantified boolean formulas through reinforcement learning
+  G. Lederman et al. (2018)
+  https://arxiv.org/abs/1807.08058
+
+  Deep symbolic superoptimization without human knowledge
+  H. Shi et al. (2019)
+  https://openreview.net/forum?id=r1egIyBFPS
+
++ NLP on code
+
+NLP techniques are apparently already used by IDEs, 
+for type inference (a form of sentence completion, for code), 
+bug detection (a spell checker, for code),
+and even code generation (write the name and arguments of your function, and the computer will write its body for you).
+
+  LambdaNet: probabilistic type inference using graph neural networks
+  J. Wei et al. (2020)
+  https://arxiv.org/abs/2005.02161
+
+  Hoppity: learning graph transformations to detect and fix bugs in programs
+  E. Dinella et al. (2020)
+  https://openreview.net/forum?id=SJeqs6EFvB
+
+  A syntactic neural model for general-purpose code generation
+  P. Yin and G. Neubig (2017)
+  https://arxiv.org/abs/1704.01696
+
+* Soft topics 
+
++ Artificial general intelligence (AGI)
+
+Computers are good at very specific tasks, but are often unable to apply their learned skills to other problems.
+As such, they cannot be said to be "intelligent",
+if we define "intelligence" as how quickly one can learn a new task.
+The ARC dataset uses this idea and provides an intelligence test for computers. 
+
+  The measure of intelligence
+  F. Chollet (2019)
+  https://arxiv.org/abs/1911.01547
+
+There was also a Kaggle competition
+
+  https://www.kaggle.com/c/abstraction-and-reasoning-challenge
+
++ Explainable artificial intelligence (XAI)
+
+Deep learning models are often black boxes: it is difficult to know what they are doing.
+There are now many tools to provide (post hoc) explanations of those models, 
+but they are very similar to explanations of human decisions, 
+which are often mere rationalizations: we try to find after-the-fact reasons 
+to explain our decisions and behaviour, as convincing as possible, 
+but they are often unrelated to why we acted -- indeed, we often decide or act 
+instinctively, before thinking. It is easy to find 
+equally convincing explanations of the opposite decisions...
+
+One example is "saliency maps": the gradient of the output of a neural network 
+(e.g., the probability an image is that of a cat) wrt the inputs (the pixels in an image)
+often seems to highlight what is important in an image, and what the model used to make its decision -- 
+but it actually looks like an edge detector, completely independent of the task at hand...
+
+  Sanity checks for saliency maps
+  J. Adebayo et al. (2018)
+  https://arxiv.org/abs/1810.03292
+
+Even more worryingly, you can train a neural network to have the explanations you want, 
+without changing its output on real data: just tweak it in the direction orthogonal to the data manifold -- 
+the dimension is sufficiently high.
+
+  Fairwashing explanations with off-manifold detergent
+  C.J. Anders (2020)
+  https://arxiv.org/abs/2007.09969
+
++ Fairness
+
+Bias in machine learning systems, and more generally fairness, is still a hot topic, 
+but problems remain. 
+
+The first issue is that there is no single notion of "fairness", but several -- worse, they are incompatible. 
+If you design your system to be fair according to one of those definitions, 
+someone will choose another one and claim that your system is unfair.
+
+  Paradoxes in fair machine learning
+  P. Goelz et al. (2019)
+  https://papers.nips.cc/paper/2019/hash/bbc92a647199b832ec90d7cf57074e9e-Abstract.html
+
+A second issue is that those notions of "fairness" rely on a list of "protected attributes" --
+but you can be treated unfairly for something not on that list (for instance, "linguistic skills", 
+if you live in a country whose official language you do not master).
+Extending that list will not help either: it will always remain incomplete. 
+
+  Average individual fairness
+  M. Kearns (2019)
+  https://arxiv.org/abs/1905.10607
+
++ Ethics
+
+The following paper combines 
+multi-agent reinforcement learning, 
+voting systems
+and moral philosophy: 
+since there is no single moral theory,
+we can have each agent develop its own 
+and vote on what matters most for it.
+
+  Reinforcement learning under moral uncertainty
+  A. Ecoffet and J. Lehman (2020)
+  https://arxiv.org/abs/2006.04734
+
+* Other topics
++ Transformers, Attention
+
+There are way too many papers on transformers and the attention mechanism for me to attempt to list them: 
+they provide a better understanding of those architectures,
+better (less memory-hungry) implementations, 
+and applications beyond text (to graphs and images).
+
+    Synthesizer: rethinking self-attention for transformer models
+    Transformers are RNNs: fast autoregressive transformers with linear attention
+    Lambda networks: modeling long-range interactions without attention
+    Reformer: the efficient transformer
+    Lite transformer with long-short range attention
+    FSPool: learning set representations with featurewise sort pooling
+    Poly-encoders: transformer architectures and pre-training strategies for fast and accurate multi-sentence scoring
+    Are transformers universal approximators of sequence-to-sequence functions?
+    Tree-structured attention with hierarchical accumulation
+    On the relationship between self-attention and convolutional layers  
+    Multi-scale representation learning for spatial feature distributions using grid cells
+    Logic and the 2-simplicial transformer
+    Learning deep graph matching with channel-independent embedding and Hungarian attention
+    Learn to explain efficiently via neural logic inductive learning
+    Attention is not explanation
+    Are sixteen heads really better than one?
+    A regularized framework for sparse and structured neural attention
+    Graph2Seq: graph to sequence learning with attention-based neural networks
+    etc.
+    
++ Equivariance, group actions, generalizations of CNNs
+
+Convolutional layers are translation invariant: they detect a shape regardless of its position in the image. 
+Invariance (and equivariance) can be generalized to other group actions. 
+
+For instance, to make a CNN invariant to rotations as well, we can use several copies of the same filters, sharing parameters, 
+but rotated. 
+
+  Oriented response networks
+  Y. Zhou et al. (2017)
+  https://arxiv.org/abs/1701.01833
+
+Alternatively, we can use basis functions presenting the desired invariance (or equivariance),
+for instance for scaling, or for permutations. 
+
+  Scale-equivariant steerable networks
+  I. Sosnovik et al. (2019)
+  https://arxiv.org/abs/1910.11093
+    Make CNNs scale-equivariant with basis functions
+
+  Deep set prediction networks
+  Y. Zhang et al. (2019)
+  https://arxiv.org/abs/1906.06565
+
+There are many other CNN generalizations. 
+
+  Deformable convolutional networks
+  J. Dai et al. (2017)
+  https://arxiv.org/abs/1703.06211
+
+  Kervolutional neural networks
+  C. Wang et al. (2019)
+  https://arxiv.org/abs/1904.03955
+
++ Contrastive learning
+
+Contrastive learning (SimCLR, MoCo, etc.) learns an embedding 
+in which different augmentations of the same image are closer than those of another image.
+
+  Hard negative mixing for contrastive learning
+  Y. Kalantidis et al. (2020)
+  https://arxiv.org/abs/2010.01028
+
++ Disentangled representations
+
+Deep neural networks are not only used for their output, 
+but sometimes also for their inner layers, which provide a latent representation of the input.
+For that representation to be useful, we want it to be "disentangled", but we struggle to define what we mean by that.
+Here are a few attempts at defining this concept.
+
+If a group G acts on the input of the network, 
+and if that group can be decomposed into a direct product G≈G₁×⋯×Gₙ,
+we can ask that the latent space have a similar decomposition V≈V₁×⋯×Vₙ,
+with Gᵢ acting trivially on Vⱼ if i≠j.
+
+  Towards a definition of disentangled representations 
+  I. Higgins et al. (2018)
+  https://arxiv.org/abs/1812.02230
+
+The holonomy group (transformations of the tangent space TₓM→TₓM defined by parallel transport along closed loops)
+can also help disentangle the data manifold (assuming there is a Riemannian structure on it).
+
+  Disentangling by subspace diffusion
+  https://arxiv.org/abs/2006.12982
+  D. Pfau et al. (2020)
+
+If we already have desired interpretations Gᵢ for some of the dimensions Zᵢ of the latent representation,
+we can maximize (minimize) the mutual information between Gᵢ and Zᵢ (between Gᵢ and Zⱼ, i≠j). 
+
+  Robustly disentangled causal mechanisms: validating deep representations for interventional robustness
+  R. Suter et al. (2018)
+  https://arxiv.org/abs/1811.00007
+
+  Representation learning through latent canonicalizations
+  O. Litany et al. (2020)
+  https://arxiv.org/abs/2002.11829
+
+If the class of the input is known, the model can learn separate embedding for the 
+class and the rest of the information, but using the same embedding for all the members of the same class. 
+
+  Demystifying inter-class disentanglement
+  A. Gabbay and Y. Hoshen (2019)
+  https://arxiv.org/abs/1906.11796
+
++ 3D scenes
+
+A 3D scene is usually represented by "primitives": simple shapes and meshes, which can be turned into an image. 
+Instead, one can learn (from hundreds of photos) a function mapping each point in 3D space to its colour.
+
+  NeRF: representing scenes as neural radiance fields for view synthesis
+  B. Mildenhall et al. (2020)
+  https://arxiv.org/abs/2003.08934
+
+A similar idea can be applied to image super-resolution. 
+
++ Discrete operations
+
+Discrete operations can be used inside a neural network, even though they are not differentiable 
+(strictly speaking, they are locally constant: they are differentiable almost everywhere, but their gradient is zero): 
+use the actual discrete operation in the forward pass, and a relaxation in the backward pass. 
+
+  Learned step size quantization
+  S.K. Esser (2020)
+  https://arxiv.org/abs/1902.08153
+
+  Dynamic model pruning with feedback
+  T. Lin et al. (2020)
+  https://arxiv.org/abs/2006.07253
+
+  Mixed precision DNNs: all you need is a good parametrization
+  S. Uhlich et al. (2020)
+  https://arxiv.org/abs/1905.11452
+
+  Enhancing adversarial defense by k-winners-take-all
+  C. Xiao et al. (2020)
+  https://arxiv.org/abs/1905.10510
+
+Regularizing or relaxing those operations is always an option. 
+
+  Fast differentiable sorting and ranking
+  M. Blondel et al. (2020)
+  https://arxiv.org/abs/2002.08871
+
+  Neural oblivious decision ensembles for deep learning on tabular data
+  S. Popov et al. (2019)
+  https://arxiv.org/abs/1909.06312
+
++ Gumbel softmax
+
+The Gumbel softmax is a way of differentiating through a discrete sampling operation
+
+  Z ~ Categorical(p₁,...pₙ)
+
+or
+
+  U ~ U(0,1)
+  Z = OneHot Max { i : p₁+⋯+pᵢ₋₁ ≤ U }
+
+by reparametrizing it as 
+
+  Gᵢ ~ Gumbel(0,1)
+  Z = OneHot Argmaxᵢ( Gᵢ + log pᵢ )
+
+and replacing OneHot(Argmax) with a softmax.
+
+  Learning with differentiable perturbed optimizers 
+  Q. Berthet et al. (2020)
+  https://arxiv.org/abs/2002.08676
+
+  Gradient estimation with stochastic softmax tricks
+  M.B. Paulus et al. (2020)
+  https://arxiv.org/abs/2006.08063
+
+  Deep probabilistic subsampling for task-adaptive compressed sensing
+  I.A.M. Huijben et al. (2019)
+  https://openreview.net/forum?id=SJeq9JBFvH
+
++ Optimal transport, (sliced) Wasserstein distance
+
+Optimal transport is the problem of transforming a probability distribution into another
+using a map of the underlying spaces; it defines the Wasserstein distance between distributions.
+
+Computing the Wasserstein distance is difficult in general, but adding a regularizer (an "entropy penalty") makes it easier. 
+In dimension one, however, it is very easy: it suffices to sort the data.
+Conversely, the entropy penalty can be used, in dimension 1, as a regularizer for the sorting and ranking operations. 
+
+  Differentiable ranking and sorting using optimal transport
+  M. Cuturi et al. (2019)
+  https://arxiv.org/abs/1905.11885
+
+There is another way of leveraging the simplicity of the 1-dimensional Wasserstein distance: 
+project the data onto a random 1-dimensional subspace, compute the 1-dimensional wasserstein distance, 
+repeat many time, and average the results. This is the "sliced Wasserstein distance". 
+Besides its simplicity, it turns out to have good theoretical properties. 
+It can also be generalized to "non-linear projections" (random neural nets).
+
+  Statistical and topological properties of sliced probability divergences
+  K. Nadjahi et al. (2020)
+  https://arxiv.org/abs/2003.05783
+  
+Optimal transport has concrete applications in biology, 
+to track the evolution of cells (lineage tracing, in embryology or cancerology),
+or to align and compare datasets. 
+
+  Scalable unbalanced optimal transport using generative adversarial networks
+  K. Yang and C. Uhler (2018)
+  https://arxiv.org/abs/1810.11447
+
+  Generalizing learning with optimal transport
+  S. Jegelka (2019)
+  https://slideslive.com/38922971/generalizing-learning-with-optimal-transport-invariances-and-generative-models-across-incomparable-spaces
+
+  Geometric distances via optimal transport
+  D. Alvarez-Melis and N. Fusi (2020)
+  https://arxiv.org/abs/2002.02923
+
++ Topological data analysis (TDA)
+
+Topological data analysis (TDA) applies algebraic topology to data science: 
+it can help infer the shape of a dataset -- how many connected components are there? how many "holes"? does the data look like a ball or a torus?
+Those numbers (number of connected components, number of "holes", number of "higher-order holes") are called "Betti numbers": β₀, β₁, β₂, etc.
+
+While this may sound complicated, in practice, we often restrict ourselves to the 0-th homology: 
+the connected components -- is the data in one chunk or several?
+
+There are many applications: 
+to understand the shape of a dataset, 
+to build features which will then be used by standard machine learning models, 
+or as a regularizer, to ensure that the model (e.g., the decision boundary, in a classifier) is not too complex (from a topological point of view),
+
+  Topological regularization via persistence sensitive optimization
+  A. Nigmetov et al. (2020)
+  https://arxiv.org/abs/2011.05290
+
+  A topological regularizer for classifiers via persistent homology
+  C. Chen et al. (2018)
+  https://arxiv.org/abs/1806.10714
+
+  Neural persistence: a complexity measure for deep neural networks using algebraic topology
+  B. Rieck et al. (2018)
+  https://arxiv.org/abs/1812.09764
+
+There are many introductions to TDA. Here is the last one I have read.
+
+  An introduction to topological data analysis: fundamental and practical aspects for data scientists
+  F. Chazal and B. Michel (2017)
+  https://arxiv.org/abs/1710.04019
+
+If you want actual code, check the TDA R package.
+
+  https://cran.r-project.org/web/packages/TDA/index.html
+
++ UMAP variants
+
+Principal component analysis (PCA) is often used to reduce the dimension of the data but, 
+being linear, it often requires more dimensions than the "intrinsic" dimension of the data. 
+T-SNE is a non-linear analogue: it can squeeze more information into fewer dimensions -- 
+but it is very slow.
+UMAP is similar to t-SNE, but much faster. 
+It can even be used as a layer in a neural net (the paper also clearly compares t-SNE and UMAP).
+
+  Parametric UMAP: learning embeddings with deep neural networks for representation and semi-supervised learning
+  T. Sainburg et al. (2020)
+  https://arxiv.org/abs/2009.12981
+
+There are many other t-SNE variants. 
+
+  NCVis: noise contrastive approach for scalable visualization
+  A. Artemenkov and M. Panov (2020)
+  https://arxiv.org/abs/2001.11411
+
+  Efficient algorithms for t-distributed stochastic neighbourhood embedding
+  G.C. Linderman (2017)
+  https://arxiv.org/abs/1712.09005
+
+  Arbitrary style transfer in real-time with adaptive instance normalization
+  X. Huang and S. Belongie (2017)
+  https://arxiv.org/abs/1703.06868
+
++ Hyperbolic embeddings
+
+It has now become standard practice to embed data with a (potentially unknown) hierarchical or graph structure into hyperbolic spaces.
+
+  Poincaré GloVe: hyperbolic word embeddings
+  A. Tifrea et al. (2019)
+  https://arxiv.org/abs/1810.06546
+
+But this assumes that the curvature is known and constant. 
+Instead, we can learn the curvature from the data. 
+
+  Low-dimensional hyperbolic knowledge graph embedding
+  I. Chami et al. (2020)
+  https://arxiv.org/abs/2005.00545
+
+To account for non-constant curvature, we can embed the data in a graph instead. 
+
+  Beyond vector spaces: compact data representation as differentiable weighted graphs
+  D. Mazur et al. (2019)
+  https://arxiv.org/abs/1910.03524
+
+  Embedding words in non-vector spaces with unsupervised graph learning
+  M. Ryabinin et al. (2020)
+  https://arxiv.org/abs/2010.02598
+
++ Manifolds
+
+The data or the parameters of our models are not always in Euclidean spaces: 
+they can be in more general manifolds, such as the sphere (for directions), 
+SO(3) or SE(3) (for poses), or Stiefel manifolds (for orthogonal matrices).
+It is possible, and often more efficient, to perform optimization directly on those manifolds, 
+instead of some ambient Euclidean space. 
+
+  Efficient Riemannian optimization on the Stiefel manifold via the Cayley transform
+  J. Li et al. (2020)
+  https://arxiv.org/abs/2002.01113
+
++ Self-supervised learning, semi-supervised learning, meta-learning, few-shot learning, transfer learning, continual learning
+
+While labeled data is difficult or expensive to obtain, 
+unlabeled data often abounds -- we have more and more ways of leveraging it. 
+
+Semi-supervised learning uses both labeled an unlabeled data, 
+and can rely on 
+consistency training (the outputs on unlabeled data should be invariant to small perturbations), 
+entropy minimization (the decision boundaries should avoid dense regions),
+data augmentation, e.g., with linear interpolation of (labeled) data points (MixUp),
+out-of-distribution masking (mask unlabeled samples with low confidence),
+training signal annealing (limit training on labeled samples -- there are too few of them -- to avoid overfitting).
+
+  RealMix: towards realistic semisupervised deep learning algorithms
+  V. Nair et al. (2019)
+  https://arxiv.org/abs/1912.08766
+    
+  FixMatch: simplifying semisupervised learning with consystency and confidence
+  K. Sohn et al. (2020)
+  https://arxiv.org/abs/2001.07685
+
+  ReMixMatch: semi-supervised learning with distribution matching and augmentation anchoring
+  D. Berthelot et al. (2019)
+  https://arxiv.org/abs/1911.09785
+
+  MixMatch: a holistic approach to semi-supervised learning
+  D. Berthelot et al. (2019)
+  https://arxiv.org/abs/1905.02249
+
+Self-supervised learning is another word for unsupervised learning: 
+we can train the model on "mock tasks", e.g., predicting if two inputs 
+are data augmentations of the same input. 
+
+  Bootstrap your own latent: a new approach to self-supervised learning
+  J.B. Grill et al. (2020)
+  https://arxiv.org/abs/2006.07733
+
+  Revisiting self-training for neural sequence generation
+  J. He et al. (2019)
+  https://arxiv.org/abs/1909.13788
+
+As always, my summary of those papers (and many more, in reverse chronological order of reading time) is here:
+
+  http://zoonek.free.fr/Ecrits/articles.pdf

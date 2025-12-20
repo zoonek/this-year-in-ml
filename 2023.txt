@@ -1,0 +1,1665 @@
+2023 in Machine Learning
+
+Here is, as every year, an overview of the papers and books
+I read this year.
+The main topics are transformers, graph neural nets, optimization,
+differentiability and time series.
+
+= 2024-01-01_2023_in_ML.png
+
+
+
+For a longer reading list:
+
+  http://zoonek.free.fr/Ecrits/articles.pdf
+
+* Transformers and large language models
++ Attention and transformers
+
+The attention mechanism and transformers have taken the machine learning
+world by storm.
+
+Here are two interpretations of the attention mechanism.
+While simple neural networks are just stacking linear transformations
+(i.e., weighted sums) and (elementwise) non-linearities,
+attention uses a more complicated operation: multiplication.
+The attention formula look like (Q,K,V)↦(QK')V
+(there is actually a softmax, and a normalization factor,
+but it is basically just the product of three matrices).
+It turns out that multiplication makes neural networks more powerful
+than mere sums.
+
+It may seem that simple neural networks already use multiplication:
+indeed, they multiply their inputs with weights -- but the weights are fixed.
+In Attention, all the factors multiplied together come from the input --
+these are no longer linear transformations, but multilinear ones. 
+
+The second (and more traditional)
+interpretation of the attention mechanism
+is as a differentiable hash table (a "dictionary",
+in Python parlance).
+The 3 inputs are the query Q, the keys K, and the values V.
+Keys and values form the actual hash table.
+We first compute the similarity between the query and each of the keys,
+with a scalar product, followed by a softmax,
+to get a probability distribution on the keys:
+if the query is very close to one of the keys,
+that distribution is concentrated on that key.
+We then use that probability distribution to
+compute a linear combination of the values.
+(There is also a scaling factor, but it is only there
+so that the standard deviation of the activations
+remains close to 1, regardless of the size of the hash table).
+
+So far, this seems unrelated to language models.
+
+To use the attention mechanism with a sequence of tokens (≈words),
+we transform each token (or token embedding) Xᵢ into a query,
+each token into a key
+(and also each token into a value): Q=W₁X, K=W₂X, V=W₃X
+(since query, keys and values all come from the same input,
+this is called self-attention).
+The product QK' is then a matrix, with one row per input token,
+and one column per input token: it measures how much "attention"
+each token pays to each other token.
+
+For the attention mechanism, that is all.
+
+A transformer is just the attention mechanism
+with a lot of implementation details.
+The most important of those is the position encoding.
+Even if the input is a sequence, the attention mechanism,
+as presented so far, is not aware of the order of the tokens.
+Position encoding just adds the position
+of each token to the input.
+
+  Attention is all you need
+  A. Vaswani et al. (2017)
+  https://arxiv.org/abs/1706.03762
+
++ Transformers
+
+There are now many variants of the original transformer,
+attempting to reduce the memory usage and increase the context length
+(the length of the input sequence):
+the original transformer needs to compute the attention matrix,
+of size N×N for a sequence of length N.
+
+The Reformer notices that the rows of the attention matrix
+are softmaxes: they tend to be sparse.
+Instead of computing the whole matrix,
+one can only compute, for each row (query),
+the k largest entries, corresponding to the k closest keys,
+identified with an approximate nearest neighbour (ANN) algorithm, e.g.,
+LSH (locality sensitive hashing).
+
+  Reformer: the efficient transformer
+  N. Kitaev et al.
+  https://arxiv.org/abs/2001.04451
+
+The Linformer notices that the attention matrix has low rank,
+and reduces the dimension of the key and value matrices before use.
+
+  Linformer: self-attention with linear complexity
+  S. Wang et al.
+  https://arxiv.org/abs/2006.04768
+
+  Fastformer: additive attention can be all you need
+  C. Wu et al.
+  https://arxiv.org/abs/2108.09084
+
+Random feature attention bypasses the attention matrix
+(it is only an intermediate result) and directly computes
+the final output, in linear time and space.
+The catch is that the result is random:
+it is only correct in expectation.
+
+  Random feature attention
+  H. Peng et al.
+  https://arxiv.org/abs/2103.02143
+
+  Rethinking attention with performers
+  K. Choromanski et al.
+  https://arxiv.org/abs/2009.14794
+
+Big Bird makes transformers more scalable
+by sparsifying the attention matrix, using:
+a moving window (keeping the entries of the attention matrix
+close to the diagonal),
+random attention (keeping a few entries at random:
+random graphs are a good approximation of complete graphs),
+and global attention (allowing a few tokens to attend to all tokens,
+i.e., keeping whole rows or columns of the attention matrix).
+
+  Big Bird: transformers for longer sequences
+  M. Zaheer et al.
+  https://arxiv.org/abs/2007.14062
+
++ Transformers for tabular data
+
+Transformers are not limited to text data:
+they also apply to images (ViT) or even
+tabular data.
+
+  Revisiting deep learning models for tabular data
+  Y. Gorishniy et al.
+  https://arxiv.org/abs/2106.11959
+
+  XTab: cross-table pretraining for tabular transformers
+  B. Zhu et al. (2023)
+  https://arxiv.org/abs/2305.06090
+
+  SAINT: improved neural networks for tabular data via row attention and contrastive pre-training
+  G. Somepalli et al.
+  https://arxiv.org/abs/2106.01342
+
+  TransTab: learning transferable tabular transformers across tables
+  Z. Wang and J. Sun
+  https://arxiv.org/abs/2205.09328
+
++ Model zoo
+
+There is now a bewildering number of large language models.
+Here are some of them. When you read this, they are probably no longer
+the most relevant ones (and I am not sure they were when I wrote those lines --
+check the HuggingFace website for up-to-date lists).
+
+  LLaMa: open and efficient foundation language models
+  H. Touvron et al. (2023)
+  https://arxiv.org/abs/2302.13971
+
+  BLOOM: a 176B-parameter open-access multilingual language model
+  T. Le Scao et al.
+  https://arxiv.org/abs/2211.05100
+
+  Pythia: a suite for analyzing large language models across training and scaling
+  S. Biderman et al.
+  https://arxiv.org/abs/2304.01373
+
+  BloombergGPT: a large language model for finance
+  S. Wu et al. (2023)
+  https://arxiv.org/abs/2303.17564
+
+  OPT: open pre-trained transformer language models
+  S. Zhang et al.
+  https://arxiv.org/abs/2205.01068
+
+  OPT-IML: scaling language model instruction meta learning through the lens of generalization
+  S. Iyer et al.
+  https://arxiv.org/abs/2212.12017
+
+  GLM: general language model pretraining with autoregressive blank infilling
+  Z. Du et al.
+  https://arxiv.org/abs/2103.10360
+
+  A comprehensive survey on pretrained foundation models: a history from BERT to ChatGPT
+  C. Zhou et al.
+  https://arxiv.org/abs/2302.09419
+
++ Training LLMs
+
+Since large language models are so large,
+fine-tuning them is a daunting task
+(in particular, you need more GPU memory to
+train a model than to use it).
+Instead of fine-tuning those big weight matrices W,
+LoRa replaces them with W+B'A, where W is fixed and B'A
+is a low-rank adjustment.
+
+  LoRa: low-rank adaptation of large language models
+  E. Hu et al.
+  https://arxiv.org/abs/2106.09685
+
+Self-Instruct fine-tunes a large language model
+to follow instructions, by staring with hand-written examples,
+asking the model to generate more examples,
+pruning the low-quality ones,
+and using the rest for fine-tuning.
+
+  Self-instruct: aligning language model with self-generated instructions
+  Y. Wang et al.
+  https://arxiv.org/abs/2212.10560
+
+Several papers try to infer "scaling laws" for LLMs:
+the relation between training time, model size, and training data.
+
+  Training compute-optimal large language models
+  J. Hoffmann et al. (2022)
+  https://arxiv.org/abs/2203.15556
+
+  Scaling laws for neural language models
+  J. Kaplan et al. (2020)
+  https://arxiv.org/abs/2001.08361
+
++ Retrieval-augmented generation (RAG)
+
+Large language models (LLM) are frozen:
+they were trained on a fixed (often public) dataset --
+they are unaware of any more recent information,
+or any private information.
+Given their size, regularly retraining them
+is not a palatable option.
+
+Instead, one can combine an LLM with a database of documents
+(e.g., all documents internal to your company,
+or everything currently available on the web -- as opposed
+to everything available when the model was trained):
+given a query, we first look in the database for documents
+potentially helpful to answer it, and give both the query
+and the documents to the LLM ("Please answer the question
+using the following documents").
+This is called retrieval-augmented generation (RAG).
+
+To find "potentially useful documents", we can look for
+documents "close" to the query
+(for some distance, e.g., L² distance
+between the latent representation of some LLM).
+However, given the large dimension of the space,
+and the large number of documents (the whole web),
+computing all the distances between the query and the documents,
+for each new query, is unreasonable.
+
+The document embeddings can be put in a "vector store":
+a database providing fast (approximate) nearest neighbour queries.
+
++ Vector stores
+
+There are many algorithms for approximate nearest neighbourhood (ANN) search.
+Here are a few.
+
+In low dimension (2 or 3), we can use k-d trees (quad-trees, oct-trees):
+the idea is to split the space along the axes, into smaller and smaller
+boxes. It is straightforward to find in which box the query is:
+we then only have to examine the documents in that box (and in its neighbours).
+Unfortunately, this does not scale well with dimension:
+at each step, we divide each region
+into 2^d regions, where d is the dimension.
+
+  https://en.wikipedia.org/wiki/K-d_tree
+  
+Eigen memory trees use a similar idea, but replace the axis-aligned
+boxes with splits orthogonal to the first principal component
+of the points in each box.
+
+  Eigen memory trees
+  M. Rucker et al. (2022)
+  https://arxiv.org/abs/2210.14077
+
+Locality sensitive hashing (LSH)
+projects the points to a (fixed, but random)
+1-dimensional subspace, where the data is binned.
+To search for the nearest neighbours of a query point,
+we just need to find the bin it is in,
+and examine the points in it (and in its neighbours).
+To reduce the number of points to examine,
+we can repeat that for many 1-dimensional subspaces,
+and only look at the intersection of the corresponding bins.
+
+  https://en.wikipedia.org/wiki/Locality-sensitive_hashing
+
+Product quantization generalizes this idea:
+instead of 1-dimensional subspaces,
+it uses the span of a handful of variables,
+and replaces the bins with k-means clusters.
+
+NSW (navigable small world) puts the points inside a graph,
+one by one, connecting each point to its approximate k nearest neighbours.
+The approximate nearest neighbours are found using greedy search (with restart):
+start at a random node, move to its neighbour closest to the query,
+and continue as long as you can get closer to the query.
+The first nodes tend to have a much higher degree: they are better connected.
+
+HNSW (hierarchical NSW)
+builds a hierarchy of such graphs, each a subset of the next one:
+given a query, we can look for its nearest neighbours in the first (coarser)
+graph, then move to the next graph, but start the search from those nodes.
+
+  Efficient and robust approximate nearest neighbor search using hierarchical navigable small world graphs
+  Y.A. Malkov and D.A. Yashunin
+  https://arxiv.org/abs/1603.09320
+
++ Prompt engineering
+
+If you struggle to write good LLM prompts,
+you can ask an LLM to write those prompts for you.
+If you have an objective measure of the quality of the result,
+you can give the previous prompts and their score to the LLM,
+and ask for a better prompt, iterating a few times,
+to improve the prompt.
+
+  Large language models as optimizers
+  C. Yang et al.
+  https://arxiv.org/abs/2309.03409
+
+In retrieval-augmented generation (RAG),
+we typically compute an embedding of the user's query,
+and compare it with the embedding of documents, to find
+the most relevant ones.
+But we are asking the wrong question:
+we are asking for documents similar to the query (a question),
+while we want documents that look like an answer to the query.
+We can ask an LLM to generate a document containing an answer to the query
+(HyDE, hypothetical document embeddings):
+it will not be a correct answer (it could contain
+hallucinations), but it will look like an answer,
+and can be used for similartity search.
+
+  Precise zero-shot dense retrieval without relevance labels
+  L. Gao et al. 
+  https://arxiv.org/abs/2212.10496
+
++ Other generative models
+
+The main architectures behind generative models, such as ChatGPT or StableDiffusion,
+are transformers, diffusions, and normalizing flows -- GANs and VAEs
+have lost some of their poppularity.
+
+* Graphs and neural nets
+
+Graph neural nets look appealing,
+but they suffer from many flaws:
+oversmoothing (they tend to average everything, and all nodes end up looking the same),
+oversquashing (information gets diluted as it moves away from its source,
+in particular if it has to go through "bottlenecks"),
+under-reaching (if the network has k steps,
+information cannot reach nodes more than k steps away),
+homophily (they assume that edges correspond to similarity between nodes).
+
++ Curvature
+
+Graphs can be seen as a discrete analogue
+of differentiable manifolds, and some notions
+from differential geometry can be extended to graphs.
+
+A surface can be positively curved (e.g., a sphere),
+have zero curvature (e.g., a plane),
+or be negatively curved (e.g., a saddle).
+That notion of curvature can be extended to graphs:
+a complete graph is positively curved,
+a grid has zero curvature,
+and a tree has negative curvature.
+
+Oversquashing is caused by negatively curved edges.
+To limit it, one can rewire the graph,
+by adding edges around edges of low curvature
+(and removing edges with high curvature).
+
+  Understanding over-squashing and bottlenecks on graphs via curvature
+  J. Topping et al.
+  https://arxiv.org/abs/2111.14522
+
+  Rewiring networks for graph neural network training using discrete geometry
+  J. Bober et al.
+  https://arxiv.org/abs/2207.08026
+
+  Stability of China's stock market: measure and forecast by Ricci curvature on network
+  X. Wang et al. (2022)
+  https://arxiv.org/abs/2204.06692
+
++ Rewiring 
+
+Other rewirings also help limit oversquashing, for instance,
+adding a master node, connecting the nodes (in layer k)
+to nodes k steps away, or personalized page rank.
+
+  DRew: dynamically rewired message passing with delay
+  B. Gutteridge et al. (2023)
+  https://arxiv.org/abs/2305.08018
+
++ Expander graphs
+
+One can also limit oversquashing by replacing the graph with...
+a random graph (every other epoch,
+to still be able to use the information it contains).
+In particular, expander graphs are sparse but allow information
+to flow quickly between any two nodes.
+
+  Expander graph propagation
+  A. Deac et al. (2022)
+  https://arxiv.org/abs/2210.02997
+  
++ Homophily, heterophily, and sheaves
+
+GNNs often have an inductive bias for homophily:
+they assume that nodes that are linked are similar
+(this also leads to over-smoothing).
+
+Sheaf neural nets can model both homophilic and heterophilic relations
+(yes, this is the same notion of sheaf as in algebraic geometry,
+but on finite sets).
+
+  Sheaf neural networks
+  J. Hansen and T. Gebhart (2020)
+  https://arxiv.org/abs/2012.06333
+
+  Sheaf neural networks with connection Laplacians
+  F. Barbero et al. (2022)
+  https://arxiv.org/abs/2206.08702
+
+  Neural sheaf diffusion: a topological perspective on heterophily and oversmoothing in GNNs
+  C. Bodnar et al. (2022)
+  https://openreview.net/forum?id=vbPsD-BhOZ
+
+  Knowledge sheaves: a sheaf-theoretic framework for knowledge graph embedding
+  T. Gebhart and J. Hansen 
+  https://arxiv.org/abs/2110.03789
+
+  A brief note for sheaf structures on posets
+  C.S. Hu (2020)
+  https://arxiv.org/abs/2010.09651
+
+  Towards a spectral theory of cellular sheaves
+  J. Hansen and R. Ghrist 
+  https://arxiv.org/abs/1808.01513
+
+  Path homologies of deep forward networks
+  S. Chowdhury et al.
+  https://arxiv.org/abs/1910.07617
+  
++ Directed graphs
+
+Some types of GNNs or graph algorithms
+are limited to undirected graphs,
+and need some adjustment to deal with directed ones.
+
+For instance, one could replace the Laplacian
+(used in spectral graph convolution, GCN)
+with the "magnetic Laplacian"
+
+  MagNet: a neural network for directed graphs
+  X. Zhang et al.
+  https://arxiv.org/abs/2102.11391
+
+or the page-rank Laplacian (but it is dense,
+because of teleportation:
+add another node, connected to all others,
+and only teleport to that one).
+
+  Digraph inception convolutional networks
+  Z. Tong et al. (2020)
+  https://proceedings.neurips.cc/paper/2020/hash/cffb6e2288a630c2a787a64ccc67097c-Abstract.html
+
+Community detection algorithms can also leverage
+edge directions: for instance,
+one could look for clusters of nodes
+with an imbalance between incoming
+and outgoing edges.
+
+  DIGRAC: Digraph clustering based on flow imbalance
+  Y. He et al.
+  https://arxiv.org/abs/2106.05194
+
++ GNNs for graph algorithms
+
+Graph neural networks can easily learn some types of algorithms,
+in particular dynamic programming, and graph algorithms.
+Once a GNN has been trained on one of those,
+it can be used as a component in a larger network,
+which will learn to leverage that algorithm for other tasks.
+
+  Neural execution of graph algorithms
+  P. Veličković et al.
+  https://arxiv.org/abs/1910.10593
+
+  Graph neural networks are dynamic programmers
+  A. Dudzik and P. Veličković (2022)
+  https://arxiv.org/abs/2203.15544
+  
+It may be useful to provide the GNN with (differentiable)
+data structures: stacks, queues, etc.
+
+  Recursive algorithmic reasoning
+  D. Jayalath et al.
+  https://arxiv.org/abs/2307.00337
+
+  Neural priority queues for graph neural networks
+  R. Jain et al. (2023)
+  https://arxiv.org/abs/2307.09660
+  
++ Graph partitioning and compression
+
+To detect communities in a graph, assign random labels to the nodes,
+and progressively update them by setting a node's label to the majority label
+of its neighbours (breaking ties at random).
+
+  Community detection via semi-synchronous label propagation algorithms
+  G. Cordasco and L. gargano 
+  https://arxiv.org/abs/1103.4550
+
+To reduce the size of a graph, apply the Weisfeler-Leman (WL) algorithm
+(colour refinement), stop before convergence (otherwise, there is little effect),
+and merge all nodes of the same colour.
+
+  Quasi-stable coloring for graph compression
+  M. Kayali and D. Suciu
+  https://arxiv.org/abs/2211.11912
+
+There are many other algorithms to partition/cluster or coarsen/compress a graph.
+Here are a few.
+
+  Metis: A fast and high quality multilevel scheme for partitioning irregular graphs
+  G. Karypis and V. Kumar (1998)
+  https://www.cs.utexas.edu/~pingali/CS395T/2009fa/papers/metis.pdf
+
+  A fast kernel-based multilevel algorithm for graph clustering
+  I. Dhillon et al. (2005)
+  https://www.cs.utexas.edu/users/inderjit/public_papers/multilevel_kdd.pdf
+  
+  GraClus: Weighted graph cuts without eigenvectors: a multilevel approach
+  I.S. Shillon et al. (2007)
+  https://www.cs.utexas.edu/users/inderjit/public_papers/multilevel_pami.pdf
+
+  On the ability of graph neural networks to model interactions between vertices
+  N. Razin et al.
+  https://arxiv.org/abs/2211.16494
+
++ Hyperbolic space
+
+Most graphs are difficult to embed in a Euclidean space.
+This can be seen with trees: as you move away from the root
+of a tree, the number of nodes tends to grow exponentially --
+in the plane, or in ℝⁿ, there is less and less room to put them.
+
+It is more natural to embed trees in hyperbolic space.
+
+  Hyperbolic neural networks++
+  R. Shimizu et al.
+  https://arxiv.org/abs/2006.08210
+
+We can do that with spaces of constant curvatures,
+but if different regions of the graph have different curvatures,
+letting the curvature vary (letting the model learn, not only the embeddings,
+but also the curvature) is an option.
+
+  Node embedding from neural Hamiltonian orbits in graph neural networks
+  Q. Kang et al. (2023)
+  https://arxiv.org/abs/2305.18965
+
++ Graphs in Python
+
+Networkx is the go-to Python library to manipulate graphs,
+but it may not be the best choice. In particular, it does not scale well:
+if you have large graphs, you may want to check networkkit (much faster),
+igraph (well known to R users, but it is actually written in C,
+and also available in Python), graph_tool (tricky to install,
+but it has nice plots), grape (for graph features, 
+random-walk-based node embeddings, edge prediction).
+
+  https://networkit.github.io/
+  https://igraph.org/
+  https://graph-tool.skewed.de/
+  https://github.com/AnacletoLAB/grape
+
++ Random dot product graphs
+
+There are many models of random graphs
+(a "random graph" is a graph-valued random variable).
+The simplest one, the Erdös-Rényi graph,
+can be generalized to random dot product graphs,
+where, to each node i, we associate a vector xᵢ,
+and the probability of an edge i–j is the scalar product ⟨xᵢ,xⱼ⟩.
+
+  Statistical inference on random dot product graphs: a survey
+  A. Athreya et al. (2017)
+  https://arxiv.org/abs/1709.05454
+
+* Time series
+
+While transformers are being applied (with success)
+to almost any domain, more traditional time series
+methods still have a word to say.
+
++ State space models: S4, Hippo
+
+State space models store the information
+of past observations in latent space.
+We can select the relation between past observations
+and latent space to keep as much information as possible:
+the HiPPO matrices provide an optimal way of doing this;
+Legendre memory units (LMU) and S4 are explicit examples.
+
+  HiPPO: recurrent memory with optimal polynomial projections
+  A. Gu et al. (2020)
+  https://arxiv.org/abs/2008.07669
+
+They can be computed efficiently.
+
+  Efficiently modeling long sequences with structured state spaces
+  A. Gu et al.
+  https://arxiv.org/abs/2111.00396
+
+They can be used inside RNNs.
+
+  It's raw! Audio generation with state space models
+  K. Goel et al.
+  https://arxiv.org/abs/2202.09729
+  
+  Diffusion-based time series imputation and forecasting with structured state space models
+  J.M. Lopez and N. Strodthoff
+  https://arxiv.org/abs/2208.09399
+  
+  Deep latent state space models for time series generation
+  L. Zhou et al.
+  https://arxiv.org/abs/2212.12749
+
+  Simple hardware-efficient long convolutions for sequence modeling
+  D.Y. Fu et al. (2023)
+  https://arxiv.org/abs/2302.06646
+
+They can be combined with dimension reduction
+
+  Neural continuous-discrete state space models for irregularly-sampled time series
+  A.F. Ansari et al.
+  https://arxiv.org/abs/2301.11308
+
++ Signature transform
+
+An (almost arbitrary) probability distribution
+is entirely characterized by its moments.
+Analogously, a time series is characterized by its "signature transform".
+The formula for the signature transform looks a bit complicated
+(it involves iterated integrals) but, if you break it down,
+each term looks like a moment -- with a big difference:
+while higher moments of a probability distribution tend to grow,
+making them very sensitive to outliers and not that useful in practice,
+the higher terms of a signature transform do not.
+
+The signature transform can be used to build "time series features",
+which can then be fed to any machine learning model.
+
+  Nowcasting with signature methods
+  S.N. Cohen et al. (2023)
+  https://arxiv.org/abs/2305.10256
+
+To use the signature transform S(x) of a time series x,
+one can either compute the first terms (a truncated signature transform),
+or use the signature kernel, k(x,y)=⟨S(x),S(y)⟩, which can be computed
+without computing (and truncating) S(x), "just" by solving a PDE.
+
+  Higher order kernel mean embeddings to capture filtrations of stochastic processes
+  C. Salvi et al.
+  https://arxiv.org/abs/2109.03582
+
+  Non-adversarial training of neural SDEs with signature kernel scores
+  Z. Issa et al.
+  https://arxiv.org/abs/2305.16274
+  
+  Non-parametric online market regime detection and regime clustering for multidimensional and path-dependent data structures
+  B. Horvath and Z. Issa (2023)
+  https://arxiv.org/abs/2306.15835
+
+There are many other time series features,
+and several Python and R libraries provide
+a selection of them.
+
+  An empirical evaluation of time series feature sets
+  T. Henderson and B.D. Fulcher
+  https://arxiv.org/abs/2110.10914
+
++ Econometric time series decompositions
+
+The Beveridge-Nelson decomposition is a (very old)
+decomposition of a time series into "trend" (random walk)
+and cycle components. I have not found it very useful.
+
+  A new approach to decomposition of economic time series into permanent and transitory components with particular attention to measurement of the business cycle
+  S. Beveridge and C.R. Nelson
+  https://www.uh.edu/~cmurray/courses/econ_7395/Beveridge%20Nelson.pdf
+
+  A unified approach for jointly estimating the business and financial cycle and the role of financial factors
+  T. Berger et al. (2022)
+  https://www.econstor.eu/bitstream/10419/232064/1/1752041453.pdf
+
+  Trend-cycle decompositions
+  E. Zivot (2005)
+  https://faculty.washington.edu/ezivot/econ584/notes/trendcycle.pdf
+
++ Econometric time series models: BVAR
+
+The auto-regressive (AR) model, for univariate time series,
+x[n] = α x[n-1] + ε[n],
+or, more generally,
+x[n] = α[1] x[n-1] + ... + α[k] x[n-k] + ε[n],
+can be generalized to multivariate time series
+(VAR, vector autoregressive model)
+but, since the α[i]'s become matrices, there are often too many parameters
+to estimate -- and the problem is even worse if there is very little data
+to start with.
+
+The Bayesian VAR (BVAR) model addresses that problem
+by putting a prior on the parameters --
+the Minnesota prior assumes that α[1] is close to the identity matrix
+(so the time series is close to a random walk),
+and the other α[i] are close to zero.
+
+If there are no misisng values, the computations can be done explicitly.
+
+  Bayesian vector autoregressions
+  T. Woźniak
+  https://fbe.unimelb.edu.au/__data/assets/pdf_file/0010/1942966/2021TomaszWozniakBVARs.pdf
+
+With missing values, it is trickier,
+but you can
+alternate between sampling the missing values
+(with a Kalman smoother),
+sampling the model hyperparameters,
+and sampling the model parameters.
+
+  Nowcasting with large Bayesian vector autoregressions
+  J. Cimadomo (2020)
+  https://www.ecb.europa.eu/pub/pdf/scpwps/ecb.wp2453~465cb8b18a.en.pdf
+
+If there are really too many time series,
+you can combine the BVAR with a factor model.
+
+  Large Bayesian vector autoregressions
+  M. Bańbura et al. (2007)
+  https://faculty.wcas.northwestern.edu/lchrist/course/Korea_2016/Ba-bura_et_al-2010-Journal_of_Applied_Econometrics.pdf
+
++ Nowcasting
+
+As mentioned above, the Kalman filter can
+be used to impute missing values -- in particular,
+given a VAR model, you can use it for nowcasting,
+when some but not all of the variables are observed.
+
+  Vector autoregressions: forecasting and reality
+  J.C. Robertson and E.W. Tallman (1999)
+  https://www.atlantafed.org/-/media/documents/research/publications/economic-review/1999/q1/robertson-tallman.pdf
+
++ Econometric time series models MIDAS
+
+When fitting a linear regression on time series,
+you may want to include several lags of the predictors,
+but this dramatically increases the number of predictors.
+However, you do not expect the coefficients of the same predictor
+to vary wildly as the lag increases: it should change smoothly,
+and progressively decrease to zero.
+Instead of fitting an unconstrained linear model,
+MIDAS constrains the coefficients to vary smoothly and decay,
+as the lag increases. 
+
+This can be combined with a (group) lasso, to select the most useful
+predictors.
+
+  Machine learning time series regression with an application to nowcasting
+  A. Babii et al. (2021)
+  https://arxiv.org/abs/2005.14057
+
++ Deep learning time series models
+
+The implicit neural representation (NeRF) of time series
+generalize the classical structural time series models
+decomposing a time series into trend, cycle and holiday components.
+
+  Learning deep time-index models for time series forecasting
+  G. Woo et al. (2023)
+  https://arxiv.org/abs/2207.06046
+
+Diffusion models, very popular with images,
+can also be applied to time series,
+for imputation or forecasting.
+
+  Non-autoregressive conditional diffusion models for time series prediction
+  L. Shen and J.T. Kwok (2023)
+  https://arxiv.org/abs/2306.05043
+
+  CSDI: conditional score-based diffusion models for probabilistic time series imputation
+  Y. Tashiro et al. (2021)
+  https://arxiv.org/abs/2107.03502
+
++ Missing values
+
+Many papers attempt to impute missing values in time series,
+with deep learning, but nothing really seems to work well, 
+at least on the data I had (I just use a Kalman filter).
+
+  Modeling temporal data as continuous functions with stochastic process diffusion
+  M. Biloš et al. (2022)
+  https://arxiv.org/abs/2211.02590
+
+  Probabilistic imputation for time series classification with missing data
+  S.H. Kim et al. (2023)
+  https://arxiv.org/abs/2308.06738
+  
+  SAITS: self-attention-based imputation for time series
+  W. Du et al. (2022)
+  https://arxiv.org/abs/2202.08516
+  
+  BRITS: bidirectional recurrent imputation for time series
+  W. Cao et al. (2018)
+  https://papers.nips.cc/paper_files/paper/2018/hash/734e6bfcd358e25ac1db0a4241b95651-Abstract.html
+  
+  Learning representations for incomplete time series clustering
+  Q. Ma et al. (2019)
+  https://papers.nips.cc/paper_files/paper/2019/hash/1359aa933b48b754a2f54adb688bfa77-Abstract.html
+
+  Estimating missing data in temporal streams using multi-directional recurrent neural networks
+  J. Yoon et al. (2017)
+  https://arxiv.org/abs/1711.08742
+
+One could also try to directly use the time series, with its missing values,
+provided the machine learning model can deal with them.
+  
+  Graph-guided network for irregularly sampled multivariate time series
+  X. Zhang et al. (2021)
+  https://arxiv.org/abs/2110.05357  
+
++ Supervised dimension reduction: partial least squares (PLS)
+
+Partial Least Squares (PLS) can be seen as a supervised generalization of PCA,
+or a 2-dataset variant of PCA.
+
+Given a dataset (matrix) X, you can compute its left and right singular vectors
+with power iteration.
+Given two datasets X and Y,
+you can do the same thing to both, swapping the scores of X and Y,
+and interweaving the updates of X and Y: this computes the first PLS component.
+
+For the next components, you need to "remove" the first component
+from X and Y -- there are several ways of doing this,
+leading to variants of PLS, some symmetric (X and Y play the same role),
+some not.
+
+To complicate things further, PLS can also refer to "PLS regression",
+which uses the PLS decomposition to express Y from X.
+
+  A simple explanation of partial least squares
+  K.S. Ng (2013)
+  http://users.cecs.anu.edu.au/~kee/pls.pdf
+
+  Partial least squares methods: partial least squares correlation and partial least squares regression
+  H. Abdi and L.J. Williams (2013)
+  https://personal.utdallas.edu/~herve/abdi-PLSC_and_PLSR2012.pdf
+  
+PLS is very similar to CCA (canonical correlation analysis):
+the former uses the covariance where the latter uses the correlation
+(computing the correlation requires inverting X'X and Y'Y,
+which can be numerically unstable).
+  
+  A survey of partial least squares (PLS) methods, with emphasis on the 2-block case
+  J.A. Wegelin (2000)
+  https://stat.uw.edu/research/tech-reports/survey-partial-least-squares-pls-methods-emphasis-two-block-case
+
++ Supervised dimension reduction and manifold optimization
+
+PLS is not the only supervised dimension reduction method:
+we can combine PLS, least squares, and PCA in the same optimization problem.
+
+    Find        u
+    To maximize u'Xyy'Xu - λ‖X-Xuu'‖²
+    Such that   ‖u‖ = 1
+
+    Find        U
+    To maximize Cov(XU, y)
+    Such that   U'U = I
+
+    Find        U
+    To maximize Cov(XU, y) - λ‖X-XUU'‖²
+    Such that   U'U = I
+
+    Find        β, U
+    To minimize ‖y-yUβ‖² - λ‖X-XUU'‖²
+    Such that   U'U = I
+
+The resulting constrained optimization problems
+do not look nice -- they are constrained and non-convex.
+But they are actually easy to solve:
+instead of seeing them as constrained optimization problems
+in a vector space of matrices,
+you can see them as unconstrained optimization
+problems on the manifold of matrices with orthogonal columns
+(the Stiefel manifold). It is possible to compute gradients
+on that manifold, and to follow the gradient without leaving
+the manifold -- gradient-based algorithms, in particular the trust region
+method, work well.
+In Python, this is available in the pymanopt package.
+
+  Supervised linear dimension reduction methods: review, extensions and comparisons
+  S. Xu et al.
+  https://arxiv.org/abs/2109.04244
+    
+  Pymanopt: a Python toolbox for optimization on manifolds using automatic differentiation
+  J. Townsend et al. (2016)
+  https://arxiv.org/abs/1603.03236
+  https://pymanopt.org/docs/stable/
+
+* Optimization
+
+Optimization algorithms are not limited to
+gradient descent (and its momentum variants)
+and convex optimization:
+ADMM, operator splitting, and manifold optimization
+should also be on your radar.
+
++ Monotone operator splitting
+
+An "operator" is a multi-valued function.
+(Monotone) "operator splitting" refers to algorithms
+solving the equation 0∈(F+G)(x),
+i.e., finding the zet of zeros of a sum of operators.
+
+  A primer on monotone operator methods
+  A.K. Ryu and S. Boyd (2016)
+  https://web.stanford.edu/~boyd/papers/monotone_primer.html
+  
+  Monotone operator equilibrium network
+  E. Winston adn J.Z. Kolter
+  https://arxiv.org/abs/2006.08591
+  
+  Monotone deep Boltzmann machines
+  Z. Feng et al. (2023)
+  https://arxiv.org/abs/2307.04990
+
++ ADMM
+
+ADMM is a special case of operator splitting.
+(it minimizes a sum, f(x)+g(z),
+subject to linear constraints, Ax+Bz=c --
+often, the constraint is just x=z).
+
+  A convergent ADMM framework for efficient neural network training
+  J. Wang et al. (2015)
+  https://arxiv.org/abs/2112.11619
+  
+  Fast and flexible ADMM algorithms for trend filtering
+  A. Ramdas and R.J. Tibshirani
+  https://arxiv.org/abs/1406.2082
+
++ Manifold optimization
+
+Gradient descent does not work well for
+constrained optimization: we often just use
+a projected gradient, i.e., we take a step
+in the gradient direction, which moves away from
+from the feasible set, and then project back onto
+the feasible set.
+Instead, we can notice that the constraints
+(often) form a manifold: instead of taking the gradient
+in the ambient space, and moving in the ambient space,
+we can take the gradient on the manifold,
+and move in the gradient direction on the manifold
+(with parallel transport).
+We can turn constrained optimization (on ℝⁿ)
+into unconstrained optimization (on a manifold).
+
+  Pymanopt: a Python toolbox for optimization on manifolds using automatic differentiation
+  J. Townsend et al. (2016)
+  https://arxiv.org/abs/1603.03236
+  https://pymanopt.org/docs/stable/
+  
+  Trust region methods on Riemannian manifolds
+  P.A. Absil et al.
+  https://sites.uclouvain.be/absil/Publi/RTR/RTR_full25.pdf
+
++ Semi-definite relaxation
+
+Lifting opimization problems to higher dimensions
+can make them better-behaved: instead of replacing
+binary variables X∈{0,1} with continuous ones X∈[0,1],
+one can use a positive semi-definite regularization.
+
+  Graph theory approach to portfolio optimization
+  D. Cajas (2023)
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4602019
+
+  Neural set function extensions: learning with discrete functions in high dimensions
+  N. Karalias et al. (2022)
+  https://arxiv.org/abs/2208.04055
+
+* Differentiable everything
+
+We can put anything inside a neural net,
+provided it is differentiable.
+But what if we want to put something non-differentiable?
+For instance, we could want to put discrete decisions
+(e.g., in combinatorial optimization,
+or in reinforcement learning, where the action spaces
+are sometimes discrete), or even stochatic operations
+(sampling from a some distribution).
+
++ Reparametrization "trick" and Gumbel softmax
+
+Consider a simple case, where we want to sample
+(inside a neural net)
+from a Gaussian distribution N(μ(x),σ²(x)),
+where $x$ is the input, and μ(x) and σ²(x)
+are computed by the previous layers of the neural net.
+That is easy: we can sample from a standard Gaussian,
+ε ~ N(0,1)
+(this happens outside the neural net:
+this does not depend on the input x of the neural net),
+and rescale: z=μ(x)+σ(x)·ε.
+The sampling operation has become differentiable.
+
+This is sometimes called the "reparametrization trick".
+Can it be generalized to other distributions?
+
+The "Gumbel Max trick" is a reparametrization
+of the categorical distribution:
+gᵢ~Gumbel(0,1), z=Argmaxᵢ(gᵢ+log(θᵢ(x))).
+The Gumbel softmax replaces the argmax
+(which outputs a one-hot vector)
+with a softmax (which outputs a probability distribution).
+
+  Categorical reparametrization with Gumbel softmax
+  E. Jang et al. (2016)
+  https://arxiv.org/abs/1611.01144
+  
+  The concrete distribution: a continuous relaxation of discrete random variables
+  C.J. Maddison et al. (2016)
+  https://arxiv.org/abs/1611.00712
+
+This can be generalized to "perturbed optimizers",
+for problems of the form
+Argmax_{y∈C}⟨y,θ⟩,
+i.e., linear objective and arbitrary constraints.
+
+  Learning with differentiable perturbed optimizers
+  Q. Berthet et al. (2020)
+  https://arxiv.org/abs/2002.08676
+
+  Differentiation of blackbox combinatorial solvers
+  M. Vlastelica et al. (2019)
+  https://arxiv.org/abs/1912.02175
+
++ Simpler solutions
+
+There are simpler alternatives,
+but they may be inaccurate or slow.
+
+For instance, one could use the exact, discrete computation
+in the forward pass, and some differentiable relaxation in the backward pass.
+
+Reinforce is another alternative (popular in reinforcement learning),
+but it is a zeroth-order optimization algorithm.
+
+Instead of building a relaxation of your optimization problem,
+or a first or second order approximation (as in sequential
+quadratic programming, SQP) yourself, you can train a neural network
+to compute such an approximation.
+
+  SurCo: learning linear surrogates for combinatorial nonlinear optimization problems
+  A. Ferber et al. (2023)
+  https://arxiv.org/abs/2210.12547
+
++ Beyond dual numbers
+
+In deep learning, gradients are often computed from back-propagation.
+Instead we could use forward propagation.
+The difference looks innocuous: the gradient sought
+is a product of matrices (gradients), one for each layer;
+back-propagation computes those products backwards,
+starting from the loss function, while forward propagation
+computes them forwards, ending with the loss function.
+Since matrix product is associative, the result is the same,
+but the size of the intermediate results is vastly different --
+that is why we prefer backpropagation.
+
+Forward propagation can also be presented with dual numbers:
+to differentiate wrt to x, just replace x with x+ε, where ε²=0
+(it is a nilponent infinitesimal).
+Indeed, for analytic functions, we have f(x+ε)=f(x)+f'(x)ε.
+More formally, the ring of dual numbers can be defined as ℝ[X]/(X²)
+(if you are unfamiliar with those notations:
+ℝ[X] is the ring of polynomials in one indeterminate,
+(X²) is the ideal generated by X², i.e., the set of polynomials multiples of X²,
+and / is the notation for the quotient of a ring by an ideal).
+
+This idea can be generalized
+to quantities of the form
+a + bε + (c with probability dε)
+(for instance, for a Bernoulli distribution,
+we would have a=b=0, c=1,
+and d would depend on the parameter of the Bernoulli distribution,
+with respect to which we want to differentiate).
+
+  Automatic differentiation of programs with discrete randomness
+  G. Arya et al.
+  https://arxiv.org/abs/2210.08572
+
+* Books
+
+Here are some of the books I read this year.
+They are all freely available online.
+
+My go-to reference for deep learning used to be
+I. Goodfellow et al.'s Deep Learning, 
+but it is now more than 5 years old.
+I now recommend S. Prince's book: it is 
+amply illustrated, carefully details all the computations,
+and is accompanied by notebooks.
+
+  Understanding deep learning
+  S.J.D. Prince (MIT Press, 2023)
+  https://udlbook.github.io/udlbook/
+
+For a less-technical audience, the "little book of deep learning"
+is a short, illustrated presentation of most current deep learning
+architectures and issues. It is designed to be read... on a phone.
+
+  The little book of deep learning
+  F. Fleuret (2023)
+  https://fleuret.org/francois/lbdl.html
+
+For graph neural nets, check:
+
+  Deep learning on graphs
+  Y. Ma and J. Tang (2021)
+  https://yaoma24.github.io/dlg_book/
+  
+If you use Matplotlib,
+the followig book will show you
+how to do everything you thought was impossible.
+
+  Scientific visualization: Python and Matplotlib
+  N. Rougier (2021)
+  https://github.com/rougier/scientific-visualization-book
+
+Quantum computing is still many years away,
+but the topic is becoming more and more mainstream.
+There are two, apparently unrelated, presentations
+of quantum computing.
+First, general-purpose quantum computing
+is just linear algebra on (𝕔²)^⊗n:
+you combine linear operators; their output is converted
+into a probability distribution, and you get a sample from that
+distribution -- quantum algorithms try to make that probability
+distribution concentrated on the desired output
+(it is usually easy to check if a solution is correct:
+if it is not, you can just try again).
+The second form of quantum computing,
+for "adiabatic quantum computers",
+solves (non-convex)
+quadratic unconstrained binary optimization (QUBO) problems:
+you then have to convert the task at hand into such a problem.
+Books and courses on quantum computing
+only cover general-purpose quantum computing.
+
+  Quantum computing: lecture notes
+  R. de Wolf (2022)
+  https://homepages.cwi.nl/~rdewolf/qcnotes.pdf
+
+Quantum computing is only vaguely related (if at all)
+to quantum mechanics -- you only need quantum mechanics if you
+want to build a quantum computer, not if you just plan to use one.
+
+  Quantum mechanics for mathematicians
+  A. Alekseev (2019)
+  https://www.youtube.com/watch?v=RqVkMU_8z_o&list=PLqX5gFCSJtMBA62lNda_l5jRV09LklQ0s&pp=iAQB
+  
+* Other topics
++ Extracting causal relations from text
+
+Text (books, news, etc.) contains a wealth of causal claims:
+we can extract them, either implicitly (by training an LLM
+and hoping for the best), or explicitly (with a classifier:
+we can then put the results in a database, for further use).
+
+  Guided generation of cause and effect
+  Z. Li et al.
+  https://arxiv.org/abs/2107.09846
+
+Once this information has been extracted, it can be used,
+for instance to detect causal relations between the variables
+in a tabular dataset -- the model would not look at the data,
+just at the metadata, i.e., the name of the columns...
+
+  Causal reasoning and large language models: opening a new frontier for causality
+  E. Kıcıman et al. (2023)
+  https://arxiv.org/abs/2305.00050
+
++ Causality and robustness
+
+To check if your model is causal,
+use it under different interventions (different "regimes" --
+you do not have to know what those interventions are,
+just that there has been an intervention):
+that should not affect its performance.
+
+  Causal inference using invariant prediction: identification and confidence intervals
+  J. Peters et al. (2015)
+  https://arxiv.org/abs/1501.01332
+
++ Causality in Python
+
+There are two main tasks in causality:
+causal discovery, i.e., finding the causal graph,
+and causal inference, i.e., using the causal graph
+(e.g., to find the strength of the various causal relations,
+or to infer the effect of an intervention, with do-calculus).
+
+For causal discovery, check gCastle.
+
+  gCastle: a Python toolbox for causal discovery
+  K. Zhang et al.
+  https://github.com/huawei-noah/trustworthyAI/tree/master/gcastle
+
+The causal discovery toolkit (cdt) provides similar functionalities
+but, since it is and interface to various R packages (some of CRAN,
+some on github, some archived because they are no longer maintained),
+it is much trickier to install.
+
+  https://fentechsolutions.github.io/CausalDiscoveryToolbox/html/index.html
+
+For causal inference, check the dowhy package
+
+  https://github.com/py-why/dowhy
+
++ How to recognize a DAG
+
+A directed graph with n nodes is a DAG iff its adjacency matrix W satisfies
+the NOTEARS condition, Tr exp W = n.
+Indeed, exp(W) is a sum of powers of W, and the diagonal elements of Wᵏ
+are the numbers of cycles of length k containing a node: we want them all to be zero
+(the n on the rhs comes from k=0).
+This is differentiable: it can be used as a penalty.
+
+There are variants of that condition, but they tend to suffer from the same problem:
+the penalty decreases with the length of the cycles.
+
+  DAGs with NO TEARS: Continuous Optimization for Structure Learning
+  X. Zheng et al. (2018)
+  https://arxiv.org/abs/1803.01422
+
+  On the role of sparsity and DAG constraints for learning linear DAGs
+  I. Ng et al. (2020)
+  https://arxiv.org/abs/2006.10201
+  
+  Unsuitability of NOTEARS for causal graph discovery
+  M. Kaiser and M. Sipos (2021)
+  https://arxiv.org/abs/2104.05441
+ 
+  DAGMA: learning DAGs via M-matrices and a log-determinant acyclic characterization
+  K. Bello et al. (2022)
+  https://arxiv.org/abs/2209.08037
+  
++ ODEs
+
+To find an ODE ẋ=f(x)
+(i.e., to find f) from noisy data,
+you cannot reliably estimate ẋ:
+instead, use a variational formulation
+(multiply by a test function, integrate,
+and integrate by parts to remove the differential on x).
+
+  D-CODE: discovering closed form ODEs from observed trajectories
+  Z. Qian et al.
+  https://openreview.net/forum?id=wENMvIsxNN
+
++ PDEs
+
+To solve a partial differential equation (PDE)
+
+  f_θ(x,u,Du) = 0 for x∈Ω
+       B(x,u) = 0 for x∈∂Ω
+
+train a neural net to minimize ∑ₓ‖f_θ‖² + ∑‖B‖²
+(PINN: physically-informed neural net).
+
+  Deep learning for solving and estimating dynamic macro-finance models
+  B. Fan et al.
+
+In Python, check DeepXDE.
+
+  https://deepxde.readthedocs.io/
+
++ Layer metrics
+
+The distribution of eigenvalues of the weight matrices of a neural net
+can help gauge how well it is trained.
+
+  Predicting trends in the quality of state-of-the-art neural networks without access to training or testing data
+  C.H. Martin et al.
+  https://arxiv.org/abs/2002.06716
+  https://weightwatcher.ai/
+
+The intrinsic dimension of the latent representation
+(e.g., in the penultimate layer of your network)
+may also be a good predictor if its performance.
+
+The intrinsic dimension can be computed
+by comparing the (distributions of the)
+distances to the first and second nearest neighbours.
+
+  Intrinsic dimension of data represetations in deep neural networks
+  A. Ansuini et al.
+  https://arxiv.org/abs/1905.12784
+
+  Estimating the intrinsic dimension of datasets by a minimal neighbourhood information
+  E. Facco et al.
+  https://arxiv.org/abs/1803.06992
+
+In addition to the dimension, you may also want to look at
+the curvature of the (latent) data manifold.
+
+  Curvature-aware manifold learning
+  Y. Li (2017)
+  https://arxiv.org/abs/1706.07167
+
++ Initialization, watermark
+
+The weights of a neural network are usually initialized
+using some rule-of-thumb (Glorot or He initialization,
+depending on the type of neural net),
+designed to preserve the variance of the activations
+(ideally, we want unit variance in the input,
+and unit variance in the output).
+Instead of using a rule of thumb,
+LSUV (layer sequential unit variance)
+suggests to 
+first initialize the weights randomly,
+and then rescale them so that the output
+(on the first mini-batch) have unit variance 
+
+  All you need is good init
+  D. Mishkin and J. Matas
+  https://arxiv.org/abs/1511.06422
+
+  Improving transformer optimization through better initialization
+  X.S. Huang et al. (2020)
+  https://proceedings.mlr.press/v119/huang20f.html
+
+For residual networks, this is more complicated:
+by construction, the layers (of the form identity + something)
+increase the variance. 
+
+  Fixup initialization: residual learning without normalization
+  H. Zhang et al.
+  https://arxiv.org/abs/1901.09321  
+
+For graph neural networks, it is trickier.
+
+  Breaking the curse of depth in graph convolutional networks via refined initialization strategy
+  S. Wang et al. (2023)
+  https://openreview.net/forum?id=WW2HN95G5F
+
+Detecting if a text or an image has been generated by AI
+is a difficult cat-and-mouse problem.
+Specific AI models can be designed to include an invisible watermark:
+for instance, for a diffusion model generating images,
+we could embed it into the initial noise vector,
+in Fourier space (e.g., as rings).
+
+  Tree-ring watermarks: fingerprints for diffusion images that are invisible and robust
+  Y. Wen et al.
+  https://arxiv.org/abs/2305.20030
+
++ Data-centric machine learning
+
+Deep learning models require more and more data,
+but this may not be unavoidable.
+Data-centric machine learning tries to make better use
+of the data available:
+we may want to start the training with easy-to-learn
+examples and progressively introduce more difficult ones;
+we may want to discard (or reweight) similar examples,
+ensuring the training data remains diverse.
+
+Can we find a subset of the data (a "coreset")
+on which training will give the same results?
+
+These ideas have been around for a long time
+(boosting, negative sample mining, curriculum learning, etc.),
+but the size of current models makes them almost unavoidable.
+
+  Autocoreset: an automatic practical coreset construction framework
+  A. Maalouf et al.
+  https://arxiv.org/abs/2305.11980
+
+  Lowering the pre-training tax for gradient-based subset training: 
+  a lightweight distributed pre-training toolkit
+  Y. Ro et al. (2023)
+  https://proceedings.mlr.press/v202/ro23a.html
+
+Determinantal point processes can ensure the diversity of
+the training set, which is particularly important for few-shot learning.
+
+  Compositional exemplars for in-context learning
+  Y. Ye et al. (2023)
+  https://arxiv.org/abs/2302.05698
+
+  Improved financial forecasting via quantum machine learning
+  S. Thakkar et al.
+  https://arxiv.org/abs/2306.12965
+
+  DPPy: DPP sampling with Python
+  G. Gautier et al. (2019)
+  https://jmlr.org/papers/v20/19-179.html
+  
++ Data attribution
+
+Explainable AI (XAI) usually focuses on the features:
+which features are the most important (for the model in general,
+or for a sample in particular), how they affect the output,
+and possibly also how they interact.
+
+Instead of looking at the features, we can look at the data:
+which samples, in the training set, were the most important --
+for the model in general
+or for a test sample in particular.
+This is commonly done for traditional statistical models 
+(e.g., the leverage of an observation, for linear regression)
+or some machine learning models (the support vectors of a SVM):
+how can this be generalized to deep learning?
+
+  TRAK: Attributing model behaviour at scale
+  S.M. Park et al. (2023)
+  https://arxiv.org/abs/2303.14186
+
++ Gradients
+
+Training very large neural networks
+requires more memory than using them:
+to compute the gradients, you need to store the activations.
+
+Instead of exactly computing the gradient,
+you can compute a "stochastic gradient":
+a noisy quantity, which is only equal to the gradient in expectation
+(the gradient in a random direction).
+
+  Fine-tuning language models with just forward passes
+  S. Malladi et al.
+  https://arxiv.org/abs/2305.17333
+
++ Probabilistic forecasts
+
+The main difference between frequentist and Bayesian statistics,
+is that the former produces point estimates,
+and the latter whole probability distributions.
+Can deep learning models produce such probabilistic forecasts?
+
+Some do, out of the box: generative models
+(diffusion, normalizing flows, VAEs, and even GANs)
+output distributions or, at least, samples from a distribution.
+
+  Portfolio optimization using predictive auxiliary classifier generative adversarial networks with measuring uncertainty
+  J. Kim and M. Lee
+  https://arxiv.org/abs/2304.11856
+
+Some of the stochastic regularizers
+used during training, e.g., dropout,
+can also be used at test time, to produce samples from a distribution.
+
+  Uncertainty in deep learning
+  Y. Gal (2016)
+  https://www.cs.ox.ac.uk/people/yarin.gal/website/thesis/thesis.pdf
+
+You can also explicitly train a neural network
+to model a distribution: "prior data fitted" (PFN) networks
+output a locally uniform distribution.  
+
+  Transformers can do Bayesian inference
+  S. Müller et al.
+  https://arxiv.org/abs/2112.10510
+
++ GFlowNets
+
+GFlowNets are models to sample from distributions
+of discrete objects that can be built incrementally,
+such as sets, graphs or molecules
+(and, more generally, to sample from multimodal distributions).
+
+  GFlowNet Foundations
+  Y. Bengio et al.
+  https://arxiv.org/abs/2111.09266
+  
+  Flow network based generative models for non-iterative diverse candidate generation
+  E. Bengio et al.
+  https://arxiv.org/abs/2106.04399
+
++ Monotonic neural nets
+
+Enforcing monotonicity constraints can make your models
+interpretable, by construction: all the predictors will
+enter the model in a direction that makes sense to you.
+
+For some models, it is easy to do (linear regression,
+xgboost, etc.), but for deep learning models, it is trickier.
+There used to be complicated solutions ("lattice networks" --
+difficult to implement, difficult to train, not scalable),
+or approximate ones (adding a penalty if the gradients have
+the wrong signs -- if you wanted certainty, you could then
+search for non-monotonicity, with an MILP or SMT solver).
+
+The naive approach, constraining the weights to be positive,
+is too restrictive: with a ReLU activation, it only generates
+convex increasing functions -- and with a sigmoid activation,
+it was too difficult to train.
+Instead, it seems that constraining the weights to be positive
+and using 3 activation functions, ReLU, 
+u↦-ReLU(-u), and hard tanh, does the trick.
+
+  Constrained monotonic neural networks
+  D. Runje amd S.M. Shankaranarayana (2023)
+  https://arxiv.org/abs/2205.11775
+
+Another application of those monotonic neural nets,
+besides interpretability, is to build
+probability distributions (the cdf is monotonic,
+and the pdf can be obtained by automatic differentiation).
+
+  Neural likelihoods via cummulative distribution functions
+  P. Chilinski and R. Silva
+  https://arxiv.org/abs/1811.00974
+
++ Quantum computing
+
+There are two forms of quantum computing:
+general-purpose quantum computing
+(linear algebra on (𝕔²)^⊗n),
+and adiabatic quantum computing
+(quadratic unconstrained binary optimization, QUBO).
+
+When you were taught convex optimization,
+you (painstakingly) learned how to transform
+an optimization problem into one the computer could solve,
+for instance by adding slack variables.
+You can start to learn to do the same to transform
+your problems into QUBO problems.
+
+  Learning QUBO models for quantum annealing: a constraint-based approach
+  F. Richoux et al.
+  https://hal.science/hal-04064111/document
+
+Fortunately, this can be automated.  
+  
+  QUBO.jl: a Julia ecosystem for quadratic unconstrained binary optimization
+  P.M. Xavier et al.
+  https://arxiv.org/abs/2307.02577
+
++ Entropy estimator
+
+Traditional statistics often makes the (implicit) assumption
+that everything is Gaussian and linear.
+In contrast, information theory does not make any such assumption,
+and therefore seems much more applicable.
+However, estimating those information theoretical quantities
+(entropy, mutual information, etc.)
+from data is tricky.
+The simplest of them, entropy, is H(p) = E_{X~p} -log p(X).
+We can replace the expectation with the average over the data,
+but we still need some estimator ̂p of p for the integrand.
+The KL estimator (unrelated to Kulback-Leibler)
+assumes that the distribution is uniform in a neighbourhood of
+of each point. 
+In particular, this assumes the distribution is isotropic.
+It is possible to replace the uniform distribution
+with a (truncated) Gaussian to account for anisotropy.
+(With the data I had, it did not make a big difference, though.)
+
+  A non-parametric k-nearest neighbour entropy estimator
+  D. Lombardi and S. Pant (2015)
+  https://arxiv.org/abs/1506.06501
+
+  Gaussian probabilities and expectation propagation
+  J.P. Cunningham et al. (2011)
+  https://arxiv.org/abs/1111.6832
+
++ Alternating conditional expectation (ACE)
+
+Instead of forecasting Y from X,
+it may be equally useful to find
+a transformation f(Y) (unknown, but non-trivial)
+that is easy to forecast.
+
+  Maximally machine-learnable portfolios
+  P.G. Coulombe et al. (2022)
+  https://arxiv.org/abs/2306.05568
+
++ Beyond ℝ
+
+Neural networks typically manipulate real numbers.
+There have been many attempts to increase the expressivity
+of neural nets by using complex numbers, quaternions
+or, more generally, geometric algebra (Clifford algebras) instead.
+There are physical motivations for doing so.
+
+  Clifford neural layers for PDE modeling
+  J. Brandsetter et al. (2023)
+  https://arxiv.org/abs/2209.04934
+
++ Normalizing flows
+
+Triangular transport maps are a variant of normalizing flows.
+
+  On the representation and learning of monotone triangular transport maps
+  R. Baptista et al. 
+  https://arxiv.org/abs/2009.10303
+
++ Conformal inference
+
+Conformal inference is a generic
+way of providing calibrated prediction intervals
+(or prediction sets, for classification problems),
+for arbitrary models.
+It is usually obtained by fitting the model many times
+with the training data,
+the new value of x, and and all possible values of y,
+and comparing them.
+
+But there are shortcuts: 
+turning a neural net into a conformal predictor
+may be more straightforward.
+
+  Conformal inference is (almost) free for neural networks trained with early stopping
+  Z. Liang et al. (2023)
+  https://arxiv.org/abs/2301.11556
+
+Conformal inference assumes the data is exchangeable,
+but there are a few tricks to still use it with time series.
+
+  Sequential predictive conformal inference for time series
+  C. Xu and Y. Xie (2023)
+  https://arxiv.org/abs/2212.03463
+
++ Equivariance
+
+When feeding images to a neural net,
+you may want the computations to be equivariant to planar transformations:
+not just translations (CNNs provide that), but also rotations.
+
+  General E(2)-equivariant steerable CNNs
+  M. Weiler and G. Cesa (2019)
+  https://arxiv.org/abs/1911.08251
+  https://quva-lab.github.io/e2cnn/
