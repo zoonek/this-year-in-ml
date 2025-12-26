@@ -1,6 +1,124 @@
 2025 in Machine Learning
 
 * TODO Multiple Testing
+
+I will first review the traditional approach to statistical testing,
+including p-values, multiple testing, and sequential testing,
+before presenting the notion of e-values.
+
+** Statistical tests
+
+Statistical tests answer the question "is there something noticeable in my data?".
+More precisely, we start with a descroption of what we mean by "there is nothing noticeable":
+this is the null hypotheses, H₀ -- a set of probability distributions,
+for instance the set of all probability distributions on ℝ with mean zero.
+We then compute a quantity the test statistic,
+which has a known distribution(*)
+if the data comes from one of the distributions in H₀.
+If the test statistic is above its 1-α quantile, for a predefined value of α
+(often 5%), we reject H₀ (we claim that there is something noticeable in the data), otherwise, we do not reject H₀
+(we answer that we do not have enough data to see if there is something noticeable in the data).
+
+We can make two types or error:
+type I error, incorrectly rejecting H₀;
+type II error, not rejecting H₀ when we should have.
+
+** p-values
+
+Instead of test statistics (each test has its own distribution,
+so test statistics can be difficult to interpret), we can consider p-values,
+i.e., transformations of the test statistics that are uniformly distributed(*) in [0,1]
+if the data comes from H₀, and closer to 0 if not.
+
+Note that the p-value is the probability of seeing such an extreme test statistic if the data comes from H₀ --
+it is not the probability that H₀ is true.
+
+Another way of interpreting the p-value is as a random number,
+which either comes from the uniform distribution(*) if H₀ is true,
+or from another, unspecified distribution if not.
+We have a single observation (n=1), we do not know what that unspecified distribution is,
+and we have to decide whether it comes from H₀ or not.
+
+(*) We made a simplification in that distribution: it is not always possible for the p-value to be uniformly distributed.
+For instance, if  the null hypothesis is composite, i.e., if it contains several distributions,
+the distribution of the test statistic and therefore of the p-value may depend on which distribution in H₀ the data comes from.
+In this case, we just require that the distribution of the p-values, for each distribution in H₀,
+be stochastically greater than Unif(0,1).
+A similar problem happens with discrete distributions: the p-values then follow a discrete distribution as well, so it cannot be uniform.
+
+** FWER and FDR
+
+There are several ways of generalizing the notion of type I error to multiple tests:
+we can look at the (expected) proportion of type I erorrs in N tests
+(FDR, false discovery rate)
+or at the probability of making one or more type I error in N tests (FWER, family-wise error rate).
+If the number of tests is large, it will be difficult to control the FWER.
+
+Adjusting the p-values for the FWER is easy:
+if the tests are independent, use Šidák's adjustment, p ← 1 - (1-p)ᴺ,
+or its approximation, Bonferroni's adjustment, p ← Np.
+
+Those adjustments can be improved if you have the list of p-values (Holm):
+sort the p-values (from smallest to largest),
+and adjust them as
+pₖ ← (N-k+1)pₖ
+(more previsely, pₖ ← Max{ (N-ℓ+1)p_ℓ, ℓ≤k };
+the Holm-Šidák adjustment is similar).
+
+For FDR, this is trickier:
+sort the p-values, from the smallest to the largest, and use the Benjamini-Hochberg (BH) adjustment,
+pₖ ← (N/k) pₖ
+or, more precisely,
+pₖ ← Min{ N p_ℓ / ℓ, ℓ≥k }
+(for dependent testsm the Benjamini-Yekutieli (BHY) adjustment multiplies this by
+∑{1/k, k≤N}).
+(Strictly speaking, the BH procedure does not control the FDR, but P(H₀)×FDR,
+where P(H₀) is unknown, but often close to 1.)
+
+TODO: Resampling (White, Romano-Wolf)
+
+If there is a very large number of tests (tens of thousands),
+we can do have a better FDR control
+by estimating P(H₀) (q-values)
+or the distribution of the p-values under H₀ and H₁ (local FDR).
+
+** Sequential testing
+
+So far, we assumed we had access to all the data but,
+in many situations, data is progressively collected over time:
+we may want to continuously test as the data arrives.
+More precisely, we want to peek at the data,
+a times 1,2,...,T, perform a test each time, and stop collecting data as soon as we reject H_0.
+Of course, we cannot use the single-test critical values to decide when to reject the null:
+the type I error would be too large.
+
+We can proceed as follows (group sequential design).
+Design the tests so that the test statistics
+form a Brownian motion S₁,...,S_T,
+Cov(Sₛ,Sₜ)=min(s,t);
+the corresponding standardized statistics are
+Zₜ = Sₜ/√t, Cov(Zₛ,Zₜ) = √( s/t ), s≤t.
+We can compute the type I errpr rate α
+from the critical values c₁,...,c_T:
+
+    α = P[ ∃ t : Zₜ ≥ cₜ ].
+
+If we fix α, there are many solutions for the cₜ's:
+for instance, we can choose them to be constant (Pocock boundary)
+or (better) to be proportional to 1/√t (O'Brien-Fleming – early stopping requires stronger evidence).
+It is also possible to adjust the p-values.
+
+More generally, alpha-spending considers a spending function
+α:[0,1]→[0,α],
+α(0)=0, α(1)=α, α↗
+and uses critical values cₜ such that
+
+  P[ Zₜ<cₜ, Z₁<c₁,...,Zₜ₋₁<cₜ₋₁ ] = α(t/T) - α((t-1)/T).
+
+** TODO E-values
+
+TODO
+
 ** TODO Statistical tests
 
 TODO: Statistical tests, type I error, type II error, power, Neyman-Pearson (likelihood ratio test), p-values
@@ -20,9 +138,9 @@ TODO: q-values, local FDR
 \emph{White's reality check} controls for the FWER as follows:
 \begin{compactitem}[--]
 \item Put the data (e.g., residuals of $n$ models)
-  in a matrix, one model per column; 
+  in a matrix, one model per column;
 \item Compute the corresponding $n$ test statistics and take their maximum:
-  we want to know if it is significant; 
+  we want to know if it is significant;
 \item Generate $R$ bootstrap samples (e.g., block bootstrap, separately for each row), compute the test statistics (one for each column),
   and take their maximums;
 \item The $p$-value is the quantile of the observed maximum statistic among the $R$ bootstrap maximum statistics.
@@ -30,7 +148,7 @@ TODO: q-values, local FDR
 This only tests of the best test statistic is significant.
 \[
 \begin{tikzpicture}[>=stealth,xscale=.1,yscale=.15,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
-\begin{scope}    
+\begin{scope}
   \foreach \i in {0,...,7} {
     \draw (0,\i) -- (10,\i) -- (10,\i+1) -- (0,\i+1) -- cycle;
   }
@@ -57,9 +175,9 @@ This only tests of the best test statistic is significant.
 The \emph{Romano-Wolf stepdown} approach
 applies White's reality check iteratively:
 \begin{compactitem}[--]
-\item Sort the hypotheses, from the smallest $p$-value (largest statistic) to the largest; 
-\item Apply White's reality check; 
-\item If significant, reject the first null hypothesis and continue with the remaining ones; 
+\item Sort the hypotheses, from the smallest $p$-value (largest statistic) to the largest;
+\item Apply White's reality check;
+\item If significant, reject the first null hypothesis and continue with the remaining ones;
 \item If not, accept the remaining nulls.
 \end{compactitem}
 
@@ -94,7 +212,7 @@ The \d{q-values} are
 \[ q_i = \hat q(p_i) = \min_{ t \geq p_i } \widehat{ \text{FDR} } (t). \]
 The $q$-value is not the probability of a false positive --
 it is the expected proportion of false positives if we use that value as a threshold --
-the probability can be much higher if there are smaller $q$-values. 
+the probability can be much higher if there are smaller $q$-values.
 
 ** TODO Sequential Testing
 *** Multiple testing: sequential testing
@@ -132,7 +250,7 @@ There are many choices for the $c_k$:
   \[ c_k = C_{\text{WT}}(\alpha, K, \Delta) \left( \dfrac k K \right) ^{ -1/2+\Delta }
   \propto k ^{ -1/2+\Delta } ; \]
 \item Haybittle-Peto bounds are locally constant
-  \[ 
+  \[
   c_k = \begin{cases}
     3 & \text{if } k < K \\
     C_{\text{HP}}( \alpha, K ) & \text{ otherwise.}
@@ -154,7 +272,7 @@ We could also have stopping rules of the form
 
 We could even have an inner wedge:
 \begin{compactitem}[--]
-\item If $\va{ z_k } > b_k$, stop and reject $H_0$; 
+\item If $\va{ z_k } > b_k$, stop and reject $H_0$;
 \item If $\va{ z_k } < a_k$, stop and fail to reject $H_0$.
 \end{compactitem}
 
@@ -179,13 +297,13 @@ To assess the strength of the evidence
 (usually done with $p$-values), we need to compare pairs $(k, z_k)$:
 \begin{compactitem}[--]
 \item Stagewise ordering (lexicographic order);
-\item MLE: compare the $z_k / \sigma_k$; 
+\item MLE: compare the $z_k / \sigma_k$;
 \item Likelihood: compare the $z_k$;
 \item Score: compare the $\sigma_k z_k$.
 \end{compactitem}
 The $p$-value is then
 \[ \operatorname*{P}_{ (T, Z_T) \sim H_0 } \bigl[
-  (T, Z_T) \succcurlyeq (k, z_k) 
+  (T, Z_T) \succcurlyeq (k, z_k)
   \bigr] \]
 (only the stagewise ordering is consistent with the test result).
 
@@ -197,7 +315,7 @@ first, find $k_u$, $z_u$, $k_\ell$, $z_\ell$ such that
 \end{align*}
 then, compute the acceptance region
 \[ A(\theta_0) = \bigl\{\,
-(k,z) \ {:}\ (k_\ell,z_\ell) \preccurlyeq (k,z) \preccurlyeq (k_u,z_u) 
+(k,z) \ {:}\ (k_\ell,z_\ell) \preccurlyeq (k,z) \preccurlyeq (k_u,z_u)
 \,\bigr\}
 \]
 and the confidence set
@@ -234,7 +352,7 @@ for for the standard of care), e.g., with a power prior
 \[ \theta \sim \text{Lik} ( \theta \,|\, \text{history} )^ {\alpha_0}  \pi_0(\theta); \]
 phases II and III can be combined (hierarchical design,
 or seamless phase II/III design).
-Computing the sample size requires the estimation of nuisance parameters. 
+Computing the sample size requires the estimation of nuisance parameters.
 
 *** Multiple testing: group sequential methods
 
@@ -287,7 +405,7 @@ The FDR and mFDR (marginal FDR) are
 \begin{align*}
   \text{FDR} &= \sum_\theta \E \left[ \dfrac{ \text{FP} }{ \text{FP} + \text{TP} } \right] \\
   \text{pFDR} &= \E \left[ \dfrac{ \text{FP} }{ \text{FP} + \text{TP} } \mid| \text{FP} + \text{TP} > 0 \right] \\
-  \text{mFDR} &= \sum_\theta \left[ 
+  \text{mFDR} &= \sum_\theta \left[
     \dfrac{ \E[ \text{FP} ] }{ \E[ \text{FP} + \text{TP} ] \color{gray} + \eta }
     \right]
   \overset{\text{convexity}}{\leq} \text{FDR} \\
@@ -356,7 +474,7 @@ under $H_0$ (she cannot tell) she cannot make money.
 Under $H_0$, $L_t$ is a non-negative martingale (a fair game):
 \begin{compactitem}[(ii)]
 \item[(i)] $\E_{ H_0 }[ L_\tau ] \leq 1$ for any stopping time $\tau$
-  (optional stopping theorem); 
+  (optional stopping theorem);
 \item[(ii)] $P[\, \exists t \,:\, L_t \leq 1/\alpha \,] \leq \alpha $ (Ville's theorem).
 \end{compactitem}
 We say that:
@@ -469,7 +587,7 @@ Examples include
 \begin{align*}
   \mathscr P &= \{ \text{symmetric distributions} \} \\
   \intertext{or}
-  \mathscr P &= \{ \text{sub-gaussian distributions} \}. 
+  \mathscr P &= \{ \text{sub-gaussian distributions} \}.
 \end{align*}
 
 \textbf{1g.}
@@ -495,7 +613,7 @@ For a random time $T$ (not only a stopping time -- hindsight is allowed),
 
 For instance, for the mean of a distribution bounded in $[-1,+1]$,
 \[ \dfrac1n \sum_{i=1}^n X_i \pm 1.71 \sqrt{
-    \dfrac{ 
+    \dfrac{
       \log \log 2n + 0.72 \log( 10.4/\alpha )
     }{
       n
@@ -510,7 +628,7 @@ Given $X_1,X_2,\dots,$ random variables in $[0,1]$,
 we want to estimate their mean.
 The Hoefding inequality gives confidence intervals
 \[ \left[
-    \bar X_n \pm \dfrac{ \log(2/\alpha) }{ 2n } 
+    \bar X_n \pm \dfrac{ \log(2/\alpha) }{ 2n }
   \right] \inter [0,1]
 \]
 but assumes the worst possible variance.
@@ -537,14 +655,14 @@ The confidence regions are (for any betting strategy)
 \end{align*}
 The GRAPA (growth rate adapted to a particular alternative) strategy is
 \[ \lambda_t^{(m)} (P) = \argmax_\lambda \E\nolimits_P \bigl[
-  \log \bigl( 1 + \lambda( X_t - m ) \bigr) \bigm| \mathscr F_{t-1} 
+  \log \bigl( 1 + \lambda( X_t - m ) \bigr) \bigm| \mathscr F_{t-1}
   \bigr]
 \]
 (we do not known $P$: approximate it with $\hat\mu_t$ and $\hat{\sigma}_t$).
 
 One can also use a mixture of betteing strategies,
 \[ C_t = \left\{
-    m \ :\ \int \prod_{i=1}^t \bigl( 1 + \lambda (X_i - m ) \bigr) d\nu(\lambda) < 1/\alpha 
+    m \ :\ \int \prod_{i=1}^t \bigl( 1 + \lambda (X_i - m ) \bigr) d\nu(\lambda) < 1/\alpha
   \right\}.
 \]
 
@@ -584,7 +702,7 @@ such that
 It defines a baseline e$_j$-process
 \[ \Lambda_n^{(j)} = \begin{cases}
   1 & \text{if } n < j \\
-  \displaystyle\prod_{i=j}^n L_i & \text{if } n \geq j 
+  \displaystyle\prod_{i=j}^n L_i & \text{if } n \geq j
 \end{cases}
 \]
 for which the SR and \textsc{Cusum} e-detectors can be computed as
@@ -613,7 +731,7 @@ If both $\mathscr P$ and $\mathscr Q$ are composite, use universal inference
 \begin{align*}
   \Lambda_n^{(j)} &= \prod_{ i=j}^n \dfrac{ \hat q_{i-1} ( X_i ) }{ \hat p_n (X_i ) } \\
   \intertext{or}
-  \Lambda_n^{(j)} &= \prod_{ i=j}^n \dfrac{ \int q ( X_i ) \nu(dq) }{ \hat p_n (X_i ) }.  
+  \Lambda_n^{(j)} &= \prod_{ i=j}^n \dfrac{ \int q ( X_i ) \nu(dq) }{ \hat p_n (X_i ) }.
 \end{align*}
 
 
@@ -651,7 +769,7 @@ We can convert between e-values and p-values,
 but the p-to-e transformation loses information.
 \[
 \begin{tikzpicture}[>=stealth,xscale=2,yscale=.5,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
-\node[anchor=east] (A) at (0,0) {E-values};    
+\node[anchor=east] (A) at (0,0) {E-values};
 \node[anchor=west] (B) at (1,0) {P-values};
 \draw[->] ([yshift=+3pt]A.east) to node[anchor=south] {\footnotesize $p=1/e$} ([yshift=+3pt]B.west);
 \draw[->] ([yshift=-3pt]B.west) to node[anchor=north] {\footnotesize $e=\mathbf1_{p\leq\alpha} / \alpha$} ([yshift=-3pt]A.east);
@@ -719,13 +837,13 @@ it has level $\alpha$ if the type-I error $\E[\phi]$ satisfies
 \[ \forall P \in \mathscr P \quad \E\nolimits_P [ \phi] \leq\alpha \]
 (we can also consider $[0,1]$-valued tests: $\phi$ is then the probability of rejecting $H_0$).
 
-\textbf{2.} 
+\textbf{2.}
 From Markov's inequality, if $E$ is an e-variable,
 \[ \forall P \in \mathscr P \quad P[ E \leq 1/\alpha] \leq \alpha, \]
 \ie,
 \begin{compactitem}[--]
 \item $1/E$ is a p-variable;
-\item $\min(\alpha E, 1 )$ is a level-$\alpha$ test; 
+\item $\min(\alpha E, 1 )$ is a level-$\alpha$ test;
 \item $\mathbf 1_{ E \geq 1/\alpha }$ is a level-$\alpha$ binary test.
 \end{compactitem}
 Note that if $p$ is a p-variable, $1/p$ is generally not an $E$-variable.
@@ -872,7 +990,7 @@ $d_{\text{TV}} ( \operatorname{Conv} \mathscr P , \operatorname{Conv} \mathscr Q
 where the total variation distance is
 \begin{align*}
   d_{\text{TV}} (P,Q) &= \sup_A \va{ P(A) - Q(A) } \\
-  d_{\text{TV}} (\mathscr P, \mathscr Q) &= \inf_{\substack{ P \in \mathscr P \\ Q \in \mathscr Q }} d_{\text{TV}} (P,Q) 
+  d_{\text{TV}} (\mathscr P, \mathscr Q) &= \inf_{\substack{ P \in \mathscr P \\ Q \in \mathscr Q }} d_{\text{TV}} (P,Q)
 \end{align*}
 
 For simple $H_0$ and $H_1$, the \emph{likelihood ratio} $E = dQ / dP$ is log-optimal
@@ -891,7 +1009,7 @@ are asymptotically log-optimal
 For the T-test
 \begin{align*}
   \mathscr P &= \bigl\{ N( 0, \sigma^2 ) \ : \ \sigma > 0 \bigr\} \\
-  \mathscr P &= \bigl\{ N( \mu, \sigma^2 ) \ : \ \sigma > 0, \ \mu\neq 0 \bigr\}   
+  \mathscr P &= \bigl\{ N( \mu, \sigma^2 ) \ : \ \sigma > 0, \ \mu\neq 0 \bigr\}
 \end{align*}
 use
 \begin{align*}
@@ -1049,15 +1167,15 @@ Universal inference looks at the ratio of a mixture over a maximum likelihood.
         \int \prod_i p(X_i) \nu(dp)
         } \\
   G_n &= \dfrac{
-        \sup\limits_{ q \in \mathscr Q} \prod_i q(X_i) 
+        \sup\limits_{ q \in \mathscr Q} \prod_i q(X_i)
         }{
-        \sup\limits_{ p \in \mathscr P } \prod_i p(X_i) 
+        \sup\limits_{ p \in \mathscr P } \prod_i p(X_i)
         } \\
   U_n &= \dfrac{
         \int \prod_i q(X_i) \mu(dq)
         }{
-        \sup\limits_{ p \in \mathscr P } \prod_i p(X_i) 
-        }  
+        \sup\limits_{ p \in \mathscr P } \prod_i p(X_i)
+        }
 \end{align*}
 When the null is simple, $B_n = U_n$ is the numeraire.
 
@@ -1113,9 +1231,9 @@ The \emph{Wald sequential probability ratio test} (SRPT) uses the same statisic:
 choose $\gamma_0$ and $\gamma_1$ (e.g., $\gamma_0=\beta$, $\gamma_1=1/\alpha$ --
 this is sufficient to keep the type I and type II errors below $\alpha$ and $\beta$),
 \begin{compactitem}[--]
-\item Accept $H_0$ if $L_t \leq \gamma_0$; 
-\item Reject $H_1$ if $L_t \geq \gamma_1$; 
-\item Continue to collect data otherwise. 
+\item Accept $H_0$ if $L_t \leq \gamma_0$;
+\item Reject $H_1$ if $L_t \geq \gamma_1$;
+\item Continue to collect data otherwise.
 \end{compactitem}
 It achieves the best trade-off between type I error, type II error, and stopping time,
 in the following sense:
@@ -1171,8 +1289,8 @@ For a simple $H_0$:
 \begin{compactitem}[--]
 \item Start with wealth $W_0=1$;
 \item At time $t$, choose $S_t : \mathscr X \longrightarrow [0,\infty]$
-  such that $\E\nolimits_P\bigl[ S_t(X) | X_1,\dots,X_{t-1} \bigr] \leq 1$; 
-\item Observe $X_t$; 
+  such that $\E\nolimits_P\bigl[ S_t(X) | X_1,\dots,X_{t-1} \bigr] \leq 1$;
+\item Observe $X_t$;
 \item Update the wealth $W_t = W_{t-1} \cdot S_t( X_t )$.
 \end{compactitem}
 The wealth $(W_t)_t$ is a test supermartingale.
@@ -1202,10 +1320,10 @@ of 1 and $E_t$ with predictable weights
 e.g.,
 \begin{align*}
   \lambda_t &= \argmax_{ \lambda \in [0,1] } \E\nolimits_Q\bigl[
-              \log \bigl( (1-\lambda) + \lambda E_t \bigr) \bigm| \mathscr F_{t-1} 
+              \log \bigl( (1-\lambda) + \lambda E_t \bigr) \bigm| \mathscr F_{t-1}
               \bigr] \\
   \intertext{or}
-  \lambda_t &= \argmax_{ \lambda \in [ 0, \gamma ] } \dfrac1{t-1} \sum_{ s = 1 } ^ {t-1} \log \bigl( (1-\lambda) + \lambda E_t \bigr) 
+  \lambda_t &= \argmax_{ \lambda \in [ 0, \gamma ] } \dfrac1{t-1} \sum_{ s = 1 } ^ {t-1} \log \bigl( (1-\lambda) + \lambda E_t \bigr)
 \end{align*}
 (empirically adaptive e-process; it is asymptotically log-optimal).
 
@@ -1278,7 +1396,7 @@ $E'_k = b_k E_k$,
 where
 \begin{align*}
   & \forall P \in \mathscr P_k \quad \E\nolimits_P\bigl[ T( \alpha b_k E_k ) \bigr] \leq \alpha \\
-  & T(x) = \dfrac{ K }{ \lceil K/x \rceil } \mathbf 1_{ x \geq 1 }. 
+  & T(x) = \dfrac{ K }{ \lceil K/x \rceil } \mathbf 1_{ x \geq 1 }.
 \end{align*}
 BH (independent p-values) is a special case of boosted e-BH;
 BHY is a special case of e-BH.
@@ -1304,11 +1422,11 @@ For small $K$ ($K\leq10$), we can slightly improve e-BH:
 \begin{compactitem}[--]
 \item First test the global null $\bigcap \mathscr P_k$,
   rejecting it if $F(e_1,\dots,e_K) \geq 1/\alpha$
-  (with $F=\text{average}$ for instance); 
+  (with $F=\text{average}$ for instance);
 \item Then, if it is rejected, apply e-BH with
-  $\alpha' = K \alpha / (K-1)$.  
+  $\alpha' = K \alpha / (K-1)$.
 \end{compactitem}
-(This can be adapted to boosted e-values.) 
+(This can be adapted to boosted e-values.)
 
 Stochastic rounding $S$
 (choose a grid, e.g., $\{0, \alpha^{-1}\}$, and randomly round up or down,
@@ -1318,7 +1436,7 @@ preserves e-values, decreases e-power, but increases power.
 
 \begin{compactitem}[--]
 \item Re-BH applies e-BH to
-  $\bigl( S_\alpha(E_k) \bigr)_{ 1 \leq k \leq K}$; 
+  $\bigl( S_\alpha(E_k) \bigr)_{ 1 \leq k \leq K}$;
 \item Eu-BH applied e-BH to
   $E_1/U, \dots, E_k/U$,
   where $U \sim \text{Unif}(0,1)$;
@@ -1362,7 +1480,7 @@ Every FDR controlling procedure can be written as the closed e-BH procedure appl
 
 In the definition of $\mathscr C_\alpha$, you can change the error metric, $\text{FDP}_A(R)$, e.g.,
 \begin{compactitem}[--]
-\item FWER: $L_A(R) = \mathbf 1_{ \va{ A \inter R} \geq k } $; 
+\item FWER: $L_A(R) = \mathbf 1_{ \va{ A \inter R} \geq k } $;
 \item PFER: $L_A(R) = \va{ A \inter R } / K $;
 \item FDX: $\mathbf 1_{ \text{FDP}_A(R) \geq \gamma }$.
 \end{compactitem}
@@ -1387,15 +1505,15 @@ and $\delta$ a binary $\mathscr F_T$-measurable random variable, nested
 \[ \mathrm{P}_{H_0} \bigl[ \delta(\alpha) = 1 \bigr] \leq \alpha. \]
 Sequential tests of power one (which do not accept $H_0$ in finite time)
 define \emph{always valid $p$-values} $p_n$
-\[ \forall\, T \text{ stopping time} \ \ \ 
-\forall s \in [0,1] \ \ \ 
+\[ \forall\, T \text{ stopping time} \ \ \
+\forall s \in [0,1] \ \ \
 \mathrm{P}_{\!H_0} [ p_T \leq s ] \leq s \]
 as
 \[ p_n = \inf \bigl\{ \alpha \ {:}\ T(\alpha) \leq n , \ \delta(\alpha) = 1 \bigr\} \]
 and always valid confidence regions
 \[ \text{CI}_n = \{ \theta \ {:} \ p_n^\theta > \alpha \} . \]
 
-For instance, given a prior $H$ on $\theta$, the 
+For instance, given a prior $H$ on $\theta$, the
 \emph{mixture sequential probability ratio test} (mSPRT):
 \begin{align*}
   \Lambda_n(s) &= \int_\Theta \left( \dfrac{ f_\theta(s) }{ f_{\theta_0}(s) } \right)^{\!\!n} dH(\theta) \\
@@ -1416,9 +1534,56 @@ For instance, given a prior $H$ on $\theta$, the
 Neural networks:
 \begin{compactitem}[--]
 \item Are biased towards overly smooth functions;
-\item Are more affected (than tree-based methods) by uninformative features; 
+\item Are more affected (than tree-based methods) by uninformative features;
 \item Are rotation-invariant (rotating the input does not affect training).
 \end{compactitem}
+
+** Deep Learning
+
+Deep learning models are still often seen as inferior to tree-based models
+(gradient descent, random forests)
+for tabular data,
+in part because of their rotation invariance --
+trees are axis-aligned, which often helps them identify structure in tabular data.
+
+This may be changing thanks to better pre-processing
+
+TODO: papers
+
+transformers
+
+TODO: papers
+
+better tuning
+
+TODO: papers
+
+and more agressive ensembling
+
+TODO: papers
+
+** Kernel methods
+
+Kernel methods with axis-aware kernels (ℓᵖ) also have that axis-aligned prior.
+For instance, recursive feature machines (RFM)
+fir a ridge regression in a warped space,
+x↦Mx,
+where M is the average gradient outer product (AGOP)
+
+    Mean ∇f(xᵢ) ∇f(xᵢ)'
+
+whose eigenvectors identify the directions along which the predictor varies the most.
+One can stack such models,
+or use them to recursively partition the data
+(note that training such models does not require backpropagation).
+
+TODO: papers
+
+Kernel methods do not scale to large datasets, but one can use the Nyström approximation.
+
+    TODO: Formula
+
+TODO: papers
 
 ** TODO Ensembling, fine-tuning
 *** Tabular data: efficient ensembles of neural nets
@@ -1491,13 +1656,13 @@ Search for the optimal combination of regularization techniques
 \item Stochastic weight averaging;
 \item Look-ahead optimization;
 \item Weight decay;
-\item Dropout; 
-\item Snapshot Ensemble; 
-\item Skip connections; 
-\item ShakeShake; 
-\item ShakeDrop; 
+\item Dropout;
+\item Snapshot Ensemble;
+\item Skip connections;
+\item ShakeShake;
+\item ShakeDrop;
 \item Mixup;
-\item CutMix; 
+\item CutMix;
 \item CutOut;
 \item Adversarial learning.
 \end{compactitem}
@@ -1518,7 +1683,7 @@ may come from feature embeddings: try to
   % TODO: PLOT? No
 \item Or use periodic transformations,
   \[ x \longmapsto ( \cos 2\pi \mathbf c x, \sin 2\pi \mathbf c x ), \]
-  with trained frequencies $\mathbf c$.    
+  with trained frequencies $\mathbf c$.
 \end{compactitem}
 
 *** Transformers, embeddings
@@ -1529,7 +1694,7 @@ may come from feature embeddings: try to
   J. Qu et al.
 \end{book}
 \begin{compactitem}[--]
-\item 
+\item
   Compute column embeddings (TFcol)
 \begin{align*}
   &\begin{aligned}
@@ -1558,9 +1723,9 @@ may come from feature embeddings: try to
     &W, B = \text{Lin}(V) \\
     &e = W \odot c + B
   \end{aligned}
-\end{align*} 
+\end{align*}
 \item Add a positional column embedding (RoPE) -- this breaks the permutation invariance,
-  but prevents representation collapse -- the column embeddings only depends on the distribution of the values; 
+  but prevents representation collapse -- the column embeddings only depends on the distribution of the values;
 \item Add four \textsc{cls} tokens to each row, and apply a transformer (TFrow);
   only keep the \textsc{cls} embeddings, $H$;
 \item Add $y$ (1-hot encoding, limited to 10 classes -- use a hierarchical encoding if there are more)
@@ -1611,24 +1776,24 @@ add a \textsc{cls} token, apply a transformer
 \draw[->] (1,3.6) -| (N2);
 \draw[->] (N2) -- (FF);
 \draw[->] (FF) |- (P2);
-\end{tikzpicture}  
+\end{tikzpicture}
 \]
 and use the \textsc{cls} token for the forecast.
 \[
 \begin{tikzpicture}[>=stealth,xscale=.5,yscale=.2,inner sep=1pt,outer sep=0pt,every node/.style={anchor=base}]
-\begin{scope}    
+\begin{scope}
   \foreach \i in {0,...,6}
     \draw (0,\i) -- (1,\i) -- (1,\i+1) -- (0,\i+1) -- cycle;
-\end{scope}  
+\end{scope}
 \begin{scope}[shift={(2,0)}]
   \foreach \i in {0,...,6}
     \draw (0,\i) -- (2,\i) -- (2,\i+1) -- (0,\i+1) -- cycle;
-\end{scope}  
+\end{scope}
 \begin{scope}[shift={(5,0)}]
   \foreach \i in {0,...,7}
     \draw (0,\i) -- (2,\i) -- (2,\i+1) -- (0,\i+1) -- cycle;
   \node[anchor=center] at (1,7.5) {\footnotesize\textsc{cls}};
-\end{scope}  
+\end{scope}
 \begin{scope}[shift={(8,0)}]
   \foreach \i in {0,...,7}
     \draw (0,\i) -- (2,\i) -- (2,\i+1) -- (0,\i+1) -- cycle;
@@ -1641,7 +1806,7 @@ and use the \textsc{cls} token for the forecast.
 \draw[->] (1.1,3.5) -- (1.9,3.5);
 \draw[->] (4.1,3.5) -- (4.9,3.5);
 \draw[->] (7.1,3.5) -- (7.9,3.5);
-\end{tikzpicture}  
+\end{tikzpicture}
 \]
 Fine-tune the hyperparameters (optuna).
 
@@ -1656,7 +1821,7 @@ TabPFN is trained on synthetic data, from \emph{noisy sparsified random MLPs}:
 \begin{compactitem}[--]
 \item Pick hyperparameters at random: number of layers, layer sizes, activation functions, dropout rate
   (this makes the network sparse), noise scale (inject noise in each layer);
-\item Pick the weights at random; 
+\item Pick the weights at random;
 \item Pick a few neurons at random as predictors $X$, and another as response $y$; clip at $4\sigma$;
   use \emph{ranking discretization} to produce categorical variables;
 \end{compactitem}
@@ -1695,7 +1860,7 @@ TabPFN is trained on synthetic data, from \emph{noisy sparsified random MLPs}:
     \node[circle,fill] at (2,2) {};
     \node[circle,fill] at (7,1) {};
     \node at (4.5,-1) {\footnotesize ranking soft discretization};
-  \end{scope}  
+  \end{scope}
 \end{tikzpicture}
 \]
 
@@ -1729,8 +1894,8 @@ To improve TabPFN:
 Put a $k$-NN component inside an MLP:
 \[
 \begin{tikzpicture}[>=stealth,xscale=1.2,yscale=.7,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
-\node[anchor=base east] (x) at (0,2) {$x$};    
-\node[anchor=base east] (xi) at (0,1) {$\{x_i\}_i$};    
+\node[anchor=base east] (x) at (0,2) {$x$};
+\node[anchor=base east] (xi) at (0,1) {$\{x_i\}_i$};
 \node[anchor=base east] (yi) at (0,0) {$\{y_i\}_i$};
 \node[draw] (e1) at (1,2) {enc\strut};
 \node[draw] (e2) at (1,1) {enc\strut};
@@ -1744,7 +1909,7 @@ Put a $k$-NN component inside an MLP:
 \draw[->] (e2) -- (R);
 \draw[->] (R) -- (p);
 \draw[->] (p) -- (y);
-\end{tikzpicture}  
+\end{tikzpicture}
 \]
 The retrieval component $R$
 \begin{compactitem}[--]
@@ -1756,7 +1921,7 @@ The retrieval component $R$
   \item Takes their top-$k$ softmax and multiplies it with
   \item The value
     \[ V( \tilde x , \tilde x_i , y_i ) = W_y( y_i) + T\bigl( W_k(\tilde x ) - W_k( \tilde x_i ) \bigr) \]
-    where $T$ is a 1-hidden layer MLP.    
+    where $T$ is a 1-hidden layer MLP.
 \end{compactitem}
 
 \nextbook
@@ -1796,7 +1961,7 @@ instead of the whole dataset.
 A \emph{kernel machine} is a linear model (ridge regression) on transformed data
 \begin{align*}
   f(x) &= K( x, X ) \alpha \\
-  \alpha &= \bigl( K(XmX) + \lambda I \bigr)^{-1} y . 
+  \alpha &= \bigl( K(XmX) + \lambda I \bigr)^{-1} y .
 \end{align*}
 
 The \emph{average gradient outer product} (AGOP)
@@ -1814,7 +1979,7 @@ it iterates $T \leq 10$ times
   \hat f_t(x) &= K ( M_t x , X M_t ) \alpha_t \\
   \alpha+t &= \bigl( K( X M_t , X M_t ) + \lambda Y \bigr)^{-1} y \\
   M_{t+1} &= \text{AGOP} \bigl( \hat f_t( M_t x ) , X ) ^c, \qquad c=\tfrac12 \text{ or } \tfrac14 \\
-  M_i &= I. 
+  M_i &= I.
 \end{align*}
 
 Instead of kernels invariant to orthogonal transformations such as
@@ -1848,13 +2013,13 @@ the \emph{recursive feature machine} (RFM)
     \vphantom{\ensuremath{
             \begin{aligned}
               & f(x) = y K_M( X, X )^{-1} K_M(X, x)  \\
-              & M = \operatorname*{Mean}_x \nabla f(x) \nabla f(x)^\top 
-            \end{aligned}    
+              & M = \operatorname*{Mean}_x \nabla f(x) \nabla f(x)^\top
+            \end{aligned}
     }}
     \right.}}
     \begin{aligned}
       & f(x) = y K_M( X, X )^{-1} K_M(X, x)  \\
-      & M = \operatorname*{Mean}_x \nabla f(x) \nabla f(x)^\top 
+      & M = \operatorname*{Mean}_x \nabla f(x) \nabla f(x)^\top
     \end{aligned}
 \end{align*}
 where
@@ -2032,9 +2197,9 @@ and hyperparameter search spaces (for ensembling).
 \end{book}
 To generate synthetic tabular data:
 \begin{compactitem}[--]
-\item Discretize column 1 into $n$ classes; 
-\item Shuffle the rows while preserving column 1; 
-\item Restore column 1; 
+\item Discretize column 1 into $n$ classes;
+\item Shuffle the rows while preserving column 1;
+\item Restore column 1;
 \item Do the same for the other columns;
 \item Optionally replace the values in each column with data from a piecewise uniform distribution approximating the data, preseving the ranks.
 \end{compactitem}
@@ -2133,7 +2298,7 @@ to assess \emph{probabilistic} forecasts --
 cross-entropy
 \begin{align*}
   - \operatorname*{Mean}_x \log f(x) &= H( \text{data}, F ) \\
-  H(p,q) &= - \E_{ X \sim p } \log q(x) 
+  H(p,q) &= - \E_{ X \sim p } \log q(x)
 \end{align*}
 is often a better choice if the forecasted density is available.
 
@@ -2389,12 +2554,12 @@ Learn a transition function between patterns
 where $p$ is a latent representation,
 $\alpha$ its duration, $\beta$ its scale.
 
-\emph{FTS Diffusion} combines those elements to generate financial time series. 
+\emph{FTS Diffusion} combines those elements to generate financial time series.
 
 \nextbook
 \begin{book}
   \emph{Breaking the data scarcity barrier: significant return prediction improvement across models through scale-invariant data augmentation}\\
-  H. Juang et al. 
+  H. Juang et al.
 \end{book}
 Use FTS-Diffusion for data augmentation,
 when forecasting future S\&P\,500 daily returns
@@ -2402,7 +2567,7 @@ from the past 60 days, with deep learning models
 (iTransformer, pretrained on a domain-adjacent dataset, 8 FX time series).
 
 ** TODO Probabilistic forecasts
-*** Probabilistic forecasts, scoring rules, 
+*** Probabilistic forecasts, scoring rules,
 
 \nextbook
 \begin{book}
@@ -2419,13 +2584,13 @@ for some combinations of
 \begin{align*}
   d &: \text{ dimension} \\
   n &: \text{ground truth sample size} \\
-  m &: \text{ forecast sample size} 
+  m &: \text{ forecast sample size}
 \end{align*}
 the statistical power of most scoring rules to detect
 \begin{compactitem}[--]
-\item Differences in mean; 
+\item Differences in mean;
 \item Positive correlations;
-\item Skewness; 
+\item Skewness;
 \item Difference in marginal variance;
 \item etc.
 \end{compactitem}
@@ -2458,7 +2623,7 @@ A \emph{weak autoencoder} only recovers its input in distribution.
 \end{tikzpicture}
 \]
 
-** TODO TO SORT 
+** TODO TO SORT
 *** Koopman, ODE
 
 \nextbook
@@ -2473,7 +2638,7 @@ KoNODE lets the ODE parameters $\theta$ vary with time,
 with its dynamics described by
 \begin{align*}
   \theta_t &= h( w_t ) \\
-  \dot w_t &= A w_t 
+  \dot w_t &= A w_t
 \end{align*}
 (the dynamics of $\theta$ are non-linear, but they become linear when lifted to a higher-dimension space).
 
@@ -2489,7 +2654,7 @@ with its dynamics described by
 \emph{Mechanistic interpretability} (MI) studies
 \begin{compactitem}[--]
 \item The \emph{features} encoded in the model (in layers, components (e.g., attention heads), or neurons);
-\item \emph{Circuits}, \ie, computational subgraphs whose nodes are features; 
+\item \emph{Circuits}, \ie, computational subgraphs whose nodes are features;
 \item \emph{Universality}: whether those features or circuits generalize to other architectures or tasks.
 \end{compactitem}
 Feature study can be targeted (``is feature X present? where?''):
@@ -2545,7 +2710,7 @@ To train SAEs:
 \begin{compactitem}[--]
 \item Use a TopK activation function (this eliminates the need for a sparsifying $L^2$ penalty)
   or MultiTopK (combine losses for several values of $k$, e.g., $\ell_k + \tfrac18 \ell_{4k}$);
-\item Initialize the decoder to the transpose of the encoder; 
+\item Initialize the decoder to the transpose of the encoder;
 \item Add an \emph{auxilliary loss}, for the reconstruction error from the top $k_{\text{aux}}$ dead latents --
   this reduces the number of dead latents, which can otherwise reach 90\% of the activations.
 \end{compactitem}
@@ -2580,7 +2745,7 @@ The $L^1$ penalty in SAE
 \begin{align*}
   x &= x - b_2 \\
   y &= \text{ReLU}( W_1 x + b_1 ) \\
-  \hat x &= W_2 y + b_2 
+  \hat x &= W_2 y + b_2
 \end{align*}
 causes shrinkage.
 Instead, \emph{gated SAE}s use
@@ -2660,7 +2825,7 @@ Train a single, overcomplete SAE on the activations of several pretrained models
   \node[fill=blue!15] (mj) at (0,5) {model $j$};
   \node (ai) at (2,4) {activations $i$};
   \node (aj) at (0,4) {activations $j$};
-  \node[fill=blue!15] (ei) at (2,3) {encoder $i$};  
+  \node[fill=blue!15] (ei) at (2,3) {encoder $i$};
   \node[fill=blue!15] (ej) at (0,3) {encoder $j$};
   \node (l) at (1,2) {latent};
   \node[fill=blue!15] (di) at (2,1) {decoder $i$};
@@ -2722,8 +2887,8 @@ using a sparse hidden layer) do not work that well.
 Applications of sparse autoencoders (SAE) to interpret LLMs include
 identifying features activated when
 \begin{compactitem}[--]
-\item The model gives instructions to build chemical, biological or nuclear weapons; 
-\item The user probes the model's goals and values, or tries to jailbreak it; 
+\item The model gives instructions to build chemical, biological or nuclear weapons;
+\item The user probes the model's goals and values, or tries to jailbreak it;
 \item The model is trained to be a sleeper agent;
 \item etc.
 \end{compactitem}
@@ -2734,7 +2899,7 @@ identifying features activated when
 \nextbook
 \begin{book}
   \emph{Transcoders find\\ interpretable LLM feature circuits}\\
-  J. Dunefsky et al. 
+  J. Dunefsky et al.
 \end{book}
 \emph{Circuit analysis} looks for sparse subgraphs corresponding to specific behaviours.
 Transcoders approximate a densely activating MLP layer with a wider, sparsely activating layer.
@@ -2780,7 +2945,7 @@ apply dictionary learning to them jointly
   \draw[->] (X) |- (p1);
   \draw[->] (0,3) -| (Y);
   \draw[->] (Y) |- (p2);
-  \draw[->] (p2) -- (B);  
+  \draw[->] (p2) -- (B);
   \draw[->] (p1) -- (p2);
 \end{tikzpicture}
 =
@@ -2880,14 +3045,14 @@ but looks for a \emph{convex} combination of leaf forecasts
 \begin{compactitem}[--]
 \item Trains a random forest, with shallow trees, and splits at the $q$-empirical quantiles of the marginal distribution ($q=10$);
 \item Selects the most frequent rules (internal nodes or leaves);
-\item Removes the redundant ones (linear combinations of more frequent ones); 
+\item Removes the redundant ones (linear combinations of more frequent ones);
 \item Fits a ridge regression with the rule values.
 \end{compactitem}
 
 \nextbook
 \begin{book}
   \emph{Rule induction partitioning estimator:\\ design of an interpretable prediction algorihm}\\
-  V. Margot et al. 
+  V. Margot et al.
 \end{book}
 RIPE
 \begin{compactitem}[--]
@@ -2901,7 +3066,7 @@ RIPE
 \begin{tikzpicture}[>=stealth,scale=.25,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
   \fill[yellow!50!white] (0,2) -- (0,4) -- (2,4) -- (2,3) -- (1,3) -- (1,2) -- cycle;
   \draw[ultra thick,green!50!black] (0,2) -- (5,2) -- (5,5) -- (0,5) -- cycle;
-  \draw[ultra thick,red!70!white] (0,-2) -- (0,4) -- (2,4) -- (2,-2) -- cycle; 
+  \draw[ultra thick,red!70!white] (0,-2) -- (0,4) -- (2,4) -- (2,-2) -- cycle;
   \draw[ultra thick,blue!40!white] (1,-2) -- (1,3) -- (5,3) -- (5,-2) -- cycle;
   \node[circle,fill,inner sep=1pt] (A) at (.5,3.5) {};
   \node[right=-1.5mm of A]{\footnotesize$x$};
@@ -2915,7 +3080,7 @@ RIPE
     \node[anchor=west] at (1.5,3) {cells not containing $x$};
     \node[anchor=west] at (1.5,1) {\strut intersection of cells containing $x$};
     \node[anchor=west] at (1.5,-.2) {\strut minus};
-    \node[anchor=west] at (1.5,-1.4) {\strut union of cells not containing $x$};    
+    \node[anchor=west] at (1.5,-1.4) {\strut union of cells not containing $x$};
   \end{scope}
 \end{tikzpicture}
 \]
@@ -2981,13 +3146,13 @@ they are:
 \begin{compactitem}[--]
 \item Sensitive topics;
 \item Story-telling;
-\item Porn and hate speech; 
+\item Porn and hate speech;
 \item Real-world problems;
 \item ``Start your response with `Sure, I am happy to help'{}''
 \end{compactitem}
 This suggests a few attacks:
 \begin{compactitem}[--]
-\item Removing the non-dominant directions; 
+\item Removing the non-dominant directions;
 \item Removing trigger words (identified by LRP) by rephrasing the prompt.
 \end{compactitem}
 
@@ -3015,7 +3180,7 @@ LoRE is a tree- and counterfactual-based variant of LIME:
 \item Also give counterfactuals: features to change to change the output.
 \end{compactitem}
 
-*** Taylor 
+*** Taylor
 
 \nextbook
 \begin{book}
@@ -3047,7 +3212,7 @@ the root points $(x_{ij}^\ell)_i$ are easier to find.
 The resulting relevance propagation rules are similar to the LRP ones,
 but without hyperparameters to choose.
 
-** TODO TO SORT 
+** TODO TO SORT
 *** Sparsity, Discrete variables
 
 \nextbook
@@ -3073,9 +3238,9 @@ The \emph{sparseMAP} generalizes this to other polytopes
       u \\
       u = My \\
       y \in \Delta \\
-      \theta = [M \ N ] \eta 
+      \theta = [M \ N ] \eta
   }}
-  \theta' y - \dfrac12 \n{ M y }_2^2  
+  \theta' y - \dfrac12 \n{ M y }_2^2
 \end{align*}
 
 \nextbook
@@ -3088,7 +3253,7 @@ The \emph{sparseMAP} generalizes this to other polytopes
   \text{sparsemax}(s) &= \argmin_{ \xi \in \Delta } \n{ \xi - s }_2^2 \\
   \text{sparsemax}_k(s) &= \argmin_{\substack{
       \xi \in \Delta \\
-      \n \xi _0 \leq k 
+      \n \xi _0 \leq k
   }} \n{ \xi - s }_2^2 \\
   \text{sparseMAP}(s) &= \argmin_{ \xi \in \Delta } \n{ A \xi - s } _2^2
 \end{align*}
@@ -3209,7 +3374,7 @@ is identifiable: the DAG can be recovered from the joint distribution of $X$ or,
 
 From Stein's identity
 \[ \E_{ \mathbf x \sim p } \bigl[
-  \mathbf h(x) \nabla \log p(\mathbf x ) ^\top + \nabla \mathbf h( \mathbf x ) 
+  \mathbf h(x) \nabla \log p(\mathbf x ) ^\top + \nabla \mathbf h( \mathbf x )
   \bigr] = 0 \]
 we can estimate the score at the sample points
 \begin{align*}
@@ -3255,7 +3420,7 @@ The model can be updated after each iteration (leaf removal) without retraining:
 % Not clear
 One can learn a DAG in two steps:
 \begin{compactitem}[--]
-\item First, find a topological ordering, 
+\item First, find a topological ordering,
 \item Then, find a DAG consistent with that ordering -- an upper triangular matrix.
 \end{compactitem}
 The \emph{permutahedron} is
@@ -3355,14 +3520,14 @@ The spectral radius can be approximated as
   \llap{\ensuremath{
       5\times \left[
       \vphantom{
-        \begin{aligned}  
+        \begin{aligned}
           u &\leftarrow \dfrac{ A' u }{ \n{ A' u }_2 } \\
           v &\leftarrow \dfrac{ Av }{ \n{ Av }_2 }
         \end{aligned}
       }
       \right.
   }}
-  &\begin{aligned}  
+  &\begin{aligned}
     u &\leftarrow \dfrac{ A' u }{ \n{ A' u }_2 } \\
     v &\leftarrow \dfrac{ Av }{ \n{ Av }_2 }
    \end{aligned}\\
@@ -3373,7 +3538,7 @@ To ensure differentiability, add $\epsilon = 10^{-6}$,
 \[ \dfrac{ \partial \rho( W \odot W + \epsilon ) }{ \partial W_{ij} } = 2 \dfrac{ W_{ij} v_i u_j }{ u' v }. \]
 To allow for nonlinear relations, use a polynomial loss
 \[ L(W) = \sum_t \sum_i \left(
-X_{it} - \sum_ { j \in \text{Pa}(i) } W_{ij} \sum_{ k = 0 }^3 \alpha_{jk} X_{jt}^k 
+X_{it} - \sum_ { j \in \text{Pa}(i) } W_{ij} \sum_{ k = 0 }^3 \alpha_{jk} X_{jt}^k
 \right)^2 . \]
 To solve
 \[ \operatorname*{Minimize}_W L(w) \ \text{ st } \ \rho(W) = 0, \]
@@ -3416,7 +3581,7 @@ provide 3 variables and ask for their causal graph.
 
 Applications include
 \begin{compactitem}[--]
-\item Post-processing the output of the PC algorithm, to orient the remaining unoriented edges; 
+\item Post-processing the output of the PC algorithm, to orient the remaining unoriented edges;
 \item Constraints (transitive closure) for the PC or GES algorithms.
 \end{compactitem}
 
@@ -3487,7 +3652,7 @@ predict which variables were intervened on:
   \draw[|->] (Do) to node[anchor=south]{\footnotesize\textsc{sea}} (Go);
   \draw[|->] (Di) to node[anchor=south]{\footnotesize\textsc{sea}} (Gi);
   \draw[|->] (Go) -- (1.4,.5) to node[anchor=south]{\footnotesize\textsc{sea}-like} (I);
-  \draw[|->] (Gi) -- (1.4,.5) -- (I);  
+  \draw[|->] (Gi) -- (1.4,.5) -- (I);
 \end{tikzpicture}
 \]
 
@@ -3504,7 +3669,7 @@ the log-likelihood is
 p \bigl( x_j ; g_\theta( A_j \odot x ) ) ^{ I_j }
 \]
 where $A \in \{0,1\}^{d\times d}$ is the adjacency matrix,
-$I \in \{0,1\}^d$ are the (unknown) interventions 
+$I \in \{0,1\}^d$ are the (unknown) interventions
 and $p$ is Gaussian or a normalizing flow.
 
 *** Causal discovery: intervention data
@@ -3693,7 +3858,7 @@ recovers a causal order on the variables by identifying the root as the node min
 To account for both positive and negative relations, use
 \begin{align*}
   \psi_{12} &= \lim_{ u \to 1^- } \E\bigl[
-              \sigma\bigl( F_2(X_2) \bigr) \mid \sigma\bigl( F_1(X_1)\bigr) > u 
+              \sigma\bigl( F_2(X_2) \bigr) \mid \sigma\bigl( F_1(X_1)\bigr) > u
               \bigr] \\
   \sigma(x) &= \va{ 2x - 1 } \\
   \psi_{12} &= \dfrac12 ( \Gamma_{1,2} + \Gamma_{-1,2} )
@@ -3862,7 +4027,7 @@ but just a topological order compatible with it
 \begin{compactitem}[--]
 \item State: embedding of the latest variable selected;
 \item Action: variable to add;
-\item Reward: BIC improvement; 
+\item Reward: BIC improvement;
 \item Encoder: $\RR^{n\times d} \to \RR^{n \times d}$ (self-attention);
 \item Decoder: LSTM;
 \item Optimization: policy gradient, actor critic.
@@ -3878,7 +4043,7 @@ Pretrain on simulated data; fine-tune on the data of interest.
 Score-based causal discovery algorithms, such as GES, are greedy -- finding the best DAG is NP-hard.
 Reinforcement learning is an alternative to greedy, exhaustive or random walk search:
 \begin{compactitem}[--]
-\item State: solution; 
+\item State: solution;
 \item Action: new (nearby) solution;
 \item Reward: score improvement.
 \end{compactitem}
@@ -3886,7 +4051,7 @@ Reinforcement learning is an alternative to greedy, exhaustive or random walk se
 $\max_t R_t$ instead of $\sum_t \delta^t R_t$ -- \emph{risk-seeking reinforcement learning}.)
 Here, the approach is slightly different:
 \begin{compactitem}[--]
-\item State: bootstrap sample; 
+\item State: bootstrap sample;
 \item Action: DAG;
 \item Reward: $\text{score} + \lambda_1 \mathbf 1_{ \text{DAG} } + \lambda_2 \text{NOTEARS}$.
 \end{compactitem}
@@ -3933,7 +4098,7 @@ where the two classes of nodes correspond to variables and factors, e.g.,
   \begin{scope}[every node/.style={thick,draw,inner sep=2pt}]
     \node (f1) at (1,3) {};
     \node (f2) at (5,3) {};
-    \node (f3) at (3,1) {};    
+    \node (f3) at (3,1) {};
   \end{scope}
   \draw[->] (v1) -- (f1);
   \draw[->] (v2) -- (f1);
@@ -3960,7 +4125,7 @@ where the two classes of nodes correspond to variables and factors, e.g.,
   \begin{scope}[every node/.style={thick,draw,inner sep=2pt}]
     \node (f1) at (1,3) {};
     \node (f2) at (5,3) {};
-    \node (f3) at (3,1) {};    
+    \node (f3) at (3,1) {};
   \end{scope}
   \draw[->] (v1) -- (f1);
   \draw[->] (v2) -- (f1);
@@ -3983,7 +4148,7 @@ where the two classes of nodes correspond to variables and factors, e.g.,
   \begin{scope}[every node/.style={thick,draw,inner sep=2pt}]
     \node (f1) at (1,3) {};
     \node (f2) at (5,3) {};
-    \node (f3) at (3,1) {};    
+    \node (f3) at (3,1) {};
   \end{scope}
   \draw[->] (f1) -- (v5);
   \draw[->] (f2) -- (v5);
@@ -4131,7 +4296,7 @@ VAR model, with acyclicity constraint and sparsity penalty.
 \end{book}
 The score function $\nabla \log p$
 can be used to test for conditional independence:
-\[ X \indep Y \,|\, Z \ \Longleftrightarrow\ 
+\[ X \indep Y \,|\, Z \ \Longleftrightarrow\
 \dfrac{ \nabla^2 }{ \nabla X \nabla Y } \log p(X, Y, Z ) = 0. \]
 This leads to a generalization of the PC and PCI algorithms: AdaScore.
 
@@ -4240,7 +4405,7 @@ There are special cases:
   \draw[->,thick,blue!50!black] (x3) -- (x4);
   \draw[->,thick,blue!50!black] (x3) -- (x5);
   \draw[->,thick,blue!50!black] (x4) -- (x6);
-  \draw[->,thick,blue!50!black] (x5) -- (x7);  
+  \draw[->,thick,blue!50!black] (x5) -- (x7);
 \end{tikzpicture}
 \]
 \item A \emph{confirmatory factor analysis} (CFA) model
@@ -4267,7 +4432,7 @@ There are special cases:
   \draw[->] (e2) -- (y5);
   \draw[->] (e2) -- (y6);
   \draw[->] (e2) -- (y7);
-  \draw[<->,thick,purple!80!blue!60] (e1) to [out=30,in=150] (e2);  
+  \draw[<->,thick,purple!80!blue!60] (e1) to [out=30,in=150] (e2);
 \end{tikzpicture}
 \]
 \end{compactitem}
@@ -4283,7 +4448,7 @@ A heuristic approach could be:
 \item Compute the correlations $(\rho_{ij})_{1 \leq i,j\leq m}$
   and the corresponding distances $D_{ij} = 1 - \va{\rho_{ij}}$;
 \item Run the OPTICS clustering algorithm,
-  with \texttt{min\_cluster\_size=2}, to estimate the number $k$ of latent factors; 
+  with \texttt{min\_cluster\_size=2}, to estimate the number $k$ of latent factors;
 \item Compute a sparse PCA (SPCA) and keep the first $k$ components;
 \item Refine the CFA by fitting the SEM and dropping the coefficients with a large $p$-value.
 \end{compactitem}
@@ -4324,7 +4489,7 @@ and define gradient, divergence and Laplacian
   & (\curl Y)(i,j,k) = Y(i,j) + Y(j,k) + Y(k,i) \\
   & (\curl^*** \Theta) (i,j) = \sum_k \Theta(i,j,k) \\
   & \Delta_0 = \grad^*** \grad \\
-  & \Delta_1 = \grad \grad^*** + \curl^*** \curl 
+  & \Delta_1 = \grad \grad^*** + \curl^*** \curl
 \end{align*}
 Note that
 \begin{align*}
@@ -4340,13 +4505,13 @@ $\phi$ can be recovered as
   \phi &= - \Delta_0^\dagger \div Y \\
   \phi(d) &= 0 \\
   \Delta_0 &=
-\left[\!\!\!  
+\left[\!\!\!
 \begin{tikzpicture}[baseline={([yshift=-.8ex]current bounding box.center)},outer sep=0pt]
 \matrix (m) [
   matrix of math nodes,
   nodes in empty cells,
   row sep={2.5ex,between origins},column sep={4ex,between origins},
-  ampersand replacement=\&% <= to change col separator for align env  
+  ampersand replacement=\&% <= to change col separator for align env
 ]{
   d-1 \&\&\&\& 0 \\
   \&\& -1 \\
@@ -4379,7 +4544,7 @@ Instead, use
   W_{ij} &= \begin{cases}
     0 & \text{if } p_i = p_j \text{ or } A_{ij} = A_{ji} = 0 \\
     \dfrac{ A_{ij} }{ p_j - p_i } & \text{if } A_{ij} \neq 0 \text{ and } A_{ji} = 0 \\
-    \dfrac{ A_{ji} }{ p_j - p_i } & \text{if } A_{ij} = 0 \text{ and } A_{ji} \neq 0 
+    \dfrac{ A_{ji} }{ p_j - p_i } & \text{if } A_{ij} = 0 \text{ and } A_{ji} \neq 0
   \end{cases} \\
   A &= W \odot \text{ReLU}( \grad p ) .
 \end{align*}
@@ -4446,14 +4611,14 @@ PCL estimates causal effects in presence of unobserved confounders using proxies
   \node[below=-1mm of A,font=\footnotesize] {treatment};
   \node[below=-1mm of Y,font=\footnotesize] {outcome};
   \node[above=-.5mm of U,font=\footnotesize,align=center] {unobserved\\confounder};
-  \node[above=-.5mm of Z,font=\footnotesize,align=center] {treatment-\\inducing\\\smash{proxy}};  
-  \node[above=-.5mm of W,font=\footnotesize,align=center] {outcome-\\inducing\\\smash{proxy}};  
+  \node[above=-.5mm of Z,font=\footnotesize,align=center] {treatment-\\inducing\\\smash{proxy}};
+  \node[above=-.5mm of W,font=\footnotesize,align=center] {outcome-\\inducing\\\smash{proxy}};
 \end{tikzpicture}
 \]
 \begin{align*}
   & \text{ATE}(a) = \E_U \bigl[ \E_Y [ Y \,|\, A = a , U ] \bigr] \\
   & h \text{ s.t. } \E\bigl[ Y \,|\, A = a , Z = z \bigr] = \int h(a,w) \rho_W( w | A = a , Z = z ) dw  \\
-  & \text{ATE}(a) = \E_W \bigl[ h(a,W) \bigr] 
+  & \text{ATE}(a) = \E_W \bigl[ h(a,W) \bigr]
 \end{align*}
 The ``bridge function'' $h$
 can be found with 2-stage regression.
@@ -4491,7 +4656,7 @@ The book only considers \emph{binary} treatments.
   \draw[->] (W) -- (Y);
   \node[below=-1mm of W,font=\footnotesize] {treatment};
   \node[below=-1mm of Y,font=\footnotesize] {outcome};
-  \node[right=-1mm of X,font=\footnotesize] {confounders};    
+  \node[right=-1mm of X,font=\footnotesize] {confounders};
 \end{tikzpicture}
 \]
 
@@ -4527,7 +4692,7 @@ you could stratify using a discretization (of an estimator) of the propensity sc
 
 The propensity score can be used to compute the \emph{inverse propensity weighted} estimator
 \[ \hat\tau_{\text{IPW}} = \operatorname*{Mean}_i \left[
-  \dfrac{ W_i Y_1 }{ \hat e(X_i) } - 
+  \dfrac{ W_i Y_1 }{ \hat e(X_i) } -
   \dfrac{ (1-W_i) Y_1 }{ 1-\hat e(X_i) } -
   \right] \]
 and its \emph{oracle} variant, $\hat\tau^*_{\text{IPW}}$ (which uses the true propensity score $e$ instead of an estimator $\hat e$).
@@ -4536,9 +4701,9 @@ With continuous covariates $\hat\tau^*_{\text{IPW}}$ is Gaussian, but not effici
 With discrete propensity scores, $\hat\tau_{\text{IPW}} = \hat\tau_{\text{STRAT}}$ is better than $\hat\tau^*_{\text{IPW}}$.
 
 The \emph{self-normalized} IPW estimator is
-\[ \hat\tau_{\text{IPW}} = 
-\dfrac{ \sum W_i Y_1 / \hat e_i }{ \sum W_i / \hat e_i } - 
-\dfrac{ \sum (1-W_i) Y_1 / (1-\hat e_i) }{ \sum (1-W_i) / (1-\hat e_i) } 
+\[ \hat\tau_{\text{IPW}} =
+\dfrac{ \sum W_i Y_1 / \hat e_i }{ \sum W_i / \hat e_i } -
+\dfrac{ \sum (1-W_i) Y_1 / (1-\hat e_i) }{ \sum (1-W_i) / (1-\hat e_i) }
 \]
 
 % 3. Doubly robust methods
@@ -4558,7 +4723,7 @@ They may be combined: first control for confounders, then use IPW on the residua
   \right].
 \end{align*}
 %\[ \hat\tau_{\text{AIPW}} = \dfrac1m \sum_{ i=1 }^n \left[
-%  \hat\mu_{(1)}(X_i) - \hat\mu_{(0)}(X_i) 
+%  \hat\mu_{(1)}(X_i) - \hat\mu_{(0)}(X_i)
 %  + W_i \dfrac{ Y_i - \hat\mu_{(1)}(X_i) }{ \hat e(X_i) }
 %  + (1-W_i) \dfrac{ Y_i - \hat\mu_{(0)}(X_i) }{ 1-\hat e(X_i) }
 %  \right].
@@ -4689,7 +4854,7 @@ with $w=1$, $w=1/e$, or $w=1/\sqrt e$.
   \right.
 \end{align*}
 \begin{compactitem}[--]
-\item $\hat\mu^{\text{AVG}}$ is biased downwards and non-Gaussian; 
+\item $\hat\mu^{\text{AVG}}$ is biased downwards and non-Gaussian;
 \item $\hat\mu^{\text{IPW}}$ is unbiased but still non-Gaussian;
 \item $\hat\mu^{\text{AW}}$ is unbiased and asymptotically Gaussian.
 \end{compactitem}
@@ -4727,7 +4892,7 @@ To generalize this to a high-dimensional non-parametric context:
 \[ \begin{array}{ll}
   \text{Find} & t \geq 0, \ \gamma_i^{(1)} \geq 0 \\[1mm]
   \text{To minimize} & \displaystyle t^2 + \dfrac1n \sum_i \gamma_i^{(1)} {}^2  \\
-  \text{Such that} & \displaystyle \forall j \ \va{ \dfrac1n \sum_i ( \gamma_i^{(1)} W_i - 1 ) X_i } \geq t 
+  \text{Such that} & \displaystyle \forall j \ \va{ \dfrac1n \sum_i ( \gamma_i^{(1)} W_i - 1 ) X_i } \geq t
 \end{array} \]
 (and similarly for $\gamma_i^{(0)}$).
 This leads to the AIPW-like \emph{augmented balancing} estimator
@@ -4810,7 +4975,7 @@ For instance, if $Z$ and $W$ are both binary (e.g., to model treatment complianc
   \draw[->] (W) -- (Y);
   \node[below=-1mm of Z,align=center,font=\footnotesize] {treatment\\[-.5mm]assignment};
   \node[below=-1mm of W,align=center,font=\footnotesize] {actual\\[-.5mm]treatment};
-  \node[below=-1mm of Y,font=\footnotesize] {outcome};    
+  \node[below=-1mm of Y,font=\footnotesize] {outcome};
 \end{tikzpicture}
 \]
 and if there are no defiers (monotonicity:
@@ -4831,8 +4996,8 @@ We can also compute the LATE in \emph{equilibrium models}
   \draw[->] (P) -- (S);
   \draw[->] (P) -- (Q);
   \draw[double equal sign distance] (S) -- (Q);
-  \node[right=-1mm of S,font=\footnotesize] {supply};    
-  \node[right=-1mm of Q,font=\footnotesize] {demand};    
+  \node[right=-1mm of S,font=\footnotesize] {supply};
+  \node[right=-1mm of Q,font=\footnotesize] {demand};
   \node[below=-1mm of Z,font=\footnotesize] {weather};
   \node[below=-1mm of P,font=\footnotesize,align=center] {price\\of fish};
 \end{tikzpicture}
@@ -4848,12 +5013,12 @@ or in \emph{threshold crossing models}.
   \draw[->] (Z) -- (c);
   \draw[->] (c) -- (W);
   \draw[->] (U) -- (W);
-  \draw[->] (W) -- (Y);  
+  \draw[->] (W) -- (Y);
   \node[below=-1mm of Z,font=\footnotesize] {tuition};
   \node[below=-1mm of W,align=center,font=\footnotesize] {attend\\[-.8mm]college};
   \node[below=-1mm of Y,align=center,font=\footnotesize] {lifelong\\[-.8mm]income};
   \node[above=-1mm of U,align=center,font=\footnotesize] {utility of\\[-.8mm]attending\\[-.8mm]college};
-  \node[above=-1mm of c,align=center,font=\footnotesize] {cost of\\[-0.8mm]attending\\[-0.8mm]college};  
+  \node[above=-1mm of c,align=center,font=\footnotesize] {cost of\\[-0.8mm]attending\\[-0.8mm]college};
 \end{tikzpicture}
 \]
 
@@ -4863,7 +5028,7 @@ or in \emph{threshold crossing models}.
     \dfrac{ d }{ dz \strut} \E [ Y | Z = z ]
   }{
     \dfrac{ d \strut}{ dz } \P[ W=1 | Z = z ]
-  } 
+  }
 \end{align*}
 
 % 11. Spillovers and interference
@@ -4878,21 +5043,21 @@ Assume that $Y_i$ only depends on $\mathbf w$
 through an \emph{exposure} function
 $H_i: \{0,1\}^n \to \mathscr H$, e.g.,
 \begin{compactitem}[--]
-\item $H_i(\mathbf w) = (w_j)_{ j \in C_i}$, where $C_i$ is the cluster containing $i$; 
+\item $H_i(\mathbf w) = (w_j)_{ j \in C_i}$, where $C_i$ is the cluster containing $i$;
 \item $H_i(\mathbf w) = (w_j)_{j \in \{i\} \union N_i}$,
-  where $N_i$ are the neighbours of $i$ in a social graph; 
+  where $N_i$ are the neighbours of $i$ in a social graph;
 \item $H_i(\mathbf w) = (w_i,z_i)$, where
-  $z_i = \operatorname*{Mean}_{j\in N_i} w_j$ is the fraction of friends treated. 
+  $z_i = \operatorname*{Mean}_{j\in N_i} w_j$ is the fraction of friends treated.
 \end{compactitem}
 
 To test for the presence of causal effects
 \begin{align*}
   H_0 &: \text{ no causal effect} \\
-  H_1 &: \text{ causal effect with no spillover} 
+  H_1 &: \text{ causal effect with no spillover}
 \end{align*}
 use a permutation test (scramble the treatment variable) with the statistic
 \[ T = \va{
-  \operatorname*{Mean}_{ W_i = 1 } Y_i - 
+  \operatorname*{Mean}_{ W_i = 1 } Y_i -
   \operatorname*{Mean}_{ W_i = 0 } Y_i
 } \]
 (there are better test statistics).
@@ -5059,7 +5224,7 @@ In a \emph{switchback} experiment, we repeatedly switch the treatment on and off
 To estimate causation from observational data
 with a known causal graph
 (no unmeasured confounders, and $\forall x \ P[ T=1 | X=x ] \neq 0, 1$),
-one can: 
+one can:
 \begin{compactitem}[--]
 \item Adjust for confounders;
 \item Fit a propensity model $T \sim X$,
@@ -5077,7 +5242,7 @@ but even in these cases,
 you may want to adjust for the confounders or use IPW:
 the resulting estimators are more efficient.
 \[
-\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$T$};
   \node (X) at (1,1) {$X$};
   \node (Y) at (2,0) {$Y$};
@@ -5087,9 +5252,9 @@ the resulting estimators are more efficient.
 \]
 
 To graphically assess the propensity scores:
-\begin{compactitem}[--] 
+\begin{compactitem}[--]
 \item Histogram of the propensity scores for $T=0$ and $T=1$,
-  before and after reweighting; 
+  before and after reweighting;
 \item ``Love plot'', $i \sim \text{smd}_i$,
   before and after reweighting, where the standardized mean difference (smd) for variable $i$ is
   \[ \text{smd} = \dfrac{ \bar x_{ T=1 } - \bar x_{ T = 0 } }{ \sqrt{
@@ -5161,7 +5326,7 @@ and use inverse probabilities as weights (multiply the probabilities, if you hav
 \texttt{dowhy} provides three ways of computing causal effects:
 \begin{compactitem}[--]
 \item Backdoor criterion (aka controlling for confounders):
-  the control set should not contain any descendant of $X$ and should block all paths with an arrow into $X$; 
+  the control set should not contain any descendant of $X$ and should block all paths with an arrow into $X$;
 \item Front-door criterion (known, unobserved confounder, and observed mediator)
 \[
 \begin{tikzpicture}[>=stealth,xscale=1,yscale=.7,inner sep=4pt,outer sep=1pt,baseline=0]
@@ -5193,10 +5358,10 @@ For more general do-calculus, check \texttt{grapl-causal}.
 
 \textbf{7.} \texttt{dowhy} encourages a 4-step causal inference process:
 \begin{compactitem}[--]
-\item Define the graph; 
-\item Find the estimane (e.g., with the backdoor criterion); 
+\item Define the graph;
+\item Find the estimane (e.g., with the backdoor criterion);
 \item Compute the estimator (\texttt{dowhy} can use the models in \texttt{econml});
-\item Perform refutation tests. 
+\item Perform refutation tests.
 \end{compactitem}
 With an SCM (instead of just a graph), \texttt{dowhy} can compute the \emph{causal strength} of an edge:
 the outcome variable variance change if we remove it.
@@ -5204,15 +5369,15 @@ the outcome variable variance change if we remove it.
 \textbf{8.} To test a causal model, try:
 \begin{compactitem}[--]
 \item \texttt{dowhy}'s refutation tests;
-\item RCT; 
-\item Simulated data (\texttt{RealCause}); 
+\item RCT;
+\item Simulated data (\texttt{RealCause});
 \item Sensitivity analysis (\texttt{Pysensemakr}).
 \end{compactitem}
 
 We often make the following assumptions:
 \begin{compactitem}[--]
-\item Positivity: $P[T|Z] > 0$; 
-\item Exchangebility: $Y^{(0)}, Y^{(1)} \indep T | Z$; 
+\item Positivity: $P[T|Z] > 0$;
+\item Exchangebility: $Y^{(0)}, Y^{(1)} \indep T | Z$;
 \item SUTVA: the units need not be independent, but the treatment of one should not affect the others.
 \end{compactitem}
 
@@ -5257,12 +5422,12 @@ The full X-learner is more complicated:
     \hat d_i^{(0)} &= \hat Y_i^{(1)} - Y_i^{(0)} && \text{if } T_i = 0
   \end{align*}
 \item Learn separate models to predict $\hat d^{(0)}$ and $\hat d^{(1)}$;
-\item Learn a propensity model; 
+\item Learn a propensity model;
 \item Combine those forecasts
   \[ \hat \tau = \hat e \hat{\hat d}^{(0)} + (1 - \hat e) \hat{\hat d}^{(1)} \]
   (this gives more weight to the model which had more data to train on).
 \end{compactitem}
-These models are called ``meta'' learners because they contain several models. 
+These models are called ``meta'' learners because they contain several models.
 
 \textbf{10.}
 \emph{Doubly robust} (DR) models combine treatment models (IPW) and outcome models (controlling for confounders).
@@ -5274,7 +5439,7 @@ These models are called ``meta'' learners because they contain several models.
     \node (X) at (1,1) {$X$};
     \draw[->] (X) -- (T);
     \draw[->] (X) -- (Y);
-    \draw[->] (T) -- (Y); 
+    \draw[->] (T) -- (Y);
   \end{scope}
   \node at (2.75,.5) {$\rightsquigarrow$};
   \begin{scope}[shift={(3.5,0)}]
@@ -5285,7 +5450,7 @@ These models are called ``meta'' learners because they contain several models.
     \draw[->] (X) -- (e);
     \draw[->] (e) -- (T);
     \draw[->] (X) -- (Y);
-    \draw[->] (T) -- (Y); 
+    \draw[->] (T) -- (Y);
   \end{scope}
 \end{tikzpicture}
 \]
@@ -5296,7 +5461,7 @@ In practice, they have lower variance than IPW.
 
 \emph{Double machine learning} (DML) uses:
 \begin{compactitem}[--]
-\item \emph{Cross-fitting} to reduce overfitting; 
+\item \emph{Cross-fitting} to reduce overfitting;
 \item \emph{Orthogonalization} to reduce the bias introduced by regularization:
   to compute $\beta_1$ in
   \[ Y = \beta_1 T + \beta_2 X + \epsilon, \]
@@ -5448,12 +5613,12 @@ There are several ways of adjusting for a sufficient confounder $H$.
   ($T$ is time, $A$ is the treatment).
   \item Front-door adjustment, given a surrogate marker of the effect of $T$ on $Y$ (a mediator)
 \[
-\begin{tikzpicture}[>=stealth,xscale=1,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=1,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$T$};
   %\node (X) at (-1,1) {$X$};
   \node (Y) at (2,0) {$Y$};
   \node (M) at (1,0) {$M$};
-  \node[circle,densely dotted,draw] (U) at (1,1) {$U$};  
+  \node[circle,densely dotted,draw] (U) at (1,1) {$U$};
   \draw[->] (U) -- (Y);
   \draw[->] (U) -- (T);
   \draw[->] (T) -- (M);
@@ -5465,11 +5630,11 @@ There are several ways of adjusting for a sufficient confounder $H$.
 \end{align*}
   \item Instrumental variables
 \[
-\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$T$};
   \node (I) at (-2,0) {$I$};
   \node (Y) at (2,0) {$Y$};
-  \node[circle,densely dotted,draw] (U) at (1,1) {$U$};  
+  \node[circle,densely dotted,draw] (U) at (1,1) {$U$};
   \draw[->] (U) -- (Y);
   \draw[->] (U) -- (T);
   \draw[->] (T) -- (Y);
@@ -5503,31 +5668,31 @@ There are several ways of adjusting for a sufficient confounder $H$.
 
 The \emph{propensity score} has many uses:
 \begin{compactitem}[--]
-\item Inverse propensity weighting; 
+\item Inverse propensity weighting;
 \item Backdoor adjustment: the propensity score is a sufficient confounder,
   \[ \forall t \ Y(t) \indep T \,|\, H \implies \forall t \ Y(t) \indep T \,|\, e(H); \]
-\item Stratification: computing the ATE in each quartile; 
+\item Stratification: computing the ATE in each quartile;
 \item Matching: easier to do on the propensity score $e(H)$
   than on the original confounders $H$.
 \end{compactitem}
 
 Adding \emph{precision variables} reduces variance.
 \[
-\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$T$};
   \node (Y) at (2,0) {$Y$};
-  \node (V) at (1,1) {$V$};  
+  \node (V) at (1,1) {$V$};
   \draw[->] (V) -- (Y);
   \draw[->] (T) -- (Y);
 \end{tikzpicture}
 \qquad
 \text{or}
 \qquad
-\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$T$};
-  \node (V) at (2,2) {$V$};  
+  \node (V) at (2,2) {$V$};
   \node (Y) at (2,0) {$Y$};
-  \node[circle,densely dotted,draw] (U) at (1,1) {$U$};  
+  \node[circle,densely dotted,draw] (U) at (1,1) {$U$};
   \draw[->] (U) -- (Y);
   \draw[->] (U) -- (V);
   \draw[->] (T) -- (Y);
@@ -5536,13 +5701,13 @@ Adding \emph{precision variables} reduces variance.
 
 \emph{Mediation analysis} measures the importance of a mediator.
 \[
-\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$T$};
   \node (Y) at (4,0) {$Y$};
-  \node (M) at (2,0) {$M$};  
-  \node (H3) at (1,1) {$H_3$};  
-  \node (H2) at (3,1) {$H_2$};  
-  \node (H1) at (2,2) {$H_1$};  
+  \node (M) at (2,0) {$M$};
+  \node (H3) at (1,1) {$H_3$};
+  \node (H2) at (3,1) {$H_2$};
+  \node (H1) at (2,2) {$H_1$};
   \draw[->] (T) -- (M);
   \draw[->] (M) -- (Y);
   \draw [->] (H3) -- (T);
@@ -5570,12 +5735,12 @@ Denote the potential outcome $T(t,m)$.
 
 We can also have time-dependent confounders:
 \[
-\begin{tikzpicture}[>=stealth,xscale=1,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=1,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (H) at (0,0) {$H$};
   \node (Y) at (2,0) {$Y$};
   \node (T1) at (-1,0) {$T_1$};
   \node (T2) at (1,0) {$T_2$};
-  \node[circle,densely dotted,draw] (U) at (1,1) {$U$};  
+  \node[circle,densely dotted,draw] (U) at (1,1) {$U$};
   \draw[->] (U) -- (Y);
   \draw[->] (U) -- (H);
   \draw[->] (H) -- (T2);
@@ -5673,7 +5838,7 @@ with high-dimensional confounders $W$.
 \begin{compactitem}[--]
 \item Compute the residuals $\tilde T$, $\tilde Y$
   of lasso (or post lasso, or any lasso variant) models
-  for $T \sim W$, $Y \sim W$; 
+  for $T \sim W$, $Y \sim W$;
 \item Use a least squares regression $\tilde Y \sim \tilde T$.
 \end{compactitem}
 
@@ -5721,7 +5886,7 @@ The ATE can be computed by regressing $Y \sim H$ (clever covariate).
 The \d{do} operation can be represented graphically in two ways,
 either by removing incoming edges
 \[
-\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$T$};
   \node (X) at (1,1) {$X$};
   \node (Y) at (2,0) {$Y$};
@@ -5729,8 +5894,8 @@ either by removing incoming edges
   \draw[->] (X) -- (Y);
   \draw[->] (T) -- (Y);
 \end{tikzpicture}
-\ \ \ \overset{\text{do}(T=t)}{\leadsto}\ \ \ 
-\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\ \ \ \overset{\text{do}(T=t)}{\leadsto}\ \ \
+\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$t$};
   \node (X) at (1,1) {$X$};
   \node (Y) at (2,0) {$Y$};
@@ -5743,7 +5908,7 @@ or by splitting the node in two
 (SWIG, single world intervention graph,
 of \d{fix} intervention).
 \[
-\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$T$};
   \node (X) at (1,1) {$X$};
   \node (Y) at (2,0) {$Y$};
@@ -5751,8 +5916,8 @@ of \d{fix} intervention).
   \draw[->] (X) -- (Y);
   \draw[->] (T) -- (Y);
 \end{tikzpicture}
-\ \ \ \overset{\text{do}(T=t)}{\leadsto}\ \ \ 
-\begin{tikzpicture}[>=stealth,xscale=.8,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\ \ \ \overset{\text{do}(T=t)}{\leadsto}\ \ \
+\begin{tikzpicture}[>=stealth,xscale=.8,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$T$};
   \node (t) at (.67,0) {$t$};
   \node (X) at (1,1) {$X$};
@@ -5782,7 +5947,7 @@ all the more so in high dimensions.
 \begingroup
   \allowdisplaybreaks
   \begin{align*}
-  \begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+  \begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
     \node (T) at (0,0) {$T$};
     \node[draw,inner sep=1pt] (X) at (1,1) {$X$};
     \node (Y) at (2,0) {$Y$};
@@ -5791,7 +5956,7 @@ all the more so in high dimensions.
     \draw[->] (T) -- (Y);
   \end{tikzpicture}
   &\qquad\text{decreases variance} \\
-  \begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+  \begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
     \node (T) at (0,0) {$T$};
     \node[draw,inner sep=1pt] (X) at (1,1) {$X$};
     \node (Y) at (2,0) {$Y$};
@@ -5800,23 +5965,23 @@ all the more so in high dimensions.
     \draw[->] (T) -- (Y);
   \end{tikzpicture}
   &\qquad\text{increases variance} \\
-  \begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+  \begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
     \node (T) at (0,0) {$T$};
     \node[draw,inner sep=1pt] (X) at (-1,1) {$X$};
     \node (Y) at (2,0) {$Y$};
-    \node[circle,densely dotted,draw] (U) at (1,1) {$U$};  
+    \node[circle,densely dotted,draw] (U) at (1,1) {$U$};
     \draw[->] (X) -- (T);
     \draw[->] (U) -- (Y);
     \draw[->] (U) -- (T);
     \draw[->] (T) -- (Y);
   \end{tikzpicture}
   &\qquad\text{increases bias} \\
-  \begin{tikzpicture}[>=stealth,xscale=.8,yscale=.5,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+  \begin{tikzpicture}[>=stealth,xscale=.8,yscale=.5,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
     \node (T) at (0,0) {$T$};
     \node (Y) at (2,0) {$Y$};
     \node[draw,inner sep=1pt] (X) at (1,1) {$X$};
-    \node[circle,densely dotted,draw] (U1) at (0,2) {$U_1$};  
-    \node[circle,densely dotted,draw] (U2) at (2,2) {$U_2$};  
+    \node[circle,densely dotted,draw] (U1) at (0,2) {$U_1$};
+    \node[circle,densely dotted,draw] (U2) at (2,2) {$U_2$};
     \draw[->] (U1) -- (T);
     \draw[->] (U1) -- (X);
     \draw[->] (U2) -- (Y);
@@ -5824,12 +5989,12 @@ all the more so in high dimensions.
     \draw[->] (T) -- (Y);
   \end{tikzpicture}
   &\qquad\text{M bias} \\
-  \begin{tikzpicture}[>=stealth,xscale=.8,yscale=.5,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+  \begin{tikzpicture}[>=stealth,xscale=.8,yscale=.5,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
     \node (T) at (0,0) {$T$};
     \node (Y) at (2,0) {$Y$};
     \node[draw,inner sep=1pt] (X) at (1,1) {$X$};
-    \node[circle,densely dotted,draw] (U1) at (0,2) {$U_1$};  
-    \node[circle,densely dotted,draw] (U2) at (2,2) {$U_2$};  
+    \node[circle,densely dotted,draw] (U1) at (0,2) {$U_1$};
+    \node[circle,densely dotted,draw] (U2) at (2,2) {$U_2$};
     \draw[->] (U1) -- (T);
     \draw[->] (U1) -- (X);
     \draw[->] (U2) -- (Y);
@@ -5838,12 +6003,12 @@ all the more so in high dimensions.
     \draw[-] (U1) -- (U2);
   \end{tikzpicture}
   &\qquad\text{M bias, correlated factors} \\
-  \begin{tikzpicture}[>=stealth,xscale=.8,yscale=.5,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+  \begin{tikzpicture}[>=stealth,xscale=.8,yscale=.5,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
     \node (T) at (0,0) {$T$};
     \node (Y) at (2,0) {$Y$};
     \node[draw,inner sep=1pt] (X) at (1,1) {$X$};
-    \node[circle,densely dotted,draw] (U1) at (0,2) {$U_1$};  
-    \node[circle,densely dotted,draw] (U2) at (2,2) {$U_2$};  
+    \node[circle,densely dotted,draw] (U1) at (0,2) {$U_1$};
+    \node[circle,densely dotted,draw] (U2) at (2,2) {$U_2$};
     \draw[->] (U1) -- (T);
     \draw[->] (U1) -- (X);
     \draw[->] (U2) -- (Y);
@@ -5852,12 +6017,12 @@ all the more so in high dimensions.
     \draw[->] (X) -- (Y);
   \end{tikzpicture}
   &\qquad\text{M bias, confounding} \\
-  \begin{tikzpicture}[>=stealth,xscale=.8,yscale=.5,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+  \begin{tikzpicture}[>=stealth,xscale=.8,yscale=.5,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
     \node (T) at (0,0) {$T$};
     \node (Y) at (2,0) {$Y$};
     \node[draw,inner sep=1pt] (X) at (1,1) {$X$};
-    \node[circle,densely dotted,draw] (U1) at (0,2) {$U_1$};  
-    \node[circle,densely dotted,draw] (U2) at (2,2) {$U_2$};  
+    \node[circle,densely dotted,draw] (U1) at (0,2) {$U_1$};
+    \node[circle,densely dotted,draw] (U2) at (2,2) {$U_2$};
     \draw[->] (U1) -- (T);
     \draw[->] (U1) -- (X);
     \draw[->] (U2) -- (Y);
@@ -5867,7 +6032,7 @@ all the more so in high dimensions.
     \draw[->] (X) -- (Y);
   \end{tikzpicture}
   &\qquad\text{butterfly bias} \\
-  \begin{tikzpicture}[>=stealth,xscale=1,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+  \begin{tikzpicture}[>=stealth,xscale=1,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
     \node (T) at (0,0) {$T$};
     \node[draw,inner sep=1pt] (X) at (1,1) {$X$};
     \node (Y) at (2,0) {$Y$};
@@ -5877,7 +6042,7 @@ all the more so in high dimensions.
     \draw[->] (T) -- (M);
   \end{tikzpicture}
   &\qquad\text{may decrease variance} \\
-  \begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+  \begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
     \node (T) at (0,1) {$T$};
     \node[draw,inner sep=1pt] (Z) at (1,0) {$Z$};
     \node (Y) at (2,1) {$Y$};
@@ -5886,7 +6051,7 @@ all the more so in high dimensions.
     \draw[->] (Y) -- (Z);
   \end{tikzpicture}
   &\qquad\text{collider bias} \\
-  \begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+  \begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
     \node (T) at (0,0) {$T$};
     \node[draw,inner sep=1pt] (X) at (1,1) {$X$};
     \node (Y) at (2,0) {$Y$};
@@ -5898,7 +6063,7 @@ all the more so in high dimensions.
     \draw[->] (U) -- (Y);
   \end{tikzpicture}
   &\qquad\text{collider stratification bias} \\
-  \begin{tikzpicture}[>=stealth,xscale=1,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,-.05)}]  
+  \begin{tikzpicture}[>=stealth,xscale=1,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,-.05)}]
     \node (T) at (0,0) {$T$};
     \node[draw,inner sep=1pt] (Z) at (2,0) {$Z$};
     \node (Y) at (1,0) {$Y$};
@@ -5908,7 +6073,7 @@ all the more so in high dimensions.
   &\qquad\text{recall bias}
   \end{align*}
 \endgroup
-  
+
 % 9. Modern nonlinear regression: trees, forests, boosting, neural nets, ensembling,
 % with theoretical results under the "structured sparsity" assumption
 
@@ -5939,7 +6104,7 @@ $\tilde Y$ and $\tilde T$ are estimated from models fitted without fold $k$
 To reduce bias, if you have several models to predict $T$ and $Y$,
 use the best ones by looking at the CVMSE.
 \[
-\begin{tikzpicture}[>=stealth,xscale=3,yscale=1,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=3,yscale=1,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node[rounded corners=2mm,inner sep = 2pt, draw,align=center,densely dotted] (T) at (0,0) {gun\\ownership};
   \node[rounded corners=2mm,inner sep = 2pt, draw,align=center] (X) at (1.1,1) {country\\characteristics};
   \node[rounded corners=2mm,inner sep = 2pt, draw] (Y) at (2,0) {\# murders};
@@ -5957,7 +6122,7 @@ use the best ones by looking at the CVMSE.
 
 In the \emph{interactive regression model} (IRM)
 \[
-\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,xscale=.6,yscale=.7,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (T) at (0,0) {$T$};
   \node (X) at (1,1) {$X$};
   \node (Y) at (2,0) {$Y$};
@@ -5968,7 +6133,7 @@ In the \emph{interactive regression model} (IRM)
 \qquad
 \begin{aligned}
   T &= m(X) + \tilde T  && \E[ \tilde T | X ] = 0 \\
-  Y &= g(T,X) + \epsilon && \E[ \epsilon | T,X] = 0 
+  Y &= g(T,X) + \epsilon && \E[ \epsilon | T,X] = 0
 \end{aligned}
 \]
 the treatment is not additively separable,
@@ -5997,7 +6162,7 @@ Propensity scores close to 0 or 1 are problematic: they lead to very large value
   \draw[->] (A) -- (C);
   \draw[->] (B) -- (C);
   \draw[->] (B) -- (D);
-  \draw[->,very thick,blue!70!black] (C) -- (D);  
+  \draw[->,very thick,blue!70!black] (C) -- (D);
   \draw[->] ([yshift=1pt]A.east) to node[anchor=south]{\footnotesize hiring} ([yshift=1pt]B.west);
   \draw[->] ([yshift=-1pt]B.west) to node[anchor=north]{\footnotesize applying} ([yshift=-1pt]A.east);
 \end{tikzpicture}
@@ -6060,7 +6225,7 @@ and confidence intervals.
 \textbf{12a.}
 We can measure the impact of a non-observed confounder:
 \[
-\begin{tikzpicture}[>=stealth,scale=1,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]  
+\begin{tikzpicture}[>=stealth,scale=1,inner sep=0pt,outer sep=1pt,baseline={(0,.3)}]
   \node (X) at (0,1) {$X$};
   \node[circle,draw,densely dotted,inner sep=1pt] (A) at (1,1) {$A$};
   \node (T) at (0,0) {$T$};
@@ -6103,7 +6268,7 @@ In presence of an \d{instrumental variable} (IV)
   \node (T) at (1,0) {$T$};
   \node (Y) at (2,0) {$Y$};
   \node (Z) at (0,0) {$Z$};
-  \node (X) at (0,1) {$X$};  
+  \node (X) at (0,1) {$X$};
   \draw[->] (Z) to node[anchor=north,font=\footnotesize]{$\beta$} (T);
   \draw[->] (T) to node[anchor=north,font=\footnotesize]{$\alpha$} (Y);
   \draw[->] (X) -- (Z);
@@ -6234,7 +6399,7 @@ DML works out of the box:
 
 To get valid confidence intervals with random forests, use \emph{honest forests}:
 \begin{compactitem}[--]
-\item Use a separate sample to build the tree and to compute the leaf estimates; 
+\item Use a separate sample to build the tree and to compute the leaf estimates;
 \item Use smaller subsamples, without replacement, instead of boostrap samples.
 \end{compactitem}
 
@@ -6256,7 +6421,7 @@ Instead, one can look for a quantile-constrained optimal policy
 \item S (single) learner
   \begin{align*}
     \hat g(T,Z) &\approx \E[ Y | T, Z ] \\
-    \hat \tau (X) &\approx \E\bigl[ \hat g(1,Z) - \hat g(0,Z) | X \bigr] 
+    \hat \tau (X) &\approx \E\bigl[ \hat g(1,Z) - \hat g(0,Z) | X \bigr]
   \end{align*}
 \item T (two) learner
   \begin{align*}
@@ -6317,10 +6482,10 @@ $T = \mathbf{1}_{ X \geq c}$
 observations close to the threshold are comparable.
 \begin{align*}
   \tau_{\text{RD}} &= \E\bigl[ Y(1) - Y(0) | X = c ] \\
-  &= \lim_{ x \to c^+ } \E[ Y | X = x ] - \lim_{ x \to c^- } \E[ Y | X = x ] 
+  &= \lim_{ x \to c^+ } \E[ Y | X = x ] - \lim_{ x \to c^- } \E[ Y | X = x ]
 \end{align*}
 
-** TODO TO SORT 
+** TODO TO SORT
 *** Bayesian
 
 \nextbook
@@ -6352,7 +6517,7 @@ It is \emph{characteristic} if
 \[ \left\{
 \begin{array}{rcl}
   \text{Borel}(X) & \longrightarrow & \mathscr H \\
-  P & \longmapsto & \displaystyle \int_X \kappa( \bigcdot , x ) d P(x) 
+  P & \longmapsto & \displaystyle \int_X \kappa( \bigcdot , x ) d P(x)
 \end{array}
 \right. \]
 is injective.
@@ -6360,7 +6525,7 @@ is injective.
 Examples include:
 \begin{compactitem}[--]
 \item $\mathscr C^0(X)$ and $\n\cdot _\infty$;
-\item $\mathscr C^0(X)$ and compact convergence; 
+\item $\mathscr C^0(X)$ and compact convergence;
 \item $\mathscr C_0(X)$ (continuous functions vanishing at infinity) and $\n\cdot _\infty$;
 \item $L^0$ and $\n\cdot _p$
 \end{compactitem}
@@ -6378,8 +6543,33 @@ with \texttt{dowhy-gcm}, it can answer causal queries:
 counterfactuals, direct and indirect effects,
 causal strength, root cause analysis, etc.
 
-
 * TODO LLM
+
+** LLMs as optimizers
+
+CMA-ES is a simple, population-based optimization algorithm:
+Start with random candidates, sampled from a Gaussian distribution;
+Keep the best ones;
+Fir a Gaussian distribution to them;
+Iterate, with that new Gaussian distribution.
+
+The same idea can be applied to LLMs, for instance, for symbolic regression:
+Ask the LLM to give a few functions (as Python code) to approximate the data (it does not even need to see the data, but some summary statistics may help);
+Compute the error on the data;
+Give the error to the LLM and ask it to improve the functions it gave;
+Iterate until the solutions are satisfactory.
+
+TODO: papers
+
+The same idea can be usd to optimize the prompts for an LLM, if you have an objective way of assessing the quality of the answer.
+
+TODO: papers (dspy)
+
+To solve combinatorial problems or find numeric bounds for some mathematical problems,
+you can ask, not for a siolution, but for a Python program to search for a solution.
+
+TODO: papers (AlphaEvolve, etc.)
+
 ** TODO Scientific Research
 *** LLM, AlphaEvolve
 
@@ -6390,7 +6580,7 @@ causal strength, root cause analysis, etc.
 \end{book}
 AlphaEvolve uses an LLM to solve combinatorial problems or find upper and lower bounds, e.g.,
 \begin{compactitem}[--]
-\item Maximum number of unit spheres tangent to a unit sphere in dimension $d$ (kissing number); 
+\item Maximum number of unit spheres tangent to a unit sphere in dimension $d$ (kissing number);
 \item Size of the smallest hexagon in which we can put $n$ unit hexagons;
 \item Minimum ratio between the maximum and minimum pairwise distance between $n$ points in dimension $d$;
 \item \( \max\limits_{f \geq 0} \dfrac{ \n{ f *** f }_2 }{ \n{ f*f }_1 \n{ f*f }_\infty } \)
@@ -6403,7 +6593,7 @@ AlphaEvolve uses an LLM to solve combinatorial problems or find upper and lower 
 
 AlphaEvolve does not evolve a solution, or even code to build a solution, but
 \begin{compactitem}[--]
-\item Code to \emph{search} for a solution; 
+\item Code to \emph{search} for a solution;
 \item Prompts to ask it to search for a solution.
 \end{compactitem}
 It is provided with context, sample solution, evaluation function, sample prompts.
@@ -6422,7 +6612,7 @@ Open source implementation of Google's AlphaEvolve.
 \end{book}
 Make LLM-based evolutionary algorithms (such as AlphaEvolve) more sample-efficient:
 \begin{compactitem}[--]
-\item Keep independent island subpopulations; 
+\item Keep independent island subpopulations;
 \item Select the parents with power law sampling,
   from the fitness ranks,
   or weighted sampling,
@@ -6432,7 +6622,7 @@ Make LLM-based evolutionary algorithms (such as AlphaEvolve) more sample-efficie
 \item Use novelty rejection sampling
   (cosine similarity of code embeddings, with lack of novelty confirmed by an LLM call if $\cos > 0.95$;
 \item Select which LLM to use with UCB1,
-  using the relative improvement as reward; 
+  using the relative improvement as reward;
 \item Keep the multiobjective assessment of each solution (metrics + textual description)
   in the population archive, and use it as context;
 \item Every $T$ generations,
@@ -6683,7 +6873,7 @@ RAG can suffer from low precision, low recall, irrelevance, hallucinations:
   remove irrelevant context, highlight pivotal paragraphs;
   ask the LLM to rewrite the context;
 \item Hybrid search (vector + keywords);
-\item Recursive retrieval: first retrieve small chunks, to capture key information, then larger blocks for more context; 
+\item Recursive retrieval: first retrieve small chunks, to capture key information, then larger blocks for more context;
 \item Ask the LLM to ``step back and reason about the general underlying concepts or principles'';
 \item Let the LLM populate its own database;
 \item Ask the LLM to assess the relevance of the retrieved documents;
@@ -6753,7 +6943,7 @@ some tasks (e.g., creative writing) are fine with $k=1$).
 \end{book}
 Instead of giving all the context to an LLM, proceed in two steps:
 \begin{compactitem}[--]
-\item Ask the LLM to remove irrelevant parts of the context; 
+\item Ask the LLM to remove irrelevant parts of the context;
 \item Answer the query.
 \end{compactitem}
 
@@ -6777,7 +6967,7 @@ Combine knowledge graph and LLMs with soft prompts.
   \draw[->] (T)  -- (emb);
   \draw[->] (GNN) -- (GNN-|X.west);
   \draw[->] (emb) -- (emb-|X.west);
-  \draw[->] (X) -- (S);  
+  \draw[->] (X) -- (S);
 \end{tikzpicture}
 \]
 
@@ -6816,7 +7006,7 @@ well-crafted 0-shot prompts can do better.
 There are many parameter efficient fine-tuning (PEFT) methods:
 \begin{compactitem}[--]
 \item \emph{Adapters} are small fully-connected layers (or MoE layers),
-  added (for instance) after transformers; 
+  added (for instance) after transformers;
 \item \emph{Soft prompts} are prompt prefixes added,
   not as input tokens,
   but in latent space (either only for the input layer,
@@ -6879,35 +7069,35 @@ Dilated attention is exponentially sparser as distance grows.
   % Dilated rate = 4
   \foreach \i in {0,...,3}
     \foreach \j in {\i,...,3}
-      \fill[blue!70] (4*\i,4*\j) -- (4*\i+1,4*\j) -- (4*\i+1,4*\j+1) -- (4*\i,4*\j+1) -- cycle;    
+      \fill[blue!70] (4*\i,4*\j) -- (4*\i+1,4*\j) -- (4*\i+1,4*\j+1) -- (4*\i,4*\j+1) -- cycle;
 
   % Dilated rate = 2
   \foreach \i in {0,...,3}
     \foreach \j in {\i,...,3}
-      \fill[green!70!black] (2*\i,2*\j) -- (2*\i+1,2*\j) -- (2*\i+1,2*\j+1) -- (2*\i,2*\j+1) -- cycle;    
+      \fill[green!70!black] (2*\i,2*\j) -- (2*\i+1,2*\j) -- (2*\i+1,2*\j+1) -- (2*\i,2*\j+1) -- cycle;
   \foreach \i in {4,...,7}
     \foreach \j in {\i,...,7}
-      \fill[green!70!black] (2*\i,2*\j) -- (2*\i+1,2*\j) -- (2*\i+1,2*\j+1) -- (2*\i,2*\j+1) -- cycle;    
+      \fill[green!70!black] (2*\i,2*\j) -- (2*\i+1,2*\j) -- (2*\i+1,2*\j+1) -- (2*\i,2*\j+1) -- cycle;
 
   % Dilated rate = 1
   \foreach \i in {0,...,3}
     \foreach \j in {\i,...,3}
-      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;    
+      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
   \foreach \i in {4,...,7}
     \foreach \j in {\i,...,7}
-      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;    
+      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
   \foreach \i in {8,...,11}
     \foreach \j in {\i,...,11}
-      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;    
+      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
   \foreach \i in {12,...,15}
     \foreach \j in {\i,...,15}
-      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;    
-  
+      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
+
   % Grid
   \foreach \i in {0,...,15}
     \foreach \j in {0,...,15}
       \draw (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
-    
+
   %\node at (8,-1) {\footnotesize Big Bird};
 \end{tikzpicture}
 =
@@ -6915,45 +7105,45 @@ Dilated attention is exponentially sparser as distance grows.
   % Dilated rate = 1
   \foreach \i in {0,...,3}
     \foreach \j in {\i,...,3}
-      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;    
+      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
   \foreach \i in {4,...,7}
     \foreach \j in {\i,...,7}
-      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;    
+      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
   \foreach \i in {8,...,11}
     \foreach \j in {\i,...,11}
-      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;    
+      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
   \foreach \i in {12,...,15}
     \foreach \j in {\i,...,15}
-      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;      
+      \fill[orange!60] (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
   % Grid
   \foreach \i in {0,...,15}
     \foreach \j in {0,...,15}
-      \draw (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;    
+      \draw (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
 \end{tikzpicture}
 +
 \begin{tikzpicture}[>=stealth,xscale=.11,yscale=-.11,inner sep=2pt,outer sep=1pt,baseline=-30]
   % Dilated rate = 2
   \foreach \i in {0,...,3}
     \foreach \j in {\i,...,3}
-      \fill[green!70!black] (2*\i,2*\j) -- (2*\i+1,2*\j) -- (2*\i+1,2*\j+1) -- (2*\i,2*\j+1) -- cycle;    
+      \fill[green!70!black] (2*\i,2*\j) -- (2*\i+1,2*\j) -- (2*\i+1,2*\j+1) -- (2*\i,2*\j+1) -- cycle;
   \foreach \i in {4,...,7}
     \foreach \j in {\i,...,7}
-      \fill[green!70!black] (2*\i,2*\j) -- (2*\i+1,2*\j) -- (2*\i+1,2*\j+1) -- (2*\i,2*\j+1) -- cycle;    
+      \fill[green!70!black] (2*\i,2*\j) -- (2*\i+1,2*\j) -- (2*\i+1,2*\j+1) -- (2*\i,2*\j+1) -- cycle;
   % Grid
   \foreach \i in {0,...,15}
     \foreach \j in {0,...,15}
-      \draw (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;    
+      \draw (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
 \end{tikzpicture}
 +
 \begin{tikzpicture}[>=stealth,xscale=.11,yscale=-.11,inner sep=2pt,outer sep=1pt,baseline=-30]
   % Dilated rate = 4
   \foreach \i in {0,...,3}
     \foreach \j in {\i,...,3}
-      \fill[blue!70] (4*\i,4*\j) -- (4*\i+1,4*\j) -- (4*\i+1,4*\j+1) -- (4*\i,4*\j+1) -- cycle;    
+      \fill[blue!70] (4*\i,4*\j) -- (4*\i+1,4*\j) -- (4*\i+1,4*\j+1) -- (4*\i,4*\j+1) -- cycle;
   % Grid
   \foreach \i in {0,...,15}
     \foreach \j in {0,...,15}
-      \draw (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;    
+      \draw (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
 \end{tikzpicture}
 \]
 
@@ -7000,7 +7190,7 @@ Let LLMs write code (rather than JSON) to call tools:
 this enables them to use control statements (\texttt{if}, \texttt{for}),
 combine tools (in a single call), and keep intermediate results (variables).
 
-** TODO Data 
+** TODO Data
 *** Data mixing
 
 \nextbook
@@ -7090,13 +7280,13 @@ DeepSeek-R1 uses 4 steps:
 \end{book}
 Start with a code model, and fine-tune it on a large mathematical corpus:
 \begin{compactitem}[--]
-\item Train a FastText classifier on OpenWebMath; 
-\item Apply it to CommonCrawl; 
-\item Use the results to identify websites with math contents; 
+\item Train a FastText classifier on OpenWebMath;
+\item Apply it to CommonCrawl;
+\item Use the results to identify websites with math contents;
 \item Add the corresponding pages to the FastText training data
   (adding arxiv papers does not bring any improvement);
   re-train;
-\item To avoid benchmark contamination, exclude pages containing a 10-gram from one of the benchmarks; 
+\item To avoid benchmark contamination, exclude pages containing a 10-gram from one of the benchmarks;
 \item Apply the new model to CommonCrawl.
 \end{compactitem}
 
@@ -7127,11 +7317,11 @@ and uses
 \end{book}
 DeepSeek-V3 combines:
 \begin{compactitem}[--]
-\item MoE (top-k and shared experts); 
+\item MoE (top-k and shared experts);
 \item No auxilliary loss to ensure load balancing between experts replaced by a bias term for each expert;
-\item Sequence-wise auxilliary loss; 
+\item Sequence-wise auxilliary loss;
 \item Multi-head laent attentio (MLA): joint low-rank compression of $K$ and $V$ to reduce the size of the KV cache;
-\item Multi-token predictin; 
+\item Multi-token predictin;
 \item FP8 mixed precision (FP8, BF16, FP32);
 \item Context length extension (first 32k, then 128k);
 \item Many parallelism and communication improvements).
@@ -7207,7 +7397,7 @@ Zero-shot NER with a BERT model:
 \begin{compactitem}[--]
 \item Compute embeddings $p_i$ of entity types and $h_i$ of sentence tokens;
 \item Apply FFNs to have embeddings $\text{FFN}(p_i)$ and $\text{FFN}(h_i,h_j)$,
-  ($i<j$, $\va{j-i}<12$) of entity types and spans; 
+  ($i<j$, $\va{j-i}<12$) of entity types and spans;
 \item Compute the similarity (sigmoid of scalar product)
   between entity types and spans;
 \item Return the highest scoring non-overlapping spans
@@ -7428,7 +7618,7 @@ use skipgram to learn the subword representations and add them.
 \texttt{fastText} is a linear model for text classification,
 useing
 \begin{compactitem}[--]
-\item Word and $n$-gram embeddings as features; 
+\item Word and $n$-gram embeddings as features;
 \item A low-rank constraint
   \[ \operatorname*{Maximize}_{A,B} \operatorname*{Mean} _n y_n \log \text{softmax}( B A x_n ) \]
 \item If there are many classes, a hierarchical softmax based on the Huffman coding tree.
@@ -7489,7 +7679,7 @@ Theoretical convergence results for \emph{neural operators}
 \end{book}
 \textsc{Frugal} combines low-dimensional (LoRA) stateful (Adam) updates for some of the parameters,
 and full stateless (SGD, SignSGD) for the others;
-the stateful and stateless subspaces are changed after a certain number of steps, to better explore the parameter space. 
+the stateful and stateless subspaces are changed after a certain number of steps, to better explore the parameter space.
 
 ReLoRA periodically merges the LoRA weights into the base model
 and resets them.
@@ -7501,9 +7691,9 @@ GaLore reduces the memory requirement of gradient based optimization by replacin
 
 Other PEFT (parameter-efficient fine-tuning) methods include
 \begin{compactitem}[--]
-\item Adapters (small feed-forward layers between layers); 
+\item Adapters (small feed-forward layers between layers);
 \item Trained soft prompts;
-\item BitFit: only re-train the biases; 
+\item BitFit: only re-train the biases;
 \item QLoRA.
 \end{compactitem}
 
@@ -7552,7 +7742,7 @@ where $\n \cdot$ is the $\ell^1$, $\ell^2$, $\ell^\infty$ or spectral norm.
     \node[anchor=south west] at (1.5,.5) {\footnotesize$s$};
     \node[anchor=north east] at (-1,0) {\footnotesize$x$};
     \node at (0,-1.8) {$\ell^1$};
-  \end{scope}  
+  \end{scope}
   \begin{scope}[shift={(10,0)}]
     \fill[black!10] (-1,-1) -- (-1,1) -- (1,1) -- (1,-1) -- cycle;
     \draw (-1.3,0) -- (1.3,0);
@@ -7563,7 +7753,7 @@ where $\n \cdot$ is the $\ell^1$, $\ell^2$, $\ell^\infty$ or spectral norm.
     \node[anchor=south west] at (1.5,.5) {\footnotesize$s$};
     \node[anchor=north east] at (-1,-1) {\footnotesize$x$};
     \node at (0,-1.8) {$\ell^\infty$};
-  \end{scope}  
+  \end{scope}
 \end{tikzpicture}
 \]
 
@@ -7585,7 +7775,7 @@ Muon updates matrix-shaped weights $W$ as
 \begin{align*}
   G &\leftarrow \text{gradient} \in \RR^{m\times n} \\
   O &\leftarrow \operatorname*{Argmin}_{ \n{ O }_2 \leq 1 } \tr ( G' O ) \\
-  W &\leftarrow W - \eta O 
+  W &\leftarrow W - \eta O
 \end{align*}
 (add momentum, learning rate scaling, weight decay).
 The direction $O$ can be computed as
@@ -7607,7 +7797,7 @@ or with \emph{Newton-Schluz iterations}
 \end{book}
 (Multiclass) classifiers minimize two quantities:
 \begin{compactitem}[--]
-\item Refinement error (whether the classes are in the correct order); 
+\item Refinement error (whether the classes are in the correct order);
 \item Calibration error (whether the probabilities are correct).
 \end{compactitem}
 They are not simultaneously minimized during training.
@@ -7658,8 +7848,8 @@ plt.show()
 % LOMO
 To reduce memory usage when training large models, replace the traditional
 \begin{compactitem}[--]
-\item Forward pass, keeping all the activations; 
-\item Backward pass, keeping all the gradients; 
+\item Forward pass, keeping all the activations;
+\item Backward pass, keeping all the gradients;
 \item Parameter update
 \end{compactitem}
 with
@@ -7667,8 +7857,8 @@ with
 \item Forward pass
 \item For each layer, starting from the last:
   \begin{compactitem}[\ensuremath{\cdot}]
-  \item Compute the gradients; 
-  \item Update the parameters; 
+  \item Compute the gradients;
+  \item Update the parameters;
   \item Free all the layers after the current one (they are no longer needed).
   \end{compactitem}
 \end{compactitem}
@@ -7693,6 +7883,70 @@ have a negative (positive)
 contribution to distances.
 
 * TODO Finance
+** Portfolio optimization
+
+If you are unfamiliar with portfolio optimization, the following paper covers the basics,
+rather exhaustively, from the simple Markowitz optimization problem
+to all the constraints and penalty we usually add. It focuses on convex optimization
+
+TODO: paper (Boyd/Schmeltzer)
+
+Here are a few books, if you want to go beyond those basics.
+
+D. Palomar's book focuses on optimization algorithms beyond convex optimization, in particular
+MM (Majorization-Minimization), SCA (sequential convex approximation),
+ADMM (alternating direction of multipliers), and convex-concave fractional programs.
+For instance, for a fully-invested, long-only portfolio,
+we cannot add an L¹ penalty to make it sparse:
+the fully-invested long-only constraint says that the L¹ norm is always 1;
+instead we can use the Lᵖ norm, for 0<p<1 -- the problem is no longer convex, but just quasi-convex.
+
+The book also has clear chapters on learning graphs from data,
+and on risk parity.
+
+TODO: book
+
+D. Cajas's book is a catalogue of risk measures,
+with code explaining how to  use them in portfolio optimization problems.
+
+TODO: references.
+
+M. Noger i Alonso's book is more finance-oriented,
+but covers similar topics.
+
+TODO: references
+
+If you only read one of those books, I recommend Palomar's.
+
+** Learning graphs from data
+
+Given many observations from several variables (e.g., returns for several stocks),
+we may want to represent the relations between those variables
+as a graph.
+A naive way of doing so is to compute the correlation matrix between those variables,
+and add an edge for all correlations above some threshold.
+But this tends to produce a dense graph:
+if variables A and B are correlated, and B and C are correlated, then
+A and C are correlated, even if they are idependent given C.
+To address this problem and only keep "direct" correlations,
+we can use the partial correlation matrix instead, which tends to be sparser
+(up to sign, scale and diagonal, it is the inverse of the correlation matrix).
+This is what the graphical lasso:
+find a matrix close to the inverse of the sample correlation matrix,
+with a sparsity penalty.
+
+TODO: the lasso book? check which chapter it is.
+
+There are variants of this approach, which look for the Laplacian matrix of the graph instead.
+Intuitively, signals (observations, i.e., rows in the data-frame)
+should vary slowly along the graph.
+We can easily add penalties (for degree, number of components)
+and allow for fat tail distributions.
+
+TODO: papers
+
+TODO:  Palomar's book (which chapter?)
+
 ** TODO Books
 *** Portfolio construction (review)
 
@@ -7750,7 +8004,7 @@ where $v = \ell^\top \ell$.
   \draw[->] (d) -- (m);
   \draw[->] (m) -- (mu);
   \draw[->] (mu) -- (po);
-  \draw[->] (po) -- (w);  
+  \draw[->] (po) -- (w);
 \end{tikzpicture}
 \]
 
@@ -7760,7 +8014,7 @@ Stylized facts of financial data include:
 \begin{compactitem}[--]
 \item Non-stationarity,
 \item Volatility clustering;
-\item No autocorrelation; 
+\item No autocorrelation;
 \item Heavy tails (but low-frequency data is more Gaussian);
 \item Asymmetry (compare the skewness of log-returns of S\&P 500 and bitcoin at different horizons);
 \item Positive correlation between assets (factor model structure).
@@ -7779,10 +8033,10 @@ For the scatter matrix, consider:
 \item Sample covariance matrix, which is also the Gaussian maximum likelihood estimator;
 \item The maximum likelihood estimator for the multivariate Student distribution
   \[ p(x) \propto \left[
-    1 + \dfrac1\nu (x-\mu) ' \Sigma^{-1} (x-\mu) 
+    1 + \dfrac1\nu (x-\mu) ' \Sigma^{-1} (x-\mu)
     \right]^{ (\nu + N) / 2 }
   \]
-  (the fixed point iterations for the first order conditions are just weighted sample means and covariances); 
+  (the fixed point iterations for the first order conditions are just weighted sample means and covariances);
 \item M-estimators, which generalize those fixed point iterations
   \begin{align*}
     & \dfrac1T \sum_t u_1(s) (x_t - \mu ) = 0 \\
@@ -7803,7 +8057,7 @@ Shrinkage estimators reduce the variance by increasing the bias.
 For the mean, the James-Stein estimator is
 $ (1-\rho) \hat \mu + \rho \mu_0 $,
 with
-\[ 
+\[
   \rho = \dfrac{ k + 2 }{
     (k+2) + n (\hat\mu - \mu_0) ' \Sigma^{-1} (\hat\mu - \mu_0)
   }
@@ -7815,7 +8069,7 @@ with $\Sigma_0$ scalar, diagonal, or equal-correlation,
 and
 \[ \rho =  \min \left\{
 1 , \dfrac{
-  \operatorname*{Mean}_t \n{ \hat\Sigma - x_t x_t' }_F^2 
+  \operatorname*{Mean}_t \n{ \hat\Sigma - x_t x_t' }_F^2
 }{
   \n{ \hat\Sigma - \Sigma_0 }_F^2
 }
@@ -7834,7 +8088,7 @@ by modeling them as:
 \begin{compactitem}[--]
 \item A random walk plus noise (mean model);
 \item An integrated random walk plus noise (mean + velocity);
-\item Mean + velocity + acceleration; 
+\item Mean + velocity + acceleration;
 \item Idem, with a second order approximation.
 \end{compactitem}
 The linear transformations for the latent state are respectively
@@ -7906,7 +8160,7 @@ or, if we impose a Laplacian structure,
   \text{Find} & L \succcurlyeq 0 \\
   \text{To maximize} & \log \operatorname{gdet}(L) - \tr(LS) = \rho \n{ L }_{ 1, \text{off} } \\
   \text{Such that} & L \mathbf 1 = 0 \\
-  & \forall i \neq j \ L_{ij} = L_{ji} \leq 0 
+  & \forall i \neq j \ L_{ij} = L_{ji} \leq 0
 \end{array} \]
 where gdet is the product of the non-zero eigenvalues
 ($L$ is singular because of the constraint $L\mathbf 1 = 0$).
@@ -7939,7 +8193,7 @@ or the sample variance matrix $S$
   \text{Such that} & L \mathbf 1 = 0 \\
   & \forall i \neq j \ L_{ij} = L_{ji} \leq 0 \\
   & \text{diag}\, L = \mathbf 1 \\
-  & F' F = I  
+  & F' F = I
 \end{array} \]
 which can be solved by alternate minimization.
 
@@ -7990,7 +8244,7 @@ The maximum Sharpe portfolio
 \[ \begin{array}{ll}
   \text{Find} & w \\
   \text{To maximize} & \dfrac{ w' \mu - r_f }{ \sqrt{ w' \Sigma w } } \\
-  \text{Such that} & \mathbf 1' w = 1 , \ w \geq 0 
+  \text{Such that} & \mathbf 1' w = 1 , \ w \geq 0
 \end{array} \]
 is the solution of a concave-convex \emph{fractional program}.
 It can be solved with:
@@ -8010,7 +8264,7 @@ It can be solved with:
   \[ \begin{array}{ll}
     \text{Find} & w \\
     \text{To maximize} &  w' \mu - r_f - y \sqrt{ w' \Sigma w } \\
-    \text{Such that} & w' \mathbf 1 = 1, \ w \geq 0 
+    \text{Such that} & w' \mathbf 1 = 1, \ w \geq 0
   \end{array} \]
   and updating $y = ( w' \mu - r_f ) / \sqrt{ w' \Sigma w }$;
 \item The \emph{Schaible transform}
@@ -8055,12 +8309,12 @@ You may prefer using other measures of risk and/or avoid using the imprecise $\m
 % 8. Backtesting
 \textbf{8.} In backtesting, beware of:
 \begin{compactitem}[--]
-\item Survivorship bias; 
+\item Survivorship bias;
 \item Look-ahead bias;
 \item Overfitting: perform sensitivity analysis, stress tests, use model averaging,
   keep track of the number of backtests;
 \item Outliers: look into robust optimization, robust portfolios;
-\item Transaction costs; 
+\item Transaction costs;
 \item Shorting costs.
 \end{compactitem}
 
@@ -8089,7 +8343,7 @@ A multivariate \emph{variance mixture} is
 \begin{align*}
   x &= \mu + \sqrt w z & \E[x] &= \mu \\
   z &\sim N(0,\Sigma) & \var[x] &= \E[w] \Sigma \\
-  w &\text{: $\RR_+$-valued.} 
+  w &\text{: $\RR_+$-valued.}
 \end{align*}
 For instance, the multivariate $t$ distribution is
 \begin{align*}
@@ -8140,7 +8394,7 @@ The average growth can be approximated as
 
 Higher moments can be optimized in many ways:
 \begin{compactitem}[--]
-\item Scalarization: maximize $\sum (-1)^i \lambda_1 \phi_1(w)$; 
+\item Scalarization: maximize $\sum (-1)^i \lambda_1 \phi_1(w)$;
 \item Constraints: $\phi_i(w) \geq \alpha_i$ or $\phi_i \leq \alpha_i$;
 \item Shortage: find $w$, $\delta$ to maximize $\delta$
   such that $\forall i \ \phi_i(w) \lessgtr \phi_1(w_0) - (-1)^i \delta g_i$;
@@ -8168,7 +8422,7 @@ SCA (successive convex approximation) replaces the problem
 with a sequence of problems
 \begin{align*}
   \hat x_{k+1} &= \argmin_{ x \in \mathscr X } \tilde f( x ; x_k ) \\
-  x_{k+1} &= x_k + \gamma ( \hat x_{k+1} - x_k ) 
+  x_{k+1} &= x_k + \gamma ( \hat x_{k+1} - x_k )
 \end{align*}
 where $\tilde f$ is an approximation of $f$ around $x_k$.
 
@@ -8191,7 +8445,7 @@ Alternative risk measures include:
 \begin{compactitem}[--]
 \item Semi-variance;
 \item Lower -artial moments (LPM) wrt a minimum acceptable return $\tau$;
-\item VaR; 
+\item VaR;
 \item CVaR;
   \begin{align*}
     \text{VaR}_\alpha(w) &= \argmin_\tau F_\alpha( w, \tau ) \\
@@ -8282,7 +8536,7 @@ Hierarchical portfolios include:
   replace it with a balanced binary tree, and use inverse volatility weighting in each branch;
 \item Hierarchical equal risk contribution (HERC): idem, but keep the dendrogram, use risk parity at each node,
   but stop when you have the required number of clusters
-  (using the gap statistics), and use $1/N$ in the leaves. 
+  (using the gap statistics), and use $1/N$ in the leaves.
 \end{compactitem}
 
 The HRP portfolio can be written
@@ -8334,7 +8588,7 @@ with the cummulated returns $X^{\text{cum}}$ (or $\tilde X^{\text{cum}}$).
 
 In practice, the difference between ratio and log-returns is negligible.
 
-You can replace the tracking error with other measures, e.g., 
+You can replace the tracking error with other measures, e.g.,
 downside risk, $\ell^1$ tracking error, Huberized tracking error.
 
 % FDR: not clear
@@ -8359,9 +8613,9 @@ There are several approaches to robust portfolio construction:
   replace $f(x;\hat\theta) \leq \alpha$ with
   \[ \sup_{ \theta \in U } f(x;\theta) \leq \alpha , \]
   where the supremum can be estimated by sampling, in closed form,
-  via duality, or saddle point optimization; 
+  via duality, or saddle point optimization;
 \item Resampling (cross-validation, bootstrap).
-\end{compactitem} 
+\end{compactitem}
 
 % 15. Pairs trading
 \textbf{15.}
@@ -8393,7 +8647,7 @@ The matrix $\Pi$ is often low-rank, $\Pi = \alpha \beta'$; $\beta$ contains coin
 To choose among the many corresponding stationary portfolios,
 maximize the zero-crossing rate (which determines the number of trades)
 and the variance of the spread (which determines the threshold).
-There are various proxies for the zero-crossing rate. 
+There are various proxies for the zero-crossing rate.
 
 % 16. Deep learning portfolios
 \textbf{16.}
@@ -8479,7 +8733,7 @@ the problem becomes convex.
   \text{Such that} & G y \leq h t \\
   & A y = b t \\
   & e' y + f t = 1 \\
-  & t > 0 
+  & t > 0
 \end{array} \]
 
 Least squares and box-constrained least squares can be formulated as quadratic programs (QP):
@@ -8623,7 +8877,7 @@ it can be sped up with \textsc{squarem} (if $\n{x_{k+1} - x_k}$ increases, incre
 
 Successive convex approximation (SCA) uses a convex approximation
 of the objective function (not necessarily an upper bound)
-but has to use smaller step sizes. 
+but has to use smaller step sizes.
 
 The \emph{alternating direction method of multipliers} (ADMM)
 is similar to BCD but can deal with coupled variable blocks in the constraints;
@@ -8724,7 +8978,7 @@ if it is zero, $\text{rank}\, L \leq p-k$).
 between the data or, better, between the columns of the covariance, correlation or distance matrix, and use:
 \begin{compactitem}[--]
 \item Truncation, MST, PMFG, TMFG;
-\item $k$-nn; 
+\item $k$-nn;
 \item Possibly combined with Gaussian weights.
 \end{compactitem}
 
@@ -8732,8 +8986,8 @@ Variants of the concentration matrix,
 which contains the \emph{partial correlations} include:
 \begin{compactitem}[--]
 \item $L^1$ sparsity penalty (graphical lasso);
-\item Laplacian structure on the concentration matrix; 
-\item $L^0$ sparsity penalty; 
+\item Laplacian structure on the concentration matrix;
+\item $L^0$ sparsity penalty;
 \item Low-rank Laplacian penalty (\ie, a $k$-component graph);
 \item Heavy tails (Student instead of Gaussian distribution).
 \end{compactitem}
@@ -8751,7 +9005,7 @@ and
 \item A sparsity penalty $\n W _F^2$;
 \item A degree constraint $W \mathbf = 1$;
 \item A degree penalty $- \mathbf 1 ' \log (W \mathbf 1 )$.
-\end{compactitem} 
+\end{compactitem}
 
 *** Book: Portfolio optimization (Cajas)
 
@@ -8778,7 +9032,7 @@ The James-Stein shrinkage estimator of the mean is
   \mu &= ( 1 - \alpha ) \hat \mu + \alpha \mu_0 \\
   \alpha &= \dfrac{ n - 1 }{ T } \dfrac{ n \bar\lambda - 2 \lambda_{\text{max}} }{ (\hat\mu-\mu_0)'(\hat\mu-\mu_0) } \\
   &\approx \dfrac{n-1}T \dfrac{ \bar\lambda }{  (\hat\mu-\mu_0)'(\hat\mu-\mu_0) } \\
-  \mu_0 &= \dfrac{ \mathbf 1' \hat\mu}n\mathbf1 \quad \text{ or } \quad 
+  \mu_0 &= \dfrac{ \mathbf 1' \hat\mu}n\mathbf1 \quad \text{ or } \quad
   \dfrac{ \mathbf1\Sigma^{-1}\hat\mu}{ \mathbf1\Sigma^{-1}\mathbf1 } \quad \text{ or } \quad
   \dfrac{ \tr\Sigma }{ T } \mathbf 1.
 \end{align*}
@@ -8933,7 +9187,7 @@ such as
 \item Range (convex, not coherent);
 \item CVaR range (coherent);
 \item TG range (coherent);
-\item EVaR range; 
+\item EVaR range;
 \item RLVaR range.
 \end{compactitem}
 
@@ -8942,7 +9196,7 @@ such as
 \item Average drawdown
   $\text{ADD} = \operatorname*{Mean}_t \text{DD}_t$;
 \item Ulcer index $\text{UCI} = \sqrt{ \operatorname*{Mean}_t \text{DD}_t^2 }$;
-\item Drawdown at risk DaR (not convex); 
+\item Drawdown at risk DaR (not convex);
 \item CDaR, EDaR, RLDaR, MDD.
 \end{compactitem}
 
@@ -9016,11 +9270,11 @@ The near optimal region around $w^*$ (on the efficient frontier) is
 \}.
 \end{align*}
 The NOC (near-optimal centering) portfolio is the analytic center of the near optimal region;
-you can then compute the NOC frontier. 
+you can then compute the NOC frontier.
 
 \textbf{12.} There are several variants of \emph{hierarchical risk parity}:
 \begin{compactitem}[--]
-\item Original HRP, which only uses the leaf order, not the dendrogram; 
+\item Original HRP, which only uses the leaf order, not the dendrogram;
 \item DBHT (direct bubble hierarchical tree), based on the PMFG;
 \item HERC (hierarchical equal risk contribution);
 \item NCO (nested cluster optimization):
@@ -9031,8 +9285,8 @@ you can then compute the NOC frontier.
 \textbf{13.}
 You can use a \emph{graph} on the assets (MST, PMFG, TMFG) to define constraints:
 \begin{compactitem}[--]
-\item Average centrality of the portfolio; 
-\item Do not invest in neighbours (assets at distance at most $\ell$): MIP or SDP relaxation; 
+\item Average centrality of the portfolio;
+\item Do not invest in neighbours (assets at distance at most $\ell$): MIP or SDP relaxation;
 \item Do not invest in the same cluster (MIP, SDP relaxation)
 \end{compactitem}
 
@@ -9077,7 +9331,7 @@ This is equivalent to
 \end{array}
 \]
 into the dual problem
-\[ 
+\[
 \begin{array}{ll}
   \text{Find} & s, y \\
   \text{To minimize} & b' y \\
@@ -9198,7 +9452,7 @@ $ x \in \Omega$
 is a function $V$ satisfying
 \begin{compactitem}[(ii)]
 \item[(i)] For all $\phi \in \mathscr C^1(\Omega)$, if $V-\phi$ has a local maximum at $x_0$,
-  then $F \bigl( x_0, V(x_0), \nabla \phi(x_0) \bigr) \leq 0$; 
+  then $F \bigl( x_0, V(x_0), \nabla \phi(x_0) \bigr) \leq 0$;
 \item[(ii)] For all $\phi \in \mathscr C^1(\Omega)$, if $V-\phi$ has a local minimum at $x_0$,
   then $F \bigl( x_0, V(x_0), \nabla \phi(x_0) \bigr) \geq 0$.
 \end{compactitem}
@@ -9208,7 +9462,7 @@ in a risky asset (assuming a geometric Brownian motion,
 with drift, volatility and risk-free rate known) to maximize expected CRRA utility
 \begin{align*}
   U(x) &= \dfrac{ x ^ { 1 - \gamma } }{ 1 - \gamma } \\
-  dX &= r X dt + (\mu - r ) \pi X dt + \sigma \pi X dW ; 
+  dX &= r X dt + (\mu - r ) \pi X dt + \sigma \pi X dW ;
 \end{align*}
 it is constant (it does not depend on time and wealth):
 \[ \pi^*** = \dfrac{ \mu - r }{ \gamma \sigma^2 }. \]
@@ -9219,7 +9473,7 @@ One can add transaction costs, or change the utility function.
 Applications of Markov decision processes (MDP) include
 \begin{compactitem}[--]
 \item Multi-period portfolio optimization,
-  with transaction costs or regime switching; 
+  with transaction costs or regime switching;
 \item Option hedging.
 \end{compactitem}
 To make MDPs aware of risk, one could alter the reward;
@@ -9282,7 +9536,7 @@ Hierarchical risk parity can be applied to other matrices, e.g.:
 \item Compute the sensitivity $B$ of asset returns $\mathbf r$ to risk factors $\mathbf f$:
 $\mathbf r = B \mathbf f + \epsilon $
 (with a linear model, or a sparse neural net -- use automatic differentiation to compute $B$);
-\item Compute the distances between the assets in sensitivity space; 
+\item Compute the distances between the assets in sensitivity space;
 \item Use that distance matrix to build a hierarchical risk parity portfolio.
 \end{compactitem}
 
@@ -9336,7 +9590,7 @@ The Markowitz weights, P\&L, and Sharpe ratio are
 \begin{align*}
   w_t &= \Sigma_\epsilon^{-1} \beta s_t \\
   \text{PnL}_t &= w' r_{t+1}  \\
-  \text{SR} &= \dfrac{ \E[ \text{PnL} ] }{ \sqrt{ \var[ \text{PnL} ] } }. 
+  \text{SR} &= \dfrac{ \E[ \text{PnL} ] }{ \sqrt{ \var[ \text{PnL} ] } }.
 \end{align*}
 We can compare SR and
 \[ \widehat{\text{SR}} = \dfrac{
@@ -9357,7 +9611,7 @@ requires the number of independent trials and their variance:
 \begin{compactitem}[--]
 \item Use $k$-means and the silhouette score on the strategy returns
   (distance between the columns of the correlation matrix) to estimate the number of independent trials;
-\item Replace each cluster with its minimum variance portfolio to compute the variance. 
+\item Replace each cluster with its minimum variance portfolio to compute the variance.
 \end{compactitem}
 
 *** Sharpe ratio
@@ -9416,7 +9670,7 @@ The \emph{tail covariances} are $\E[ X Y^{2k-1} ]$ and $\E[ X^{2k-1} Y ]$
 \nextbook
 \begin{book}
   \emph{Multistage stochastic programs\\ with the entropic risk measure}\\
-  O. Dowson et al. 
+  O. Dowson et al.
 \end{book}
 \[ \text{Ent}_\gamma[X] = \gamma^{-1} \log \E[ e^{\gamma X} ] \]
 
@@ -9484,7 +9738,7 @@ Hidden Markov models (HMM) can be estimated with \emph{spectral clustering}:
   $\va{y_t - y_{t+1}}$;
   mean and standard deviation over $[t-\ell,t+\ell]$, $[t-\ell,t]$, $[t,t+\ell]$
   ($\ell=2$ and 6)
-  and standardize them; 
+  and standardize them;
 \item Compute the affinity matrix
   \[ A_{ij} = \exp \bigl( - \gamma \n{ z_i - z_j }_2^2 \bigr) \]
   and normalized Laplacian $L_{\text{rw}}= I - D^{-1} A $;
@@ -9507,7 +9761,7 @@ For the state $s$, use dynamic programming:
 \end{align*}
 
 Python implementation in \texttt{jumpmodels}.
-  
+
 \nextbook
 \begin{book}
   \emph{Fitting jump models}\\
@@ -9658,10 +9912,10 @@ The loss functions can be
     \text{loss}( X, y, \theta ) &= \sum_{ y_i < y_j } \phi \bigl[ f_\theta(X_j) - f_\theta(X_i) \bigr] \\
     \phi &=
 \begin{tikzpicture}[>=stealth,xscale=.2,yscale=.3,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
-\draw[very thick,blue!60!black] (-1.000,1.313)--(-0.737,1.128)--(-0.474,0.958)--(-0.211,0.804)--(0.053,0.667)--(0.316,0.548)--(0.579,0.445)--(0.842,0.358)--(1.105,0.286)--(1.368,0.227)--(1.632,0.179)--(1.895,0.140)--(2.158,0.109)--(2.421,0.085)--(2.684,0.066)--(2.947,0.051)--(3.211,0.040)--(3.474,0.031)--(3.737,0.024)--(4.000,0.018);  
+\draw[very thick,blue!60!black] (-1.000,1.313)--(-0.737,1.128)--(-0.474,0.958)--(-0.211,0.804)--(0.053,0.667)--(0.316,0.548)--(0.579,0.445)--(0.842,0.358)--(1.105,0.286)--(1.368,0.227)--(1.632,0.179)--(1.895,0.140)--(2.158,0.109)--(2.421,0.085)--(2.684,0.066)--(2.947,0.051)--(3.211,0.040)--(3.474,0.031)--(3.737,0.024)--(4.000,0.018);
 \draw (-1,0) -- (4,0);
 \draw (2,-.2) -- (2,1.4);
-\end{tikzpicture}    
+\end{tikzpicture}
   \end{align*}
   (e.g., $\phi(z) = \log(1+e^{-z})$, $(1-z)_+$ or $e^{-z}$);
 \item Listwise
@@ -9682,15 +9936,15 @@ The loss functions can be
     \text{loss}( X, y ; \theta ) &=
     - \log \prod_i \dfrac{
       \phi \bigl[
-        f_\theta( X_{y^{-1}(i)} ) - f_\theta( X_{y^{-1}(N-i)} ) 
+        f_\theta( X_{y^{-1}(i)} ) - f_\theta( X_{y^{-1}(N-i)} )
         \bigr]
     }{
       \sum_{ i \leq u \neq v \leq N-i }
       \phi \bigl[
-        f_\theta( X_{y^{-1}(u)} ) - f_\theta( X_{y^{-1}(v)} ) 
+        f_\theta( X_{y^{-1}(u)} ) - f_\theta( X_{y^{-1}(v)} )
         \bigr]
     }
-    \text{ (Listfold)} 
+    \text{ (Listfold)}
   \end{align*}
   (ListNet is based on cross-entropy,
   ListMLE on the Plackett-Luce model,
@@ -9774,7 +10028,7 @@ Find the portfolio weights minimizing some loss function of those intervals
 
 For instance:
 \begin{compactitem}[--]
-\item Start with a finite set of portfolios $\mathscr E$; 
+\item Start with a finite set of portfolios $\mathscr E$;
 \item Compute their prediction intervals at level $\alpha$:
   $ [ \underline r_w , \bar r_w ] $;
 \item Consider a proportion $\beta$ of portfolios,
@@ -9811,7 +10065,7 @@ and all shifts of the data.
 \nextbook
 \begin{book}
   \emph{Causality-inspired models\\for financial time series forecasting}\\
-  D.C. Oliveira et al. 
+  D.C. Oliveira et al.
 \end{book}
 Use causal discovery algorithms such as
 \begin{compactitem}[--]
@@ -9908,9 +10162,9 @@ Evolution of the bow-tie structure.
 Forecast hourly or daily returns of S\&P 500 stocks from node or graph features:
 \begin{compactitem}[--]
 \item Centralities (degree, closeness, betweenness, eigenvalue);
-\item Clustering coefficient; 
-\item Modularity; 
-\item Largest component; 
+\item Clustering coefficient;
+\item Modularity;
+\item Largest component;
 \item Resilience (size of the largest component after removing a fraction of the nodes).
 \end{compactitem}
 Build the graph by thresholding the correlation matrix;
@@ -9960,7 +10214,7 @@ or theoretically, from the VAR model.
 \textbf{3.} Optimizing the theoretical quantities is a sparse generalized eigenvalue problem.
 It can be solved in three ways:
 \begin{compactitem}[--]
-\item Greedily: iteratively select the index of the variable that maximizes the ratio; 
+\item Greedily: iteratively select the index of the variable that maximizes the ratio;
 \item Exactly: exhaustive search for small matrices (up to 15$\times$15);
 \item SDP (semidefinite programming) relaxation (only for the predictability: for the mean reversion, $A\Gamma$ is not symmetric).
 \end{compactitem}
@@ -9969,7 +10223,7 @@ Instead of looking for mean-reverting portfolios, we can look for momentum portf
 maximizing the predictability $\nu$.
 
 % The paper uses row vectors; I use column vectors: their A is my A'
-% They use a continuous time OU process: there is a log in their λ, which is not always defined. 
+% They use a continuous time OU process: there is a log in their λ, which is not always defined.
 
 *** small mean-reverting portfolios
 
@@ -10004,7 +10258,7 @@ This is a (sparse) generalized eigenvalue problem,
 It can be solved:
 \begin{compactitem}[--]
 \item Greedily;
-\item With an SDP relaxation, setting $X = xx'$, $X \succcurlyeq 0$, $\text{rank}\,X = 1$; 
+\item With an SDP relaxation, setting $X = xx'$, $X \succcurlyeq 0$, $\text{rank}\,X = 1$;
 \item By brute force search (by looking at all the subsets of size $k$).
 \end{compactitem}
 
@@ -10030,7 +10284,7 @@ Given two assets and asset-specific signals,
   &&& \epsilon \sim N(0,\Delta) \\
   &&& \epsilon \indep X \\
   x &= x_1 - x_2 \\
-  r &= r_1 - r_2 
+  r &= r_1 - r_2
 \end{align*}
 we can compute the expected returns of pairs trading strategies
 $ \E\bigl[ \text{sign}(x) r \bigr] $
@@ -10070,7 +10324,7 @@ Compute asset embeddings from holdings data:
     & u \text{: user (investor)} \\
     & i \text{: item (asset)} \\
     & w \text{: weight in portfolio} \\
-    & \phi_u, \phi_i \text{: embeddings} 
+    & \phi_u, \phi_i \text{: embeddings}
   \end{align*}
 \item Word2vec, BERT, GPT, after transforming the holdings into a sequence of tokens, sorting the assets by decreasing weight.
 \end{compactitem}
@@ -10133,15 +10387,15 @@ This readily generalizes to degenerate views.
 \nextbook
 \begin{book}
   \emph{Neural factors: a novel factor learning approach to generative modeling of equities}\\
-  A. Gopal 
+  A. Gopal
 \end{book}
 An autoencoder-based factor model can generate synthetic data:
 \begin{compactitem}[--]
 \item A neural network converts stock characteristics (financial statements, a few reference indices)
   into factor exposures $\beta_{ijt}$ and the parameters of a Student distribution
-  $\alpha_{it}$, $\sigma_{it}$, $\nu_{it}$; 
+  $\alpha_{it}$, $\sigma_{it}$, $\nu_{it}$;
 \item The factors follow a Gaussian distribution
-  $z_{t+1} \sim N(0,I)$; 
+  $z_{t+1} \sim N(0,I)$;
 \item The stock returns are then
   \[ r_{i, t+1} \sim T_{ \nu_{it} } ( \alpha_{it} + \beta_{i\bigcdot t} ^\top z_{t+1} , \sigma_{it} ). \]
 \end{compactitem}
@@ -10181,7 +10435,7 @@ Most ``market anomalies'' can be explained by heterogeneous expectations (disagr
 \nextbook
 \begin{book}
   \emph{Domesticating the factor zoo\\ with economic theory}\\
-  T.M. Idzorek et al. (2024)  
+  T.M. Idzorek et al. (2024)
 \end{book}
 The factor zoo can be tamed by separating \emph{price factors} from \emph{attribution factors}.
 Price factors are small in number, long-lived, caused by excess demand resulting from investors' preferences -- risk, illiquidity, low beta, bad ESG, reputation discount.
@@ -10210,17 +10464,17 @@ Each residual can be decomposed into a sum of contributions from each input feat
 
 Compare the decompostion between the training and the test set, e.g.,
 \[ R_j = \dfrac{
-    \operatorname*{Mean}_{ i \in \text{Test} } e_{ij}^2 
+    \operatorname*{Mean}_{ i \in \text{Test} } e_{ij}^2
   }{
-    \operatorname*{Mean}_{ i \in \text{Train} } e_{ij}^2 
+    \operatorname*{Mean}_{ i \in \text{Train} } e_{ij}^2
   }
   \qquad
   \text{or}
   \qquad
   V_j =  \dfrac{
-    \operatorname*{Std}_{ i \in \text{Test} } e_{ij}^2 
+    \operatorname*{Std}_{ i \in \text{Test} } e_{ij}^2
   }{
-    \operatorname*{Std}_{ i \in \text{Train} } e_{ij}^2 
+    \operatorname*{Std}_{ i \in \text{Train} } e_{ij}^2
   }
 \]
 and adjust the coefficients, e.g.,
@@ -10269,7 +10523,7 @@ To profit from ``investor day'' events:
   (entity$_1$, relation, entity$_2$, timestamp),
   for 13 relations
   (impact, relate to, has, announce, operate in, introduce, produce, participate in, control, is member of, invest in, raise, decrease);
-\item Compute the sentiment of each entity mentioned, at the paragraph level; 
+\item Compute the sentiment of each entity mentioned, at the paragraph level;
 \item Use \emph{Katz centrality}
   (on the knowledge graph on a 1-month window) to assess the importance of each entity;
 \item Define the \emph{polarity} as the product of the centrality and (average neighbour) sentiment;
@@ -10285,13 +10539,13 @@ controlling the error-in-variables (EIV) bias):
 \begin{compactitem}[--]
 \item Define the (raw) theme returns $f$ as the polarity minus the average polarity over the past 3 months;
 \item Identify stocks highly relevant for that theme;
-\item Compute a supervised PCA on those stock returns; 
-\item Regress the theme returns on the first principal components; 
+\item Compute a supervised PCA on those stock returns;
+\item Regress the theme returns on the first principal components;
 \item Use the corresponding forecasts as cleaned theme returns $\tilde f$;
 \item Compute the exposures with regressions
   \[ R_{it} = \alpha_i + \beta_i \tilde f_t + \beta^{\text{mkt}} f_t^{\text{mkt}} + \epsilon_{it} \]
   (separately for each stock and theme).
-\end{compactitem}  
+\end{compactitem}
 
 *** No
 
@@ -10302,10 +10556,10 @@ controlling the error-in-variables (EIV) bias):
 \end{book}
 LLM applications in finance include:
 \begin{compactitem}[--]
-\item Comparison of ChatGPT-generated answers with human ones in conference calls -- differences correlate with abnormal volumes; 
-\item Denoising reported earnings; 
-\item Human-free surveys, with synthetic personas (mimicking human participants); 
-\item Making discretionary investing systematic; 
+\item Comparison of ChatGPT-generated answers with human ones in conference calls -- differences correlate with abnormal volumes;
+\item Denoising reported earnings;
+\item Human-free surveys, with synthetic personas (mimicking human participants);
+\item Making discretionary investing systematic;
 \item Identifying (and betting against) retain investor biases (technical analysis, from StockTwits).
 \end{compactitem}
 
@@ -10373,7 +10627,7 @@ where
   \hat c_i &= \sum_t \hat u_{it} \\
   \hat s_t &= \sum_i \hat u_{it} \\
   \hat\epsilon_{it} &= y_{it} - x_{it} \hat\beta \\
-  H &= \sum_{it} x_{it} x_{it} ' 
+  H &= \sum_{it} x_{it} x_{it} '
 \end{align*}
 
 \nextbook
@@ -10396,7 +10650,7 @@ Commonly used estimators of the standard error in panel regressions are biased:
   M.W. McCracken and S. Ng (2015)
 \end{book}
 Bry-Boschan on cumsum(PC$_i$), for $i=1,2,3,4$,
-to detect regime changes. 
+to detect regime changes.
 
 %\nextbook
 %\begin{book}
@@ -10419,11 +10673,11 @@ to detect regime changes.
 Conformal prediction (CP) works as follows:
 \begin{compactitem}[--]
 \item Split the data into training and calibration
-  (and test, and validation) sets; 
+  (and test, and validation) sets;
 \item Train the model on the training set
 \item Compute a \emph{non-conformity score} for all observations in the calibration set
   (any measure of how unusual $y$ is, given $x$), e.g.,
-  $ 1 - \hat p(y|x)$, for a classification model; 
+  $ 1 - \hat p(y|x)$, for a classification model;
 \item Compute its $1-\alpha$ quantile $\hat q$
   (with a finite-sample adjustment);
 \item Given new data, $x$, return all the $y$'s whose non-conformity score is below $\hat q$ as \emph{prediction set}.
@@ -10443,14 +10697,14 @@ For classification:
   not \emph{class-conditional coverage} -- the coverage is $1-\alpha$ only on average,
   but it can be much higher/lower for easier/harder classes.
 \item \emph{Adaptive prediction sets} (APS)
-  use cummulated probabilities, from the largest down to the true class; 
+  use cummulated probabilities, from the largest down to the true class;
   at test time, compute the cummulated sorted probabilities, and return the classes until the threshold
   (you can include the label just above the threshold, or not (but this can lead to empty prediction sets),
   or (better) decide at random);
 \item Top-$k$ uses the rank of the true class;
-  the prediction sets all have the same size; 
+  the prediction sets all have the same size;
 \item Regularized APS (RAPS)
-  penalizes the inclusion of too many classes; 
+  penalizes the inclusion of too many classes;
 \item Group-balanced conformal prediction applies conformal prediction separately for each group;
 \item Class-conditional APS uses group-balanced CP
   for the classes to predict:
@@ -10470,7 +10724,7 @@ For regression:
 \end{compactitem}
 Instead of conformalizing (mean) regression, we can conformalize quantile regression
 \[ s(y,x) = \max \bigl\{
-\hat f _{\text{low}} (x) - y , y - \hat f_{\text{up}}(x) 
+\hat f _{\text{low}} (x) - y , y - \hat f_{\text{up}}(x)
 \bigr\} \]
 (the distance to the nearest interval boundary, with a negative sign if inside).
 
@@ -10498,7 +10752,7 @@ Generative models sample from a distribution defined by samples
 \]
 They can be:
 \begin{compactitem}[--]
-\item One-step: GAN, VAE, invertible models; 
+\item One-step: GAN, VAE, invertible models;
 \item Iterative: diffusion (SDE), flows (ODE), GPT (AR).
 \end{compactitem}
 They can be seen as ``lazy EM'':
@@ -10539,7 +10793,7 @@ Optimal transport
     Z_0 \sim p_0 \\
     Z_1 \sim p_1
 }} \E \left[
-  \int_0^1 c( \dot Z_t ) dt 
+  \int_0^1 c( \dot Z_t ) dt
   \right]
 \]
 is difficult and unnecessary.
@@ -10568,24 +10822,24 @@ M = 6
 np.random.seed(1)
 def sample_from_p0(size=1):
     p = np.random.uniform(size=size)
-    m = np.where( p > .5, 1, -1 ) *** 3 
+    m = np.where( p > .5, 1, -1 ) *** 3
     return np.random.normal( m, 1, size=size )
-def sample_from_p1(size = 1): 
+def sample_from_p1(size = 1):
     return sample_from_p0(size)
 N = 10_000
 z0 = sample_from_p0(N)
 z1 = sample_from_p1(N)
 coupling = np.vstack([z0,z1]).T
 slope = z1 - z0
-def v(x,y, sigma=.1): 
-    yhat = slope *** x + z0 
+def v(x,y, sigma=.1):
+    yhat = slope *** x + z0
     weights = np.exp( - (y-yhat)**2 / 2 / sigma**2 )
     weights = weights / np.sum(weights)
     return np.sum( weights*slope )
 K = 10
 xs = np.linspace(0,1,K)
 ys = np.linspace(-M,M,K)
-Vs = np.array( [ 
+Vs = np.array( [
     [v(x,y) for x in xs]
     for y in ys
 ] )
@@ -10594,7 +10848,7 @@ Ys = np.tile( ys, (len(xs),1) ).T
 Us = np.cos( np.atan(Vs) )
 Vs = np.sin( np.atan(Vs) )
 fig, axs = plt.subplots( 1, 3, figsize = (12,3) )
-for i in range(50): 
+for i in range(50):
     axs[0].plot( [0,1], [z0[i],z1[i]], color = 'tab:orange', linewidth = 1 )
 #axs[1].streamplot(Xs,Ys,Us,Vs)
 for i in range(50):
@@ -10605,7 +10859,7 @@ for i in range(50):
 dz0 = scipy.stats.gaussian_kde(z0)
 dz0 = scipy.stats.gaussian_kde(z1)
 zs = np.linspace(-M,M,200)
-for ax in axs: 
+for ax in axs:
     ax.axvline( 0, color = 'black', linewidth = 1 )
     ax.axvline( 1, color = 'black', linewidth = 1 )
     s = 2
@@ -10671,7 +10925,7 @@ where the divergence is
   \end{scope}
 \end{tikzpicture}
 \]
-The rectified flow reduces the curvature (straightens trajectories -- 
+The rectified flow reduces the curvature (straightens trajectories --
 % TODO: PLOT?
 in practice, one reflow is good enough).
 The rectified flow reduces the transport cost for all convex costs (Jensen),
@@ -10681,22 +10935,22 @@ but we need not get the optimal transport.
 \begin{tikzpicture}[>=stealth,scale=.5,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
   \begin{scope}
     \node (O) at (0,0) {};
-    \foreach[evaluate=\i as \j using int(\i*45)] \i in {0,...,8} { 
+    \foreach[evaluate=\i as \j using int(\i*45)] \i in {0,...,8} {
       \node[circle,draw,thick,blue!70!black] (A-\i) at (\j:1) {};
       \node[circle,draw,thick,red!60!black] (B-\i) at (\j:2) {};
     }
-    \foreach[evaluate=\i as \j using int(\i+1)] \i in {0,...,7} { 
+    \foreach[evaluate=\i as \j using int(\i+1)] \i in {0,...,7} {
       \draw (A-\i) -- (B-\i);
     }
     \node at (0,-2.7) {\footnotesize optimal coupling};
   \end{scope}
   \begin{scope}[shift={(8,0)}]
     \node (O) at (0,0) {};
-    \foreach[evaluate=\i as \j using int(\i*45)] \i in {0,...,8} { 
+    \foreach[evaluate=\i as \j using int(\i*45)] \i in {0,...,8} {
       \node[circle,draw,thick,blue!70!black] (A-\i) at (\j:1) {};
       \node[circle,draw,thick,red!60!black] (B-\i) at (\j:2) {};
     }
-    \foreach[evaluate=\i as \j using int(\i+1)] \i in {0,...,7} { 
+    \foreach[evaluate=\i as \j using int(\i+1)] \i in {0,...,7} {
       \draw (A-\i) -- (B-\j);
     }
     \node at (0,-2.7) {\footnotesize straight, non-optimal coupling};
@@ -10840,7 +11094,7 @@ measures the (average) miscalibration (between those two points).
 For statistical tests, use
 \begin{align*}
   \text{KS} &= \max \va{ C_k } \\
-  \text{Kuiper} &= \max C_k - \min C_k; 
+  \text{Kuiper} &= \max C_k - \min C_k;
 \end{align*}
 under $H_0$ (perfect calibration)
 \begin{align*}
@@ -10868,6 +11122,42 @@ One can also compare two sub-populations, provided we can find matching units.
 We can also match on several covariates.
 
 * TODO ML
+** Decision trees
+
+Decision (and regression) trees) are traditionally built greedily:
+find the best way (according to some creterion)
+to split the data in two,
+and continue recursively until some termination criterion (e.g., tree depth, leaf size, leaf homogeneity).
+But, as most greedy approaches, this is suboptimal:
+for instance, a decision tree cannot learn XOR in this way.
+
+Instead, it is actually possible to look for an optimal decision tree:
+optimality can be formulated as a mixed integer program.
+
+TODO: paper
+
+Other methods to build (nearly) optimal decision trees include frequen itemset mining and genetic algorithms.
+
+TODO: papers.
+
+** Rule extraction
+
+Trees are somewhat interpretable but rarely fit the data.
+Conversely, random forests provide a better fit,
+but are trickier to interpret.
+
+It is actually possible to simplify random forests and make them more interpretable than trees.
+After training your random forest, look at all the paths in its trees (from the root to a node or leaf):
+each can be seen as a rule, and some of those rules are repeated across many trees.
+Keep the mopst frequent rules (this is, again, frequent itemset mining) and combine them with the lasso.
+
+TODO: Papers
+
+TODO: There are variants of this idea
+
+If you want to stick to trees, you can distill your random forest into a tree,
+but use data augmentation, (x,f(x)+noise), to better explore the neighbourhood of the decision boundary.
+
 ** TODO Trees
 *** Decision trees (optimal)
 
@@ -10883,11 +11173,11 @@ and pruned (to account for the complexity penalty).
 The problem of finding the optimal tree of depth at most $D$ can be formulated as
 mixed integer program:
 \begin{compactitem}[--]
-\item Binary variables for each node, indicating if there is a split; 
+\item Binary variables for each node, indicating if there is a split;
 \item Binary variables to select the variable used for the split;
-\item Binary variables indicating non-empty leaves; 
+\item Binary variables indicating non-empty leaves;
 \item Binary variables indicating, for each observaation and each node,
-  whether it goes to the left or to the right; 
+  whether it goes to the left or to the right;
 \item Binary variables indicating the majority class in each leaf
 \end{compactitem}
 (and many constraints).
@@ -11023,9 +11313,9 @@ They can use different variables for the models $y \sim x_1 + \cdots + x_m$
 and the splits $z_1,\dots,z_\ell$.
 The tree is built recursively:
 \begin{compactitem}[--]
-\item Fit the model to the current node; 
+\item Fit the model to the current node;
 \item Test for parameter instability (SupLM fluctuation test)
-  to select the variable to split on; 
+  to select the variable to split on;
 \item Use exhaustive search to select the split point;
 \item Split the node, and iterate until the desired depth;
 \item Prune the tree by looking at the AIC or BIC improvement.
@@ -11050,11 +11340,11 @@ e.g.,
 \[ \psi_\theta(y) = \dfrac{ \partial \text{loss} ( y ; \theta ) }{ \partial \theta } \]
 where the loss is the log-likelihood or the residual sum of squares.
 
-Since 
+Since
 $\hat B_n^{-1/2} W_n(\cdot, \hat\theta_n ) \overset{\text{d}}{\to} W^0(\cdot)$,
 where
 \begin{compactitem}[\ensuremath{\cdot}]
-\item $n$ is the number of observations; 
+\item $n$ is the number of observations;
 \item $\hat\theta_n$ is estimated using the whole sample:\\
   \mbox{}\qquad\qquad\qquad$\displaystyle\sum_{i=1}^n \psi_{\hat\theta_n} ( Y_i ) = 0 ; $
 \item $\displaystyle W_n(t,\theta) = \dfrac{1}{\sqrt n} \sum_{ i=1 }^{ \lfloor nt \rfloor }\psi_\theta(Y_i );$
@@ -11167,8 +11457,8 @@ accounting for:
 \begin{compactitem}[--]
 \item Existnce (of an overlap between ground truth and forecast);
 \item Size of the detected anomaly;
-\item Position; 
-\item Cardinality, \ie, fragmentation of the detected range. 
+\item Position;
+\item Cardinality, \ie, fragmentation of the detected range.
 \end{compactitem}
 
 \nextbook
@@ -11211,8 +11501,8 @@ work best for Jaccard similarity (intersection over union, IoU, as for image seg
 The resampled mutual information between two clusterings $f$ and $g$ is
 \[ \text{ResMI}(f,g) = \dfrac{
     I\bigl(
-    \mathbf 1_{ f(Z_1) = f(Z_2) } ; 
-    \mathbf 1_{ g(Z_1) = g(Z_2) } 
+    \mathbf 1_{ f(Z_1) = f(Z_2) } ;
+    \mathbf 1_{ g(Z_1) = g(Z_2) }
     \bigr)
   }{
     \tfrac12 \bigl[
@@ -11283,7 +11573,7 @@ where
   \begin{array}{rcl} \mathscr X & \longrightarrow & \mathscr H \\ x & \longmapsto & k(x,\bigcdot) \end{array}
   \right. \qquad \text{RKHS} \\
   & \mathbf x = (x_1,\dots,x_n) \\
-  & \Phi(\mathbf x) = \bigl( \Phi(x_1), \dots, \Phi(x_n) \bigr) 
+  & \Phi(\mathbf x) = \bigl( \Phi(x_1), \dots, \Phi(x_n) \bigr)
 \end{align*}
 $F_\tau$ is the subset of $\mathscr H^n$ of locally constant sequences with locally constant pattern (coarser than) $\tau$;
 $\Pi_\tau$ is the orthogonal projection in $F_\tau$.
@@ -11300,7 +11590,7 @@ use the $\chi^2$ kernel
 \nextbook
 \begin{book}
   \emph{Deep symbolic regression:\\ recovering mathematical expressions from data\\ via risk-seeking policy gradients}\\
-  B.K. Petersen et al. 
+  B.K. Petersen et al.
 \end{book}
 Symbolic regression usually uses genetic programming.
 Instead, use RL to train an RNN model,
@@ -11332,7 +11622,7 @@ where $\Theta$ is a library of candidate terms, e.g.,
   \text{divergence} & \nabla \cdot u \\
   \text{vorticity} & \nabla x u \\
   \text{shearing} & u_x + v_y \\
-  \text{stretching} & u_x - v_y  
+  \text{stretching} & u_x - v_y
 \end{array} \]
 and $\xi$ is a sparse vector.
 
@@ -11396,7 +11686,7 @@ after a learned orthogonal transormation:
 \item Initialize with the following heuristic (approximation of the exact solution for Gaussian data):
   \begin{compactitem}[\ensuremath{\bigcdot}]
   \item Compute the PCA and sort the eigenvalues in decreasing order;
-  \item Start with $M$ empty buckets; 
+  \item Start with $M$ empty buckets;
   \item Sequentially pick the largest eigenvalue
     and assign it to the bucket with the minimum product of eigenvalues (unless it is already full);
   \end{compactitem}
@@ -11480,7 +11770,7 @@ ML pipelines pay attention to feature ($X$) transformation, but tend to ignore \
 \begin{compactitem}[--]
 \item Normalize, e.g., with (user-specific) average: rating, time, area, number of sunlight hours, CPI, etc.
 \item Use a context-specific standardization,
-  \[ \dfrac{ y_i - \E[ y | \text{context} ] }{ \text{Sd}[ y | \text{context} ] } 
+  \[ \dfrac{ y_i - \E[ y | \text{context} ] }{ \text{Sd}[ y | \text{context} ] }
   \text{ or }
   \dfrac{ y_i }{ \E[ y | \text{context} ] }
   \]
@@ -11534,7 +11824,7 @@ then learn the best convex combination of their outputs,
 and use this weighting to remix the data.
 This is specific to the cross-entropy or the mean square error loss:
 the Bayes optimal model for a mixture
-is the mixture of Bayes optimal models for each source. 
+is the mixture of Bayes optimal models for each source.
 
 *** Data-centric ML
 
@@ -11546,7 +11836,7 @@ is the mixture of Bayes optimal models for each source.
 Training on generated data causes model collapse:
 \begin{compactitem}[--]
 \item At each generation, since the data is finite, there is a nonzero probability that some of the data distribution will be lost;
-  the tails will disappear, and the distribution will progressively drift; 
+  the tails will disappear, and the distribution will progressively drift;
 \item Since the model is only an approximation
   (it does not perfectly reproduce the target distribution),
   the generated data will follow a slightly different distribution,
@@ -11576,7 +11866,7 @@ expand the square and integrate by parts
   \int p(\xi) \psi(\xi) \psi_\theta(xi)^\top d\xi
   &= \sum_i \int p(\xi) \dfrac{ \partial \log p(\xi) }{ \partial \xi_i } \psi_\theta(\xi) _i d\xi \\
   &= \sum_i \int p(\xi) \dfrac1{p(\xi)} \dfrac{ \partial p(\xi) }{ \partial \xi_i } \psi_\theta(\xi)_i d\xi \\
-  &= - \sum_i \int p(\xi) \dfrac{ \partial \psi_\theta(\xi)_i }{ \partial \xi_i } d\xi 
+  &= - \sum_i \int p(\xi) \dfrac{ \partial \psi_\theta(\xi)_i }{ \partial \xi_i } d\xi
 \end{align*}
 and minimize
 \[ \tilde J(\theta) = \dfrac1T \sum_t \sum_i
@@ -11607,7 +11897,7 @@ ImageNet only has dimension 40.
 \end{book}
 % Not read. Original paper on the intrinsic dimension
 
-*** Statistics, Kolmogorov-Arnold networks (stacked GAMs) 
+*** Statistics, Kolmogorov-Arnold networks (stacked GAMs)
 
 \nextbook
 \begin{book}
@@ -11628,7 +11918,7 @@ A KAN is a neural net with GAM layers: the weights are replaced by learnable non
 \nextbook
 \begin{book}
   \emph{Beyond word frequency: bursts, lulls, and scaling in the empirical distribution of words}\\
-  E. G. Altmann et al. 
+  E. G. Altmann et al.
 \end{book}
 Words have different recurrence time distributions;
 they can be modeled with a ``stretched exponential'' (aka Weibul)
@@ -11670,9 +11960,9 @@ but it can be fixed.
 \end{book}
 One can compute nonnegative or sparse CCA with nonnegative or sparse regressions:
 \begin{compactitem}[--]
-\item Standardize $X$ and $Y$; 
+\item Standardize $X$ and $Y$;
 \item Initialize the deflated matrices:
-  $X_p = X$, $Y_p = Y$; 
+  $X_p = X$, $Y_p = Y$;
 \item Initialize $w_X$, $w_Y$ randomly;
   normalize them
   \begin{align*}
@@ -11680,7 +11970,7 @@ One can compute nonnegative or sparse CCA with nonnegative or sparse regressions
     w_Y &= w_Y / \n{ Y_p w_Y };
   \end{align*}
 \item
-  Update $w_X$ by regressing $Y_p w_Y \sim X_p$; normalize it; 
+  Update $w_X$ by regressing $Y_p w_Y \sim X_p$; normalize it;
   update $w_Y$ by regressing $X_p w_X \sim Y_p$; normalize it;
   repeat until the correlation $(X_p w_X )' (Y_p w_Y)$ stabilizes;
   use restarts and keep the best solution (largest correlation);
@@ -11753,7 +12043,7 @@ $\rho( y_{t+1} | y_t )$.
 Similarly, if we freeze $x$,
 \begin{align*}
   x_{t+1} &= x_t \\
-  y_{t+1} &= g(x_t , y_t ) + \text{noise} 
+  y_{t+1} &= g(x_t , y_t ) + \text{noise}
 \end{align*}
 defines $\rho_{\not x} ( y_{t+1} | y_t )$.
 The information transfer is
@@ -11886,7 +12176,7 @@ Diffusion model conditioned on masked input for image inpainting.
 \end{book}
 Normalizing flows approximate a target distribution by learning a bijective transformation
 from some reference distribution (e.g., Gaussian).
-\[  
+\[
 \begin{tikzpicture}[>=stealth,xscale=1.2,yscale=.5,inner sep=1pt,outer sep=0pt,baseline=8]
   \node (A) at (0,1) {$q_N$\strut};
   \node (B) at (1,1) {$p_G$\strut};
@@ -12023,24 +12313,24 @@ Position encoding (PE) adds a sine (or learned) positional encoding to the first
 \[
 \begin{tikzpicture}[>=stealth,xscale=.2,yscale=-.2,inner sep=2pt,outer sep=1pt,baseline=0]
   \foreach \i in {0,...,4}
-    \fill[blue!20] (\i,\i+1) -- (\i+1,\i+1) -- (\i+1,\i+2) -- (\i,\i+2) -- cycle;    
+    \fill[blue!20] (\i,\i+1) -- (\i+1,\i+1) -- (\i+1,\i+2) -- (\i,\i+2) -- cycle;
   \foreach \i in {0,...,3}
-    \fill[blue!40] (\i,\i+2) -- (\i+1,\i+2) -- (\i+1,\i+3) -- (\i,\i+3) -- cycle;    
+    \fill[blue!40] (\i,\i+2) -- (\i+1,\i+2) -- (\i+1,\i+3) -- (\i,\i+3) -- cycle;
   \foreach \i in {0,...,2}
-    \fill[blue!60] (\i,\i+3) -- (\i+1,\i+3) -- (\i+1,\i+4) -- (\i,\i+4) -- cycle;    
+    \fill[blue!60] (\i,\i+3) -- (\i+1,\i+3) -- (\i+1,\i+4) -- (\i,\i+4) -- cycle;
   \foreach \i in {0,...,1}
-    \fill[blue!80!white!80!black] (\i,\i+4) -- (\i+1,\i+4) -- (\i+1,\i+5) -- (\i,\i+5) -- cycle;    
+    \fill[blue!80!white!80!black] (\i,\i+4) -- (\i+1,\i+4) -- (\i+1,\i+5) -- (\i,\i+5) -- cycle;
   \foreach \i in {0}
-    \fill[blue!60!black] (\i,\i+5) -- (\i+1,\i+5) -- (\i+1,\i+6) -- (\i,\i+6) -- cycle;      
+    \fill[blue!60!black] (\i,\i+5) -- (\i+1,\i+5) -- (\i+1,\i+6) -- (\i,\i+6) -- cycle;
   % Grid
   \foreach \i in {0,...,5}
     \foreach \j in {0,...,5}
-      \draw (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;  
+      \draw (\i,\j) -- (\i+1,\j) -- (\i+1,\j+1) -- (\i,\j+1) -- cycle;
 \end{tikzpicture}
 \]
 adds a penalty proportional to the distance to the pre-softmax attention.
 \[ \text{softmax} \left(
-q_i K_{ : i } ^\top - m \begin{bmatrix} i-1 \\ \vdots \\ 2 \\ 1 \\ 0 \end{bmatrix} 
+q_i K_{ : i } ^\top - m \begin{bmatrix} i-1 \\ \vdots \\ 2 \\ 1 \\ 0 \end{bmatrix}
 \right) \]
 
 \nextbook
@@ -12060,14 +12350,14 @@ Convolutions can be efficiently computed with the FFT
 \begin{align*}
   (h *** u )_t &= \sum _{n=1} ^{L-1} h_{t-n} u_n \\
   (h *** u )&=
-\left[\!\!\!  
+\left[\!\!\!
 \begin{tikzpicture}[baseline={([yshift=-.8ex]current bounding box.center)},outer sep=0pt]
 %\clip (-1.25,-1.15) rectangle (1.25,1.1);
 \matrix (m) [
   matrix of math nodes,
   nodes in empty cells,
   row sep={3ex,between origins},column sep={6ex,between origins},
-  ampersand replacement=\&% <= to change col separator for align env  
+  ampersand replacement=\&% <= to change col separator for align env
 ]{
   h_0 \& h_{-1} \& \& h_{-L+1} \\
   h_1 \& h_0    \&   \&   h_{-L+2} \\
@@ -12092,7 +12382,7 @@ and possibly multiplied by a ``shaping factor'', e.g., exponential decay)
 or comes from a state space model (SSM)
 \begin{align*}
   x_{t+1} &= A x_t + B u_t \\
-  y_t &= C x_t + D u_t 
+  y_t &= C x_t + D u_t
 \end{align*}
 \ie,
 \begin{align*}
@@ -12125,14 +12415,14 @@ The H3 state space model outputs
 \[ Q \odot \text{SSM}_{\text{diag}} ( \text{SSM}_{\text{shift}} (k) \odot V ) \]
 where the shift SSL uses
 \[ A =
-\left[\!\!\!  
+\left[\!\!\!
 \begin{tikzpicture}[baseline={([yshift=-.8ex]current bounding box.center)},outer sep=0pt]
 \clip (-1,-.9) rectangle (1,.9);
 \matrix (m) [
   matrix of math nodes,
   nodes in empty cells,
   row sep={3ex,between origins},column sep={3ex,between origins},
-  %ampersand replacement=\&% <= to change col separator for align env  
+  %ampersand replacement=\&% <= to change col separator for align env
 ]{
   0 & & & 0 \\
   1 \\
@@ -12155,7 +12445,7 @@ and the diagonal SSM uses a diagonal $A$.
 \end{book}
 GRU and LSTM can be simplified, by removing the influence of the hidden state $h_{t-1}$ on the gates.
 \[
-\def\a{\color{blue!80!black}}  
+\def\a{\color{blue!80!black}}
 \def\b{\color{red!70!black}}
 \begin{tikzpicture}[>=stealth,xscale=1,yscale=1,inner sep=1pt,outer sep=0pt,baseline=8]
   \node (A) at (0,2) {\a$h_{t-1}$};
@@ -12178,7 +12468,7 @@ GRU and LSTM can be simplified, by removing the influence of the hidden state $h
 \end{tikzpicture}
 \]
 \[
-\def\a{\color{blue!80!black}}  
+\def\a{\color{blue!80!black}}
 \def\b{\color{red!70!black}}
 \begin{tikzpicture}[>=stealth,xscale=1,yscale=1,inner sep=1pt,outer sep=0pt,baseline=8]
   \node (A) at (0,3) {\b$h_{t-1}$};
@@ -12224,7 +12514,7 @@ The recurrence $x_t = a_t x_{t-1} + b_t $
 can be computed with two cummulated sums
 (which can be computed in parallel),
 \[ \mathbf x = \left(
-\prod^{\text{cum}} a_t 
+\prod^{\text{cum}} a_t
 \right) \odot \left(
 x_0 + \sum^{\text{cum}} \dfrac{ b_t }{ \prod\limits^{\text{cum}} a_t }
 \right), \]
@@ -12239,7 +12529,7 @@ For numeric stability, prefer
   a_t^*** + \text{tail}( \text{LCSE}( \text{cat}( \log x_0 , \log b_t - a_t^*** )))
   \bigr].
 \]
-  
+
 \nextbook
 \begin{book}
   \emph{Prefix sums and their applications}\\
@@ -12269,7 +12559,7 @@ $x_i = a_i + b_i/x_{i-1}$, Fibonacci numbers, etc.
 In the LSTM, replace
 \begin{align*}
   c_t &= \sigma( f_t ) c_{t-1} + \sigma(i_t) z_t \\
-  h_t &= o_t \psi( c_t ) 
+  h_t &= o_t \psi( c_t )
 \end{align*}
 with
 \begin{align*}
@@ -12392,7 +12682,7 @@ Traditional Bayesian optimization looks for one-step optimal decisions.
 Instead, use reinforcement learning (PPO) for multi-step lookahead decisions.
 Encode the state (set of points examined so far, with their values)
 with attention and DeepSet,
-to have a constant-size state space. 
+to have a constant-size state space.
 
 \nextbook
 \begin{book}
@@ -12403,7 +12693,7 @@ to have a constant-size state space.
 High-dimensional Bayesian optimization relies on:
 \begin{compactitem}[--]
 \item Embedding (linear or not) to a low-dimensional space;
-\item Assumptions, such as additivity or axis-alignment; 
+\item Assumptions, such as additivity or axis-alignment;
 \item Local (CMAES-like) sampling;
 \item Large scale length hyperprior (multiply by $\sqrt d$).
 \end{compactitem}
@@ -12445,7 +12735,7 @@ Applications include:
 \begin{compactitem}[--]
 \item Identifying useful/useless/detrimental training samples;
 \item Identifying detrimental samples in case of domain mismatch (if $L$ is computed on the test set);
-\item Building adversarial training examples. 
+\item Building adversarial training examples.
 \end{compactitem}
 
 % For non-differentiable losses, use smooth approximations.
@@ -12478,7 +12768,7 @@ LiSSA uses Newton's method
 \begin{align*}
   x &\leftarrow x - H^{-1} g \\
   g &= \nabla f \\
-  H &= \nabla^2 f 
+  H &= \nabla^2 f
 \end{align*}
 without explicit matrix inversion
 \[ H_n = I + (I-H) H_{n-1}  \]
@@ -12554,8 +12844,8 @@ which only requires gradients.
 
 For large neural nets:
 \begin{compactitem}[--]
-\item $G$ is not invertible: dampen it by adding $\lambda I$; 
-\item $G$ is too large: make it block-diagonal, with one block per layer. 
+\item $G$ is not invertible: dampen it by adding $\lambda I$;
+\item $G$ is too large: make it block-diagonal, with one block per layer.
 \end{compactitem}
 
 To compute $G^{-1}$, either use LiSSA,
@@ -12612,14 +12902,14 @@ an encoder (image-ot-text model, ``understanding'' module) and a decoder
 %TODO: PLOT
 in three steps:
 \begin{compactitem}[--]
-\item Pre-train encoder and decoder jointly,  to optimize the CLIP image reconstruction with GRPO; 
-\item Freeze the decoder and fine-tune (with LoRA) the encoder; 
+\item Pre-train encoder and decoder jointly,  to optimize the CLIP image reconstruction with GRPO;
+\item Freeze the decoder and fine-tune (with LoRA) the encoder;
 \item Freeze the encoder and fine-tune (with LoRA) the decoder.
 \end{compactitem}
 
 %I fail to see the novelty:
 %\begin{compactitem}[--]
-%\item They combine well-known model structures (Qwen-VL, Stable Diffusion), losses (CLIP, GRPO) and training (LoRA); 
+%\item They combine well-known model structures (Qwen-VL, Stable Diffusion), losses (CLIP, GRPO) and training (LoRA);
 %\item They first train the two parts of their model together, then fine-tune them one at a time;
 %\item What they call ``aha moment'' seems to boil down to ``performance improves as we train the model'';
 %\item They design both benchmark and model -- unsurprisingly, their model is best on their benchmark.
@@ -12735,11 +13025,11 @@ can be generalized to regression
 \nextbook
 \begin{book}
   \emph{Maximum entropy bootstrap for time series: the meboot R package}\\
-  H.D. Vinod and J. L\'opez-de-Lacalle 
+  H.D. Vinod and J. L\'opez-de-Lacalle
 \end{book}
 The \emph{maximum entropy bootstrap}, for potentially non-stationary time series,
 \begin{compactitem}[--]
-\item Separates the order of the observations from their distribution; 
+\item Separates the order of the observations from their distribution;
 \item Resamples the observations, using a piecewise uniform distribution (more precisely, a piecewise maximum entropy distribution, with a pre-specified mean on each interval, to allow values slightly more extreme than observed);
 \item Keep the order (sic).
 \end{compactitem}
@@ -12778,7 +13068,7 @@ and we have $\beta_1=\beta_2 = \beta_3 = \beta_4 = 1$, which can be assessed by 
 \end{book}
 The \emph{$L^\infty$ star discrepancy} of a finite set $ P \subset [0,1]^d$ is
 \[ d_\infty^*(P) = \sup_{ q \in [0,1] } \va{
-  \dfrac{ \va{ P \inter [0,q] } }{ \va P } - \lambda\bigl( [0,q] \bigr) 
+  \dfrac{ \va{ P \inter [0,q] } }{ \va P } - \lambda\bigl( [0,q] \bigr)
 } \]
 where $\lambda$ is the Lebesgue measure.
 It suffices to consider $q \in \bar\Gamma(P)$.
@@ -12995,7 +13285,7 @@ TODO: PLOTS (treatment, asymptomatic, quanrantine, hospitalization)
 Non-exponential distribution:
 \begin{align*}
   \dot S &= - \beta SI \\
-  I &= I_0 + \int_0^t - \dot S(t-s) P(s) ds 
+  I &= I_0 + \int_0^t - \dot S(t-s) P(s) ds
 \end{align*}
 Infectivity could depend on the age of the infection.
 Parameter estimation.
@@ -13017,7 +13307,7 @@ $R_{ij}$ is the average number of suceptible of group $i$ invected by an infecti
   \dot x &= F(x,y) - V(x,y) &\text{disease}\\
   \dot y &= g(x,y) &\text{non-disease} \\
   F &\text{: secondary infection} \\
-  V &\text{: net outflow} 
+  V &\text{: net outflow}
 \end{align*}
 Linearize around a disease-free equilibrium: $\dot x = (F-V) x$,
 $k = F V^{-1}$ (next generation matrix),
@@ -13036,7 +13326,7 @@ TODO: PLOT
 \textbf{7.} Tuberculosis
 \begin{compactitem}[--]
 \item Long period of latency;
-\item Only becomes active in 10\% of cases; 
+\item Only becomes active in 10\% of cases;
 \item Two strains: MDR-TB (multi-drug-resistant)
 \item Reinfection is possible, because of non-compliance or infection from someone with MDR-TB.
 \end{compactitem}
@@ -13093,7 +13383,7 @@ TODO: PLOT
 \begin{compactitem}[--]
 \item Several strains: secondary infection possible;
 \item Progressive switch between the two main strains;
-\item Vertical transmission in the vector; 
+\item Vertical transmission in the vector;
 \item Mild, unreported cases.
 \end{compactitem}
 
@@ -13244,7 +13534,7 @@ of $K$ is the function
   \SS^{n-1} \times \RR & \longrightarrow & \ZZ \\
   (\xi,h) & \longmapsto & \chi \bigl( \tilde f^{-1}_\xi \bigl( (-\infty,r] \bigr)\bigr)
 \end{array}
-\right.    
+\right.
 \]
 where $f_\xi = \langle \bigcdot , \xi \rangle$.
 
@@ -13252,7 +13542,7 @@ It can be written as a sum of step functions
 \[ \text{ECT}(\xi, h ) = \sum_k (-1)^k \sum_{ \sigma_k } \mathbf 1_{
   \bigl[ \tilde f_\xi ( \sigma_k ) , \infty \bigr)
   } (h) . \]
-To make it differentiable, replace the step functions with sigmoids.  
+To make it differentiable, replace the step functions with sigmoids.
 
 * No, Bootstrap
 *** Block bootstrap
@@ -13278,7 +13568,7 @@ There are many types of bootstraps:
 \item Wild: idem, after multiplying the residuals by $N(0,1)$
   (for heteroskedastic data);
 \item Blocks: blocks of constant sizes;
-\item Stationary: blocks of random length, from a geometric (exponential) distribution; 
+\item Stationary: blocks of random length, from a geometric (exponential) distribution;
 \item Parametric: $X \sim F_{ \hat\theta}$;
 \item Smooth: $X \sim \text{kde}$;
 \item etc.
@@ -13289,7 +13579,7 @@ use a variant of the wild bootstrap:
   \hat y_{it} &= \hat g( x_{i, t-1} ) && \text{forecast} \\
   \epsilon_{it} &= y_{it} - \hat y_{it} && \text{residual} \\
   \eta_t &\sim N(0,1) && \eta_t \text{, not } \eta_{it} \text{ or } \eta_i \\
-  y_{it}^*** = \hat y_{it} + \eta_t \epsilon_{it} 
+  y_{it}^*** = \hat y_{it} + \eta_t \epsilon_{it}
 \end{align*}
 and fine-tune the model (starting from the trained one) for $k$ epochs.
 
@@ -13345,7 +13635,7 @@ of most relevant observations, use
   \hat y &= \bar y + \dfrac{ \lambda^2 }{ \va I - 1 }
   \sum_{i \in I } r_{it} ( y_i - \bar y ) \\
   \lambda^2 &= \left.
-  \dfrac1{N+1} \sum_{i-1}^N r_{it}^2 
+  \dfrac1{N+1} \sum_{i-1}^N r_{it}^2
   \middle/
   \dfrac1{\va I + 1 } \sum_{ i \in I} r_{it}^2.
   \right.
@@ -13354,13 +13644,13 @@ of most relevant observations, use
 \nextbook
 \begin{book}
   \emph{Relevance-based prediction: a transparent and adaptive alternative to machine learning}\\
-  M. Czasonis et al. 
+  M. Czasonis et al.
 \end{book}
 Relevance-based prediction
 \begin{align*}
   \hat y &= x'_{\text{new}} \hat\beta \\
   &= \bar y + \dfrac1{N-1} \sum r_i ( y_i - \bar y ) \\
-  &= \sum w_i y_i 
+  &= \sum w_i y_i
 \end{align*}
 expresses OLS forecasts as
 (data-dependent) linear combinations of observations
@@ -13369,12 +13659,12 @@ expresses OLS forecasts as
     \text{info}( x_{\text{new}} ) + \text{info}( x_i )
     \bigr] \\
   \text{sim}( x_1,x_2 ) &= - \tfrac12 ( x_1 - x_2 ) ' V^{-1} ( x_1 - x_2 ) \\
-  \text{info}(x) &= ( x - \bar x ) ' V^{-1} ( x - \bar x ).  
+  \text{info}(x) &= ( x - \bar x ) ' V^{-1} ( x - \bar x ).
 \end{align*}
 We can also recover $R^2$ as
 \begin{align*}
   R^2 &= \dfrac1{N-1} \sum \text{info}(x_i) \text{fit}_i \\
-  \text{fit}_i &= \cor( w, y )^2 
+  \text{fit}_i &= \cor( w, y )^2
 \end{align*}
 
 \nextbook
@@ -13475,14 +13765,14 @@ the regret is polynomial -- there exist bandits for which this cannot be improve
   \emph{A practical method for solving contextual bandit problems using decision trees}\\
   A.N. Elmachtoub et al.
 \end{book}
-For each possible action, fit a decision tree on a bootstrap sample, 
+For each possible action, fit a decision tree on a bootstrap sample,
 and use it as a Thompson sample:
 predict the reward, and pick the action with the highest reward.
 
 \nextbook
 \begin{book}
   \emph{The epoch-greedy algorithm\\ for contextual multi-armed bandits}\\
-  J. Langford and T. Zhang 
+  J. Langford and T. Zhang
 \end{book}
 Iterate:
 \begin{compactitem}[--]
@@ -13502,9 +13792,9 @@ Iterate:
   p_i(t) &\propto \exp \eta \sum_{ \tau < t } \hat r_{i \tau } \\
   \hat r_{it} &= \begin{cases}
     \dfrac{ r_{it} }{ \hat p_{it} } & \text{if arm $i$ was chosen at time $t$} \\
-    0 & \text{otherwise} 
+    0 & \text{otherwise}
   \end{cases} \\
-  \hat p_{it} &= (1- \epsilon) p_{it} + \dfrac{ \epsilon }{ k } 
+  \hat p_{it} &= (1- \epsilon) p_{it} + \dfrac{ \epsilon }{ k }
 \end{align*}
 
 \emph{Exp4} uses the same idea to choose between experts (each providing a probability distribution on arms).
@@ -13512,7 +13802,7 @@ Iterate:
 \nextbook
 \begin{book}
   \emph{Approximate planning in large POMDPs\\ via reusable trajectories}\\
-  M. Kearns et al. 
+  M. Kearns et al.
 \end{book}
 Given a POMDP you can sample from,
 with a finite action space, build \emph{trajectory trees}:
@@ -13566,7 +13856,7 @@ Besides DM, IPW, DR, \emph{off-policy evaluation} (OPE) of contextual MAB polici
   }{
     \operatorname*{Mean}_t w(a_t,s_r)
   }, \qquad
-  w(a,s) = \dfrac{ \pi(a,s) }{ \hat\pi_0(a,s) } \] 
+  w(a,s) = \dfrac{ \pi(a,s) }{ \hat\pi_0(a,s) } \]
 \item Switch estimator: DR when $w \leq \tau$, DM when the importance weights are too large;
 \item DR with optimistic shrinkage
   \begin{align*}
@@ -13606,7 +13896,7 @@ This can be generalized to hybrid models
 \begin{compactitem}[--]
 \item Compute the posterior distribution of $\theta_i$, for each $i$:
   $N(\hat\theta_i, \alpha^2 A^{-1} )$;
-\item Sample from them; 
+\item Sample from them;
 \item Choose the arm $i$ maximizing $x_i ' \theta_i$.
 \end{compactitem}
 \emph{LinTS} is similar to LinUCB:
@@ -13665,7 +13955,7 @@ The \emph{fastfood transform}
 \[ V = \dfrac1{ \sigma \sqrt d } D H_d G \Pi H_d B \]
 where
 \begin{compactitem}[--]
-\item $\Pi \in \{0,1\}^{d \times d}$ is a permutation matrix; 
+\item $\Pi \in \{0,1\}^{d \times d}$ is a permutation matrix;
 \item $H_2 = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}$,
   $H_{2\ell} = \begin{bmatrix} H_\ell & H_\ell \\ H_\ell & - H_\ell \end{bmatrix}$;
 \item $B$ is diagonal with $\pm1$ entries;
@@ -13726,20 +14016,20 @@ is is a tree metric space.
   \draw[name path=L3] (1,0) -- (1,6);
   \draw[name path=L4] (3,0) -- (2,6);
   \draw[name path=L5] (6,0) -- (3,6);
-  \path [name intersections={of=L1 and L3,by=P13}];  
-  \path [name intersections={of=L1 and L4,by=P14}];  
-  \path [name intersections={of=L1 and L5,by=P15}];  
-  \path [name intersections={of=L1 and L2,by=P12}];  
-  \path [name intersections={of=L2 and L3,by=P23}];  
-  \path [name intersections={of=L2 and L4,by=P24}];  
+  \path [name intersections={of=L1 and L3,by=P13}];
+  \path [name intersections={of=L1 and L4,by=P14}];
+  \path [name intersections={of=L1 and L5,by=P15}];
+  \path [name intersections={of=L1 and L2,by=P12}];
+  \path [name intersections={of=L2 and L3,by=P23}];
+  \path [name intersections={of=L2 and L4,by=P24}];
   \path [name intersections={of=L2 and L5,by=P25}];
   \node[circle,fill] at (P13) {};
   \node[circle,fill] at (P14) {};
   \node[circle,fill] at (P15) {};
   \node[circle,fill] at (P24) {};
   \node[circle,fill=white] at (P23) {};
-  \node[circle,fill=white] at (P25) {};  
-  \node[circle,fill=white] at (P12) {};  
+  \node[circle,fill=white] at (P25) {};
+  \node[circle,fill=white] at (P12) {};
   \draw[name path=L1] (0,4) -- (7,4);
   %\draw[name path=L2] (0,1) -- (7,5);
   \draw[name path=L3] (1,0) -- (1,6);
@@ -13804,7 +14094,7 @@ An ultrametric distance is the distance between the leaves of a tree when all le
     \node[circle,fill] at (3.5,.5) {};
     \node[circle,fill] at (5,0) {};
     \node at (2.5,-1) {\footnotesize not ultrametric};
-  \end{scope}  
+  \end{scope}
 \end{tikzpicture}
 \]
 \begin{align*}
@@ -13819,7 +14109,7 @@ For the $\ell^\infty$ norm, the optimal ultrametric can be computed from the min
   T^*** &= \text{MST}(D^*).
 \end{align*}
 For the Frobenius norm, the ultrametric nearness problem is NP-hard,
-but can be solved with iterated projections or gradient descent (alternate between inner node height updates and tree structure updates).  
+but can be solved with iterated projections or gradient descent (alternate between inner node height updates and tree structure updates).
 
 \nextbook
 \begin{book}
@@ -13913,4 +14203,3 @@ with deep reinforcement learning,
 for low-noise data
 (0.1\% to 10\%):
 dimensional analysis drastically reduces the search space.
-
