@@ -82,6 +82,9 @@ we can do have a better FDR control
 by estimating P(H₀) (q-values)
 or the distribution of the p-values under H₀ and H₁ (local FDR).
 
+  \emph{Statistical significance for genomewide studies}\\
+  J.D. Storey and R. Tibshirani
+
 ** Sequential testing
 
 So far, we assumed we had access to all the data but,
@@ -115,20 +118,12 @@ and uses critical values cₜ such that
 
   P[ Zₜ<cₜ, Z₁<c₁,...,Zₜ₋₁<cₜ₋₁ ] = α(t/T) - α((t-1)/T).
 
+
+  \emph{Sequential analysis testing}\\
+  J.S. Koopmeiners (2012)
+
 ** TODO E-values
-
-TODO
-
-** TODO Statistical tests
-
-TODO: Statistical tests, type I error, type II error, power, Neyman-Pearson (likelihood ratio test), p-values
-** TODO Multiple testing
-
-TODO: FWER, FDR, Bonferroni/Šidák, BH/BHY
-TODO: Resampling (White, Romano-WOlf)
-TODO: q-values, local FDR
-
-*** White, Romano-Wolf
+** TODO White, Romano-Wolf
 
 
 \nextbook
@@ -184,7 +179,7 @@ applies White's reality check iteratively:
 These approaches to FWER control are more powerful than Bonferroni,
 because they account for the dependence between the tests.
 
-*** Multiple-testing: q-values
+** DONE TO DELETE Multiple-testing: q-values
 
 \nextbook
 \begin{book}
@@ -214,7 +209,7 @@ The $q$-value is not the probability of a false positive --
 it is the expected proportion of false positives if we use that value as a threshold --
 the probability can be much higher if there are smaller $q$-values.
 
-** TODO Sequential Testing
+** DONE TO DELETE Sequential Testing
 *** Multiple testing: sequential testing
 
 \nextbook
@@ -1523,7 +1518,7 @@ For instance, given a prior $H$ on $\theta$, the
 \end{align*}
 
 * TODO Tabular data
-** TODO Introduction
+** DONE TO DELETE Introduction
 *** Introduction
 
 \nextbook
@@ -1546,21 +1541,34 @@ for tabular data,
 in part because of their rotation invariance --
 trees are axis-aligned, which often helps them identify structure in tabular data.
 
+  \emph{Why do tree-based models still outperform deep learning on tabular data?}\\
+  L. Grinsztajn et al.
+
 This may be changing thanks to better pre-processing
 
-TODO: papers
+  \emph{On embeddings for numerical features\\ in tabular deep learning}\\
+  Y. Gorishniy et al. (2022)
 
 transformers
 
-TODO: papers
+  \emph{Revisiting deep learning models\\ for tabular data}\\
+  Y. Gorishniy et al.
 
 better tuning
 
-TODO: papers
+  \emph{Well-tuned simple nets\\ excel on tabular datasets}\\
+  A. Kadra et al.
 
 and more agressive ensembling
 
-TODO: papers
+  \emph{TabM: advancing tabular deep learning\\ with parameter-efficient ensembling}\\
+  Y. Grishniy et al.
+
+  \emph{BatchEnsemble: an alternative approach\\ to efficient ensemble and lifelong learning}\\
+  Y. Wen et al.
+
+  \emph{Packed-Ensembles\\ for efficient uncertainty estimation}\\
+  O. Laurent et al. (2023)
 
 ** Kernel methods
 
@@ -1577,16 +1585,29 @@ One can stack such models,
 or use them to recursively partition the data
 (note that training such models does not require backpropagation).
 
-TODO: papers
+  \emph{Mechanism of feature learning in convolution}\\
+  D. Beaglehole et al.
+
+  \emph{Average gradient outer product\\ as a mechanism for deep neural collapse}\\
+  D. Beaglehole et al.
+
+  \emph{xRFM: accurate, scalable and interpretable feature learning models for tabular data}\\
+  D. Beaglehole et al.
 
 Kernel methods do not scale to large datasets, but one can use the Nyström approximation.
 
-    TODO: Formula
+    A ≈ A[:,I] A[I,I]⁺ A[I,:]
 
-TODO: papers
+where I is a random subset of columns (rows).
 
-** TODO Ensembling, fine-tuning
-*** Tabular data: efficient ensembles of neural nets
+  \emph{Towards large kernel models}\\
+  A. Abedsoltan et al.
+
+  \emph{Randomly pivoted Cholesky:\\ practical approximation of a kernel matrix\\ with few entry evaluations}\\
+  Y. Chen et al.
+
+** DONE TO DELETE Ensembling, fine-tuning
+*** DONE TO DELETE Tabular data: efficient ensembles of neural nets
 
 \nextbook
 \begin{book}
@@ -1667,7 +1688,7 @@ Search for the optimal combination of regularization techniques
 \item Adversarial learning.
 \end{compactitem}
 
-** TODO Embeddings, Transformers
+** DONE TO DELETE Embeddings, Transformers
 *** Embeddings of numerical features
 \nextbook
 \begin{book}
@@ -1810,6 +1831,7 @@ and use the \textsc{cls} token for the forecast.
 \]
 Fine-tune the hyperparameters (optuna).
 
+** TODO TabPFN, k-NN
 *** TabPFN, transformer
 
 \nextbook
@@ -1948,7 +1970,7 @@ where
 and training uses random subsets of neighbours
 instead of the whole dataset.
 
-** TODO RFM, kernels
+** DONE TO DELETE RFM, kernels
 *** Tabular data, RFM
 
 % RFM (Recursive feature machines); AGOP (Average Gradient Outer Product)
@@ -2107,12 +2129,12 @@ a kind of nonlinear, supervised PCA).
 
 Those concepts can be usd to steer and/or monitor LLMs and VLMs.
 
-** TODO Kernel methods and large data
+** DONE TO DELETE Kernel methods and large data
 *** Tabular data, Kernel machines on large data
 
 \nextbook
 \begin{book}
-  \emph{}Towards large kernel models\\
+  \emph{Towards large kernel models}\\
   A. Abedsoltan et al.
 \end{book}
 A \emph{kernel machine} is a model of the form
@@ -6559,16 +6581,25 @@ Compute the error on the data;
 Give the error to the LLM and ask it to improve the functions it gave;
 Iterate until the solutions are satisfactory.
 
-TODO: papers
+  \emph{Data-driven discovery of dynamical systems\\ in pharmacology using large language models}\\
+  S. Holt et al.
+
+  \emph{Language model cross-over:\\ variation through few-shot prompting}\\
+  E. Leyerson et al.
 
 The same idea can be usd to optimize the prompts for an LLM, if you have an objective way of assessing the quality of the answer.
 
-TODO: papers (dspy)
+  \emph{Optimizing instructions and demonstrations form multi-stage language model programs}\\
+  K. Opsahl-Ong et al.
+
+  \emph{DSPy: compiling declarative language model calls into self-improving pipelines}\\
+  O. Khattab et al.
 
 To solve combinatorial problems or find numeric bounds for some mathematical problems,
 you can ask, not for a siolution, but for a Python program to search for a solution.
 
 TODO: papers (AlphaEvolve, etc.)
+
 
 ** TODO Scientific Research
 *** LLM, AlphaEvolve
@@ -6676,7 +6707,7 @@ Instead, ask the LLM to generate the reasoning and the answer in a formal langua
 math, relational inference, robot planning) and verify~it.
 
 ** TODO Optimization
-*** LLMs as optimizers, CMA-ES
+*** DONE LLMs as optimizers, CMA-ES
 
 \nextbook
 \begin{book}
@@ -6691,7 +6722,7 @@ Iterate:
   \ell &= \min_\theta \text{loss} \bigl[ f(\text{Data}; \theta ) \bigr].
 \end{align*}
 
-*** LLM as optimizer
+*** DONE No, LLM as optimizer
 
 \nextbook
 \begin{book}
@@ -6708,7 +6739,7 @@ To solve combinaorial problems (e.g., TSP) with an LLM:
 \item ``Integrate all previous findings and provide the final answer''.
 \end{compactitem}
 
-*** LLM, Prompt optimization, DSPy (prompt optimization = alternative to SFT)
+*** DONE LLM, Prompt optimization, DSPy (prompt optimization = alternative to SFT)
 
 \nextbook
 \begin{book}
@@ -6764,7 +6795,7 @@ the LLM provides the corresponding code
 (changing parameters, adding or removing penalties or constraints)
 runs it, and interprets the result (explaining how large the effect is).
 
-*** LLM, Optimization, Trees
+*** DONE LLM, Optimization, Trees
 
 \nextbook
 \begin{book}
@@ -11138,7 +11169,8 @@ TODO: paper
 
 Other methods to build (nearly) optimal decision trees include frequen itemset mining and genetic algorithms.
 
-TODO: papers.
+  \emph{Decision tree induction through LLMs\\ via semantically-aware evolution}\\
+  T. Liu et al.
 
 ** Rule extraction
 
