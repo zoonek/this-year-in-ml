@@ -1614,162 +1614,6 @@ and then work with standardized data.
   \emph{Adaptive normalization\\ for non-stationary time series forecasting:\\ a temporal slice perspective}\\
   Z. Liu et al.
 
-** DONE TO DELETE Non-stationarity
-*** Non-stationarity
-
-\nextbook
-\begin{book}
-  \emph{TimeBridge: non-stationarity matters\\ for long-term time series forecasting}\\
-  P. Liu et al. (2025)
-\end{book}
-When forecasting time series, we often have to choose between
-\begin{compactitem}[--]
-\item Eliminating non-stationarity (e.g., to preserve correlations);
-\item Preserving non-stationarity (to reveal long-term dependencies, e.g., cointegration).
-\end{compactitem}
-Split the data into patches,
-and process both the normalized (stationary) and raw (non-stationary) embeddings
-with attention.
-\begin{align*}
-  & X_{it} && \text{patches} \\
-  & P_{it} = \text{MLP}_i( X_{it} ) && \text{patch embeddings} \\
-  & P_{it}^{\text{stationary}} = P_{it} - \text{MA}( P_{i\bigcdot})_u && \text{normalized patches} \\
-  & P_{it}^{\text{down}} = \text{Downsample}( P_{i\bigcdot} )_t \\
-  & \text{Att}( P_{i\bigcdot}^{\text{stat}}, P_{i\bigcdot}^{\text{stat}}, P_{i\bigcdot} ) && \text{integrated attention} \\
-  & \text{Att}( P_{i\bigcdot}^{\text{down}}, P_{i\bigcdot}, P_{i\bigcdot} ) && \text{integrated attention} \\
-  & \text{Att}( P_{i\bigcdot}, P_{i\bigcdot}, P_{i\bigcdot} ) && \text{cointegrated attention}
-\end{align*}
-Each attention is followed by two LayerNorms:
-\begin{align*}
-  x &\leftarrow \text{LayerNorm}( P + x ) \\
-  x &\leftarrow \text{LayerNorm}\bigl( x + \text{MLP}(x) \bigr).
-\end{align*}
-
-\nextbook
-\begin{book}
-  \emph{Non-stationary diffusion\\ for probabilistic time series forecasting}\\
-  W. Ye et al.
-\end{book}
-% Not read
-To account for non-stationaryty in \emph{probabilistic} time series forecasting,
-do not use the additive noise model (ANM)
-\[ Y = f_\phi(X) + \epsilon \qquad \epsilon \sim N(0,I), \]
-but the location scale noise model (LSNM)
-\[ Y = f_\phi(X) + \sqrt{ g_\psi(X) } \epsilon \qquad \epsilon \sim N(0,I) \]
-(previous diffusion-based models assumed homoskedasticity).
-
-** DONE TO DELETE Data augmentation, synthetic data
-*** Synthetic data
-
-% FTS-Diffusion
-
-\nextbook
-\begin{book}
-  \emph{Generative learning for financial time series with irregular and scale-invariant patterns}\\
-  H. Huang et al. (ICLR 2024)
-\end{book}
-
-Scale-invariant subsequence clustering (SISC) is similar to $k$-means on length-$\ell$ subsequences, but it lets $\ell$ vary.
-\[ \begin{array}{lll}
-  \text{Find} & p_k \in \RR^L & \hspace*{-5mm} \text{length-$\ell$ patterns} \\
-              && \hspace*{-5mm}\text{(cluster centers)} \\
-              & k_t & \hspace*{-5mm} \text{cluster of } x_{ [t, t + \ell_k] } \\
-              & \ell_k \in [ \ell_{\text{min}}, \ell_{\text{max}} ] & \hspace*{-5mm} \text{subsequence length} \\
-  \text{To minimize} & d_{ \text{DTW} }\bigl( x_{ [t , t + \ell_k ] } , p_k \bigr)
-\end{array} \]
-Initialize the algorithm with $k$-means++ on maximum-lengh subsequences.
-
-Train a VAE to learn a fixed-length representation of those variable-length sequences,
-and train a diffusion model to generate more such subsequences.
-\[
-\begin{tikzpicture}[>=stealth,xscale=2,yscale=.5,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
-\node (A) at (0,0) {subsequences\strut};
-\node[right=15mm of A] (B) {latent\strut};
-\node[right=15mm of B] (C) {noise\strut};
-\draw[->] ([yshift=+3pt]A.east) to node[anchor=south] {\footnotesize enc} ([yshift=+3pt]B.west);
-\draw[->] ([yshift=-3pt]B.west) to node[anchor=north] (b) {\footnotesize dec} ([yshift=-3pt]A.east);
-\draw[->] ([yshift=+3pt]B.east) to node[anchor=south] {\footnotesize +noise} ([yshift=+3pt]C.west);
-\draw[->] ([yshift=-3pt]C.west) to node[anchor=north] (c) {\footnotesize denoise} ([yshift=-3pt]B.east);
-\node[below=1mm of b] {VAE};
-\node[below=1mm of c] {diffusion};
-\end{tikzpicture}
-\]
-
-Learn a transition function between patterns
-\[ \phi: ( p, \alpha, \beta)_t \longmapsto (p, \alpha, \beta)_{t+1}, \]
-where $p$ is a latent representation,
-$\alpha$ its duration, $\beta$ its scale.
-
-\emph{FTS Diffusion} combines those elements to generate financial time series.
-
-\nextbook
-\begin{book}
-  \emph{Breaking the data scarcity barrier: significant return prediction improvement across models
-  through scale-invariant data augmentation}\\
-  H. Juang et al.
-\end{book}
-Use FTS-Diffusion for data augmentation,
-when forecasting future S\&P\,500 daily returns
-from the past 60 days, with deep learning models
-(iTransformer, pretrained on a domain-adjacent dataset, 8 FX time series).
-
-** DONE TO DELETE Probabilistic forecasts
-*** DONE TO DELETE Probabilistic forecasts, scoring rules,
-
-\nextbook
-\begin{book}
-  \emph{Regions of reliability in the evaluation\\ of multivariate probabilistic forecasts}\\
-  \'E. Marcotte et al. (2023)
-\end{book}
-A \emph{scoring rule} is a function $S$ measuring how unlikely an event $y \sim \text{Data}$ is,
-wrt a forecasted distribution $F$; it is \emph{proper} if
-\[ \E_{ y \sim \text{Data} } S(y,F) \]
-is minimal for $F = \text{Data}$.
-
-In practice, however, we do not have a ground truth distribution, but only a finite sample from it:
-for some combinations of
-\begin{align*}
-  d &: \text{ dimension} \\
-  n &: \text{ground truth sample size} \\
-  m &: \text{ forecast sample size}
-\end{align*}
-the statistical power of most scoring rules to detect
-\begin{compactitem}[--]
-\item Differences in mean;
-\item Positive correlations;
-\item Skewness;
-\item Difference in marginal variance;
-\item etc.
-\end{compactitem}
-is low -- you need to increase $n$ and $m$.
-
-*** No, Probabilistic forecasting
-
-\nextbook
-\begin{book}
-  \emph{Generative probabilistic forecasting\\ with applications in market operations}\\
-  X. Wang and L. Tong.
-\end{book}
-A \emph{weak autoencoder} only recovers its input in distribution.
-\[
-\begin{tikzpicture}[>=stealth,xscale=1,yscale=.15,inner sep=2pt,outer sep=1pt,baseline=0]
-  \begin{scope}
-    \node[anchor=west,draw] (D) at (0,0) {discriminator\mathstrut};
-    \node[anchor=east] (x) at (-1,1) {$x$};
-    \node[anchor=east] (z) at (-1,-1) {$\hat x$};
-    \draw[->] (x) -- (x-|D.west);
-    \draw[->] (z) -- (z-|D.west);
-  \end{scope}
-  \begin{scope}[shift={(0,-5)}]
-    \node[anchor=west,draw] (D) at (0,0) {discriminator\mathstrut};
-    \node[anchor=east] (x) at (-1,1) {$z$};
-    \node[anchor=east] (z) at (-1,-1) {$\text{Unif}(0,1)^d$};
-    \draw[->] (x) -- (x-|D.west);
-    \draw[->] (z) -- (z-|D.west);
-  \end{scope}
-\end{tikzpicture}
-\]
-
 ** TODO TO SORT
 *** Koopman, ODE
 
@@ -1812,62 +1656,6 @@ The following tutorial gives more details.
 
   \emph{Mechanistic interpretability\\ for language models}\\
   (ICML 2025)
-
-** DONE TO DELETE Introduction
-*** Mechanistic interpretability, ICML tutorial
-
-\nextbook
-\begin{book}
-  \emph{Mechanistic interpretability\\ for language models}\\
-  (ICML 2025)
-\end{book}
-\emph{Mechanistic interpretability} (MI) studies
-\begin{compactitem}[--]
-\item The \emph{features} encoded in the model (in layers, components (e.g., attention heads), or neurons);
-\item \emph{Circuits}, \ie, computational subgraphs whose nodes are features;
-\item \emph{Universality}: whether those features or circuits generalize to other architectures or tasks.
-\end{compactitem}
-Feature study can be targeted (``is feature X present? where?''):
-\begin{compactitem}[--]
-\item Probing: use a simple model (linear) to distinguish presence/absence of a feature at a given layer
-  (but the probe should not be too powerful, and it can only detect the presence of a feature, not whether it is used);
-\item Vocabulary projection: decode an activation (from the residual stream) into a token
-  (you may need another matrix than the embedding matrix: it was trained from the final layer only)
-\item Transplant the activation in another context, e.g., to complete the sentence ``tell me more about''
-\end{compactitem}
-or open-ended
-\begin{compactitem}[--]
-\item Neuron activation visualization: highlight tokens which activate a neuron and try to find what they have in common --
-  but most neurons are polysemantic (\emph{superposition} phenomenon);
-\item Sparse autoencoders (SAE) try to disentangle superposed features.
-\end{compactitem}
-
-To study circuits,
-\begin{compactitem}[--]
-\item Choose a behaviour, e.g., subject-verb agreement;
-\item Define the computational graph (the nodes could be layers, bits of layers (attention heads) or neurons);
-\item Find the subgraph explaining that behaviour.
-\end{compactitem}
-Try:
-\begin{compactitem}[--]
-\item Intervention:
-  \begin{compactitem}[\ensuremath{\bigcdot}]
-  \item Noising: remove the component of interest (use resampling rather than zero or random values -- that would be out-of-distribution);
-  \item Denoising: keep the component of interest but remove the rest,
-    by adding noise, or changing the input (counterfactual input);
-  \end{compactitem}
-\item Attention visualization.
-\end{compactitem}
-
-Results are mixed:
-\begin{compactitem}[--]
-\item Only 1\% to 5\% of neurons are universal;
-\item Most neurons are polysemantic;
-\item SAE probes are worse than logistic regression;
-\item SAEs are worse than prompting to steer neural nets;
-\item MI study is not scalable, lacks benchmarks and ground truth;
-\item It is unclear how to generalize MI beyond text.
-\end{compactitem}
 
 ** SAE, Transcoder
 
@@ -1914,318 +1702,6 @@ transcoders try to reconstruct the output (of the whole network, or just a subgr
   \emph{Transcoders find\\ interpretable LLM feature circuits}\\
   J. Dunefsky et al.
 
-** DONE TO DELETE SAE, Transcoder
-*** Better SAEs
-\nextbook
-\begin{book}
-  \emph{Scaling and evaluating sparse autoencoders}\\
-  L. Gao et al.
-\end{book}
-To train SAEs:
-\begin{compactitem}[--]
-\item Use a TopK activation function (this eliminates the need for a sparsifying $L^2$ penalty)
-  or MultiTopK (combine losses for several values of $k$, e.g., $\ell_k + \tfrac18 \ell_{4k}$);
-\item Initialize the decoder to the transpose of the encoder;
-\item Add an \emph{auxilliary loss}, for the reconstruction error from the top $k_{\text{aux}}$ dead latents --
-  this reduces the number of dead latents, which can otherwise reach 90\% of the activations.
-\end{compactitem}
-
-*** Better SAEs
-
-\nextbook
-\begin{book}
-  \emph{Scaling and evaluating sparse auto-encoders}\\
-  L. Gao et al.
-\end{book}
-The SAE with top-$k$ activations ($k=32$)
-does not require an $\ell^0$ or $\ell^1$ penalty,
-but may suffer from a large number of dead neurons:
-add an auxiliary loss, the reconstruction error from the top $k_{\text{aux}}$ (512).
-You can use several values of $k$,
-e.g., $\ell(k) + \ell(4k)/8$, and change $k$ at test time.
-
-% TODO: WHAT IS $\ell$?
-
-\begin{align*}
-  y &= \sigma \bigl( W_1 (x-b_2) + b_1 \bigr) \\
-  \hat x &= W_2 y + b_2
-\end{align*}
-
-\nextbook
-\begin{book}
-  \emph{Improving dictionary learning\\ with gated sparse autoencoders}\\
-  S. Rajamanoharan et al.
-\end{book}
-The $L^1$ penalty in SAE
-\begin{align*}
-  x &= x - b_2 \\
-  y &= \text{ReLU}( W_1 x + b_1 ) \\
-  \hat x &= W_2 y + b_2
-\end{align*}
-causes shrinkage.
-Instead, \emph{gated SAE}s use
-\begin{align*}
-  x &= x - b_2 \\
-  g &= W_0 x + b_0 \\
-  y &= \mathbf 1 _{g\geq0} \odot \text{ReLU}( W_1 x + b_1 ) \\
-  \hat x &= W_2 y + b_2 \\
-  (W_1)_{ij} &= e^{ r_i } \cdot ( W_0 )_{ij}.
-\end{align*}
-
-*** SAE: Matryoshka
-
-\nextbook
-\begin{book}
-  \emph{Learning multi-level features\\ with Matryoshka sparse autoencoders}\\
-  B. Bussmann et al.
-\end{book}
-Sparse autoencoders (SAE) with a large dictionary size struggle to capture the hierarchical structure of real-world concepts
-and suffer from:
-\begin{compactitem}[--]
-\item \emph{Feature splitting}: high-level features disappear and are replaced by lower-level ones, e.g.,
-  ``punctuation mark'' is split into ``period'', ``comma'', ``question mark'', etc.;
-\item \emph{Feature absorption}: high-level features only partially split, leading to high-level features with holes, e.g.,
-  ``tokens stating with E except `Elephant'{}'';
-\item \emph{Feature composition}: high-level concepts can merge, e.g., ``red'' and ``triangle'' can lead to ``red triangle''.
-\end{compactitem}
-Train a single SAE with a Matryoshka loss
-\[ \ell = \sum _{ m \in \mathcal M} \n{ \mathbf x - f_n( \mathbf x ) }_2^2 + \alpha \ell_{\text{aux}} \]
-where $\mathcal M$ is a set of dictionary sizes (either fixed or sampled randomly for each batch --
-fixed seems to work better)
-and $f_m(\mathbf x)$ is the reconstruction using only the first $m$ features.
-
-Use JumpReLU (zero out activations below some threshold),
-Top-$k$ (zero out all bit the top $k$ activations, for each sample),
-or BatchTopK (zero our all but the top $B\times k$ activations in a batch of size $B$).
-
-\nextbook
-\begin{book}
-  \emph{Matryoshka representation learning}\\
-  A. Kusupati et al.
-\end{book}
-Use $\displaystyle \sum_{k=0}^K \ell( z_{ 1: d / 2^k} )$ as loss ($K=4$).
-
-*** SAE, JumpReLU
-
-\nextbook
-\begin{book}
-  \emph{Jumping ahead: improving reconstruction fidelity with JumpReLU sparse autoencoders}\\
-  S. Rajamanoharan et al.
-\end{book}
-To train an SAE,
-with discontinuous JumpReLU activations
-and $\ell^0$ sparsity penalty,
-use straight-through estimation for the gradients
-\[
-\dfrac{ \partial \text{JumpReLU} }{ \partial \theta } *** k_\epsilon ,
-\quad
-\dfrac{ \partial \mathbf 1 _{ z \geq \theta } }{ \partial \theta } *** k_\epsilon
-\]
-where $k_\epsilon$ is a (rectangle) kernel of bandwidth $\epsilon$;
-for the $\ell^0$ penalty, use the pre-activations:
-\[ \n{y} _0 = \mathbf 1 _{ W_1 x + b_1 \geq 0 }. \]
-
-*** Universal SAE
-
-\nextbook
-\begin{book}
-  \emph{Universal sparse autoencoders:\\ interpretable cross-model concept alignment}\\
-  H. Thasarathan et al.
-\end{book}
-Train a single, overcomplete SAE on the activations of several pretrained models.
-\[
-\begin{tikzpicture}[>=stealth,xscale=2,yscale=.8,inner sep=2pt,outer sep=0pt,baseline=0]
-  \node (i) at (1,6) {image};
-  \node[fill=blue!15] (mi) at (2,5) {model $i$};
-  \node[fill=blue!15] (mj) at (0,5) {model $j$};
-  \node (ai) at (2,4) {activations $i$};
-  \node (aj) at (0,4) {activations $j$};
-  \node[fill=blue!15] (ei) at (2,3) {encoder $i$};
-  \node[fill=blue!15] (ej) at (0,3) {encoder $j$};
-  \node (l) at (1,2) {latent};
-  \node[fill=blue!15] (di) at (2,1) {decoder $i$};
-  \node[fill=blue!15] (dj) at (0,1) {decoder $j$};
-  \node (hi) at (2,0) {$\widehat{\text{activations }i}$};
-  \node (hj) at (0,0) {$\widehat{\text{activations }j}$};
-  \draw[->] (i) -- (mi);
-  \draw[->] (mi) -- (ai);
-  \draw[->] (ai) -- (ei);
-  \draw[->] (ei) -- (l);
-  \draw[->] (l) -- (di);
-  \draw[->] (di) -- (hi);
-  \draw[->] (i) -- (mj);
-  \draw[->] (mj) -- (aj);
-  \draw[->] (aj) -- (ej);
-  \draw[->] (ej) -- (l);
-  \draw[->] (l) -- (dj);
-  \draw[->] (dj) -- (hj);
-\end{tikzpicture}
-\]
-
-
-*** Gemma Scope (is there a website?)
-
-\nextbook
-\begin{book}
-  \emph{Gemma Scope: open sparse autoencoders everywhere all at once on Gemma 2}\\
-  T. Lieberum et al.
-\end{book}
-To explain an LLM,
-train a \emph{sparse autoencoder} (SAE, sparse and nonnegative)
-on its activations
-(after the MLP, or the activations on the residual stream -- for all layers)
-\begin{align*}
-  & x \mapsto y = \sigma( W_1 x + b_1 ) \mapsto \hat x = W_2 y + b_2 \\
-  & \sigma(z) = \text{JumpReLU}_\theta(z) = z \odot \mathbf{1}_{ z \geq \theta } =
-  \smash{%
-\begin{tikzpicture}[>=stealth,scale=.5,inner sep=1pt,outer sep=0pt,baseline=-2]
-  \draw[->] (-1,0) -- (1.5,0);
-  \draw[->] (0,-1) -- (0,1.5);
-  \draw[densely dotted] (-1,-1) -- (1.5,1.5);
-  \draw[ultra thick,blue!50] (-1,0) -- (.75,0);
-  \draw[ultra thick,blue!50] (.75,.75) -- (1.5,1.5);
-\end{tikzpicture}%
-}
-  \\
-  & \theta = 10^{-3}
-\end{align*}
-\emph{Transcoders} (which reconstruct the output of an MLP from its input,
-using a sparse hidden layer) do not work that well.
-
-*** SAE: applications (Claude)
-\nextbook
-\begin{book}
-  \emph{Scaling monosemanticity: extracting interpretable features from Claude 3 Sonnet}\\
-  A. Templeton et al.
-\end{book}
-% With an interactive feature UMAP
-Applications of sparse autoencoders (SAE) to interpret LLMs include
-identifying features activated when
-\begin{compactitem}[--]
-\item The model gives instructions to build chemical, biological or nuclear weapons;
-\item The user probes the model's goals and values, or tries to jailbreak it;
-\item The model is trained to be a sleeper agent;
-\item etc.
-\end{compactitem}
-
-
-*** Transcoders; circuits
-
-\nextbook
-\begin{book}
-  \emph{Transcoders find\\ interpretable LLM feature circuits}\\
-  J. Dunefsky et al.
-\end{book}
-\emph{Circuit analysis} looks for sparse subgraphs corresponding to specific behaviours.
-Transcoders approximate a densely activating MLP layer with a wider, sparsely activating layer.
-\begin{align*}
-  z &= \text{ReLU}( W_1 x + b_1 ) \\
-  \hat y &= W_2 z + b_2.
-\end{align*}
-Train with a faithfulness loss
-$\n{ \hat y - y }^2$
-and a sparsity penalty $\n z _1 $.
-
-%TODO: FIGURE 1?
-
-To find interpretable circuits,
-pick the top $k$ activations;
-among their children, pick the top $k$ activations;
-among the resulting $k^2$ graphs, pick the top $k$ ones;
-and continue.
-
-%TODO: FIGURE 2?
-
-*** Transcoder
-\nextbook
-\begin{book}
-  \emph{Sparse cross-coders\\ for cross-layer features and model diffing}\\
-  J. Lindsey et al.
-\end{book}
-Adjacent layers are almost parallel:
-apply dictionary learning to them jointly
-(a cross-coder is a multi-layer transcoder).
-\[
-\begin{tikzpicture}[>=stealth,xscale=.5,yscale=.4,inner sep=2pt,outer sep=1pt,baseline=37]
-  \node (I) at (0,6) {};
-  \node (J) at (0,3) {};
-  \node (A) at (0,6.7) {};
-  \node (B) at (0,-.3) {};
-  \node[draw] (X) at (1,5) {\ \ \ };
-  \node[draw] (Y) at (1,2) {\ \ \ };
-  \node[circle,draw,inner sep=-.5pt] (p1) at (0,4) {\footnotesize$+$};
-  \node[circle,draw,inner sep=-.5pt] (p2) at (0,1) {\footnotesize$+$};
-  \draw[->] (A) -- (p1);
-  \draw[->] (0,6) -| (X);
-  \draw[->] (X) |- (p1);
-  \draw[->] (0,3) -| (Y);
-  \draw[->] (Y) |- (p2);
-  \draw[->] (p2) -- (B);
-  \draw[->] (p1) -- (p2);
-\end{tikzpicture}
-=
-\begin{tikzpicture}[>=stealth,xscale=.5,yscale=.4,inner sep=2pt,outer sep=1pt,baseline=37]
-  \node (I) at (0,6) {};
-  \node (J) at (0,3) {};
-  \node (A) at (0,6.7) {};
-  \node (B) at (0,-.3) {};
-  \node[draw] (X) at (2,5) {\ \ \ };
-  \node[draw] (Y) at (1,2.5) {\ \ \ };
-  \node[circle,draw,inner sep=-.5pt] (p1) at (1,4) {\footnotesize$+$};
-  \node[circle,draw,inner sep=-.5pt] (p2) at (1,1) {\footnotesize$+$};
-  \node[circle,draw,inner sep=-.5pt] (p3) at (0,1) {\footnotesize$+$};
-  \draw[->] (A) -- (p3);
-  \draw[->] (0,6) -| (X);
-  \draw[->] (0,6) -| (p1);
-  \draw[->] (X) |- (p1);
-  \draw[->] (X) |- (p2);
-  \draw[->] (p1) -- (Y);
-  \draw[->] (Y) -- (p2);
-  \draw[->] (p2) -- (p3);
-  \draw[->] (p3) -- (B);
-\end{tikzpicture}
-=
-\begin{tikzpicture}[>=stealth,xscale=.5,yscale=.4,inner sep=2pt,outer sep=1pt,baseline=37]
-  \node (A) at (0,6.7) {};
-  \node (B) at (0,-.3) {};
-  \node[draw] (X) at (2,3.5) {\ \ \ };
-  \node[draw] (Y) at (1,3.5) {\ \ \ };
-  \node[circle,draw,inner sep=-.5pt] (p1) at (0,1) {\footnotesize$+$};
-  \node[circle,draw,inner sep=-.5pt] (p2) at (1,1) {\footnotesize$+$};
-  \draw[->] (A) -- (p1);
-  \draw[->] (p1) -- (B);
-  \draw[->] (0,6) -| (X);
-  \draw[->] (0,6) -| (Y);
-  \draw[->] (X) |- (p2);
-  \draw[->] (Y) -- (p2);
-  \draw[->] (p2) -- (p1);
-\end{tikzpicture}
-=
-\begin{tikzpicture}[>=stealth,xscale=.5,yscale=.4,inner sep=2pt,outer sep=1pt,baseline=37]
-  \node (A) at (0,6.7) {};
-  \node (B) at (0,-.3) {};
-  \node[draw] (X) at (1,3.5) {\ \ \ \ \ \ };
-  \node[circle,draw,inner sep=-.5pt] (p1) at (0,1) {\footnotesize$+$};
-  \draw[->] (A) -- (p1);
-  \draw[->] (p1) -- (B);
-  \draw[->] (0,6) -| (X);
-  \draw[->] (X) |- (p1);
-\end{tikzpicture}
-\]
-
-*** Circuits
-
-\nextbook
-\begin{book}
-  \emph{Sparse feature circuits: discovering and editing interpretable causal graphs in language models}\\
-  S. Marks et al.
-\end{book}
-Neurons or attention heads are polysemantic.
-Instead, use sparse autoencoders and look for sparse feature circuits.
-After interpreting them,
-you may decide to remove some of them
-(e.g., gender, for fairness).
-
 ** Interpretable random forests
 
 Decision trees are interpretable but often perform poorly;
@@ -2248,84 +1724,6 @@ There are many variants of this idea.
 
   RIPE: Rule induction partitioning estimator: design of an interpretable prediction algorihm
   V. Margot et al.
-
-** DONE TO DELETE ML: RuleFit
-*** ML, interpretablity: RuleFit
-
-\nextbook
-\begin{book}
-  \emph{Predictive learning via rule ensembles}\\
-  J.H. Friedman nad B.E. Popescu (2008)
-\end{book}
-\emph{RuleFit} is an interpretable machine learning model:
-\begin{compactitem}[--]
-\item Fit a random forest;
-\item Extract rules (each path from the root of a tree to a leaf defines a rule);
-\item Fit a lasso on the initial features and the rules (to capture interactions),
-  after standardizing both features and rules.
-\end{compactitem}
-
-\nextbook
-\begin{book}
-  \emph{Node Harvest}\\
-  N. Meinshausen (2010)
-\end{book}
-\emph{NodeHarvest} is similar to RuleFit,
-but looks for a \emph{convex} combination of leaf forecasts
-(instead of a linear combination of leaf indicators).
-
-\nextbook
-\begin{book}
-  \emph{Interpretable random forests\\ via rule extraction}\\
-  C. B\'enard et al.
-\end{book}
-\emph{Sirus}
-\begin{compactitem}[--]
-\item Trains a random forest, with shallow trees, and splits at the $q$-empirical quantiles of the marginal distribution ($q=10$);
-\item Selects the most frequent rules (internal nodes or leaves);
-\item Removes the redundant ones (linear combinations of more frequent ones);
-\item Fits a ridge regression with the rule values.
-\end{compactitem}
-
-\nextbook
-\begin{book}
-  \emph{Rule induction partitioning estimator:\\ design of an interpretable prediction algorihm}\\
-  V. Margot et al.
-\end{book}
-RIPE
-\begin{compactitem}[--]
-\item Builds a set of ``suitable'' rules (hyper-rectangles, using a small number of coordinates);
-\item Computes the forecast of an observation $x$ by using the average of the values in
-  \begin{compactitem}[\ensuremath{\cdot}]
-  \item The intersection of the cells containing $x$
-  \item Minus the union of the cells not containing $x$;
-  \end{compactitem}
-\[
-\begin{tikzpicture}[>=stealth,scale=.25,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
-  \fill[yellow!50!white] (0,2) -- (0,4) -- (2,4) -- (2,3) -- (1,3) -- (1,2) -- cycle;
-  \draw[ultra thick,green!50!black] (0,2) -- (5,2) -- (5,5) -- (0,5) -- cycle;
-  \draw[ultra thick,red!70!white] (0,-2) -- (0,4) -- (2,4) -- (2,-2) -- cycle;
-  \draw[ultra thick,blue!40!white] (1,-2) -- (1,3) -- (5,3) -- (5,-2) -- cycle;
-  \node[circle,fill,inner sep=1pt] (A) at (.5,3.5) {};
-  \node[right=-1.5mm of A]{\footnotesize$x$};
-  \begin{scope}[shift={(8,-.5)}]
-    \draw[ultra thick,red!70!white]   (0,5.7) -- (1,5.7) -- (1,5.15) -- (0,5.15) -- cycle;
-    \draw[ultra thick,green!50!white] (0,4.85) -- (1,4.85) -- (1,4.3) -- (0,4.3) -- cycle;
-    \draw[ultra thick,blue!40!white]  (0,2.7) -- (1,2.7) -- (1,3.3) -- (0,3.3) -- cycle;
-    \draw[ultra thick, yellow!50!white] (0,0.7) -- (1,0.7) -- (1,1.3) -- (0,1.3) -- cycle;
-    \fill[ultra thick, yellow!50!white] (0,0.7) -- (1,0.7) -- (1,1.3) -- (0,1.3) -- cycle;
-    \node[anchor=west] at (1.5,5) {cells containing $x$};
-    \node[anchor=west] at (1.5,3) {cells not containing $x$};
-    \node[anchor=west] at (1.5,1) {\strut intersection of cells containing $x$};
-    \node[anchor=west] at (1.5,-.2) {\strut minus};
-    \node[anchor=west] at (1.5,-1.4) {\strut union of cells not containing $x$};
-  \end{scope}
-\end{tikzpicture}
-\]
-\item Prunes the set of suitable rules to minimize the empirical risk.
-\end{compactitem}
-Those rules do not form a tree -- they can be converted to a partition of a tree,
-but it could be exponentially larger than the rule set.
 
 ** No, Adaptive lasso
 *** ML, interpretability: Adaptive lasso
@@ -2356,29 +1754,6 @@ For linear models, this was popularized as "relevance" forecasting.
   \emph{Relevance-based prediction: a transparent and adaptive alternative to machine learning}\\
   M. Czasonis et al.
 
-** DONE TO DELETE Relevance
-*** Statistics: Relevance
-
-\nextbook
-\begin{book}
-  \emph{Dual interpretation\\ of machine learning forecasts}\\
-  P. Goulet Colombe et al.
-\end{book}
-The output of many models ((kernel) ridge regression, neural nets, random forests, boosting)
-can be expressed as linear combinations of training observations:
-\[ \hat y_j = \sum_{ i \in \text{Train} } w_{ij} y_i . \]
-Those weights can be interpreted as the weights of a ``data portfolio''.
-We can compute and plot:
-\begin{compactitem}[--]
-\item The contributions $c_{ji} = w_{ji} y_i$, and their cummulated sums;
-\item The concentration of $w_{\bigcdot j }$;
-\item The sum of the negative weights (short positions);
-\item The sum of the weights (not necessarily 1 -- but tree-based models are long-only, fully-invested);
-\item The turnover $\n{ w_{ \bigcdot, j} - w_{ \bigcdot, j-1} }_1$;
-\item The overall historical importance
-  $\n{ w_{ i \bigcdot } }_1$.
-\end{compactitem}
-
 ** LIME, LRP, Taylor, etc.
 
 Other ways of interpreting a model include
@@ -2395,91 +1770,6 @@ and Taylor expansions.
 
   \emph{Explaining nonlinear classification decisions with deep Taylor decomposition}\\
   G. Montavon et al.
-
-** DONE TO DELETE LIME, LRP, Taylor, etc.
-*** Layerwise relevance propagation, fine-tuning, attacks
-
-\nextbook
-\begin{book}
-  \emph{The hidden dimensions of LLM alignment:\\
-  a multi-dimensional analysis\\ of orthogonal safety directions}\\
-  W. Pan et al.
-\end{book}
-Approximate the activation shift before and after fine-tuning
-$T : \mathcal X \to \mathcal X$ with an affine function
-\[ \operatorname*{Argmin}_{ w, b } \E_x \bigl\| T(x) - (Wx+b) \bigr\| ^2 \]
-and interpret the first $k$ components
-(right singular vectors)
-of $W-I$ back to prompt tokens using layerwise relevance propagation (\texttt{lxt});
-they are:
-\begin{compactitem}[--]
-\item Sensitive topics;
-\item Story-telling;
-\item Porn and hate speech;
-\item Real-world problems;
-\item ``Start your response with `Sure, I am happy to help'{}''
-\end{compactitem}
-This suggests a few attacks:
-\begin{compactitem}[--]
-\item Removing the non-dominant directions;
-\item Removing trigger words (identified by LRP) by rephrasing the prompt.
-\end{compactitem}
-
-\nextbook
-\begin{book}
-  \emph{AttnLRP: Attention-aware layer-wise relevance propagation for transformers}\\
-  R. Achtibat et al.
-\end{book}
-LRP can be generalized to transformers, in spite of the nonlinear operations
-(softmax, matrix multiplication, layernorm, MoE: linearize them).
-
-Implementation in \texttt{lxt}.
-
-*** LIME variants
-
-\nextbook
-\begin{book}
-  \emph{Local rule-based explanations\\ of black box decision systems}\\
-  R. Guidotti et al.
-\end{book}
-LoRE is a tree- and counterfactual-based variant of LIME:
-\begin{compactitem}[--]
-\item Fit a decision tree on the output of the model on a synthetic neighbourhood of the point of interest;
-  use a genetic algorithm to better explore the decision boundary;
-\item Also give counterfactuals: features to change to change the output.
-\end{compactitem}
-
-*** Taylor
-
-\nextbook
-\begin{book}
-  \emph{Explaining nonlinear classification decisions with deep Taylor decomposition}\\
-  G. Montavon et al.
-\end{book}
-To decompose a function $f: \RR^d \to \RR_+$ into
-$f(x) = \sum_i R_i(x)$,
-ideally such that $\forall i, x \ R_i(x) \geq 0$
-(which implies $f(x)=0 \Rightarrow R(x) = 0$),
-we can think of sensitivity analysis
-\[ R(x) \propto
-\left( \dfrac{ \partial f }{ \partial x } \right)^2
-\] or the Taylor decomposition
-\begin{align*}
-  R(x) &= \left. \dfrac{ \partial f }{ \partial x } \right|_{ x = \tilde x } \odot (x - \tilde x ) \\
-  \tilde x &= \operatorname*{Argmin}_{ f(\tilde x) = 0 } \n{ \tilde x - x }
-\end{align*}
-but finding the anchor point $\tilde x$
-(e.g., an image with only the background and without the subject that $f$ tries to detect)
-is expensive.
-
-For a neural network, we can consider the mapping from the activations in one layer $\ell$
-to the relevance of a neuron $j$ in the next layer $\ell+1$
-\[ f_j^{ \ell \to \ell + 1 } : ( x_i^\ell)_i \longmapsto R_j^{\ell+1} \]
-and apply the Taylor decomposition --
-the root points $(x_{ij}^\ell)_i$ are easier to find.
-
-The resulting relevance propagation rules are similar to the LRP ones,
-but without hyperparameters to choose.
 
 ** TODO TO SORT
 *** Sparsity, Discrete variables
@@ -5967,6 +5257,22 @@ harder samples at the end (fine-tuning). They can be identified, for instance, b
   \emph{Domain2Vec: vectorizing datasets to find\\ the optimal data mixture without training}\\
   M. Zhang et al.
 
+When training with data from different sources,
+train a (cheap) proxy model for each source,
+then learn the best convex combination of their outputs,
+and use this weighting to remix the data.
+
+  \emph{MixMin: finding data mixtures\\ via convex minimization}\\
+  A. Thudi et al. (2025)
+
+Beware of generated data: training on it will eventually lead to model collapse.
+There are two effects. First, generated data will omit some details present, but rarely, in real data --
+distribution tails will progressively disappear.
+Second, generated data will be slightly off, and progressively drift away from real data.
+
+  \emph{The curse of recursion: training on\\ generated data makes models forget}\\
+  O. Shumailov et al.
+
 ** Training
 
 LLMs are fine-tuned with a mix of SFT (supervised fine-tuning,
@@ -6479,6 +5785,12 @@ TODO: papers
 
 TODO:  Palomar's book (which chapter?)
 
+  \emph{Optimization algorithms for graph Laplacian estimation via ADMM anbd MM}\\
+  L. Zhao et al.
+
+  \emph{Graphical models in heavy-tailed markets}\\
+  J.V. Cadoso et al.
+  
 ** Jump model, other models
 
 There are many ways of defining "regimes",
@@ -6507,181 +5819,28 @@ We can also add a sparsity penalty, to perform feature selection.
   \emph{Feature selection in jump models}\\
   P. Nystrup et al. (2021)
 
-** TODO learning to rank, supervised portfolios
-*** Learning to rank
+** Learning to rank, supervised portfolios
 
-\nextbook
-\begin{book}
+The prelude to portfolio construction is often a model forecasting
+future returns, with the L^2 norm as loss function.
+But this is not really what we want: to build a portfolio,
+we want to know which stocks will have a large positive return,
+and which will have a large negative return --
+we do not care much about those in the middle.
+This preference is not reflected by the loss function.
+Instead of forecasting returns,
+we could try to rank stocks
+(learning-to-rank is used in information retrieval systems, such as search engines),
+with more importance given to the top and bottom ranks. 
+
   \emph{Enhancing long-short portfolios: a refined approach using learning to rank algorithms}\\
   M. Linger et al.
-\end{book}
-Portfolio consruction is often a 2-step process:
-\[
-\begin{tikzpicture}[>=stealth,scale=.25,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
-  \node[anchor=base] (A) {data\strut};
-  \node[right=6mm of A] (B) {score\strut};
-  \node[right=6mm of B] (C) {weights\strut};
-  \draw[|->] (A) -- (B);
-  \draw[|->] (B) -- (C);
-\end{tikzpicture}
-\]
-(the score could be a financial ratio, or a forward return forecast)
-where the weights often depend on the ranks of the score.
-Instead, learning to rank (LTR) uses a 1-step process.
-The loss functions can be
-\begin{compactitem}[--]
-\item Poinwise (forecast the rank of an observation);
-\item Pairwise (predict which of two observations is ranked higher), e.g., RankNet;
-  \begin{align*}
-    \text{loss}( X, y, \theta ) &= \sum_{ y_i < y_j } \phi \bigl[ f_\theta(X_j) - f_\theta(X_i) \bigr] \\
-    \phi &=
-\begin{tikzpicture}[>=stealth,xscale=.2,yscale=.3,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
-\draw[very thick,blue!60!black] (-1.000,1.313)--(-0.737,1.128)--(-0.474,0.958)--(-0.211,0.804)--(0.053,0.667)--(0.316,0.548)--(0.579,0.445)--(0.842,0.358)--(1.105,0.286)--(1.368,0.227)--(1.632,0.179)--(1.895,0.140)--(2.158,0.109)--(2.421,0.085)--(2.684,0.066)--(2.947,0.051)--(3.211,0.040)--(3.474,0.031)--(3.737,0.024)--(4.000,0.018);
-\draw (-1,0) -- (4,0);
-\draw (2,-.2) -- (2,1.4);
-\end{tikzpicture}
-  \end{align*}
-  (e.g., $\phi(z) = \log(1+e^{-z})$, $(1-z)_+$ or $e^{-z}$);
-\item Listwise
-  \begin{align*}
-    \text{loss}( X, y ; \theta ) &=
-    - \sum_i \dfrac{ \phi(y_i) }{ \sum_j \phi(y_j) } \log
-    \dfrac{\phi f_\theta(X_i) }{ \sum_j \phi f_\theta( X_j ) }
-    \text{ (ListNet, cross-entropy)}
-    \\
-    \text{loss}( X, y ; \theta ) &=
-    - \log \prod_i \dfrac{
-      \phi f_\theta( X_{ y^{-1}(i) } )
-    }{
-      \sum_{ k \geq i } \phi f_\theta( X_{ y^{-1}(k) } )
-    }
-    \text{ (ListMLE, Plackett-Luce)}
-    \\
-    \text{loss}( X, y ; \theta ) &=
-    - \log \prod_i \dfrac{
-      \phi \bigl[
-        f_\theta( X_{y^{-1}(i)} ) - f_\theta( X_{y^{-1}(N-i)} )
-        \bigr]
-    }{
-      \sum_{ i \leq u \neq v \leq N-i }
-      \phi \bigl[
-        f_\theta( X_{y^{-1}(u)} ) - f_\theta( X_{y^{-1}(v)} )
-        \bigr]
-    }
-    \text{ (Listfold)}
-  \end{align*}
-  (ListNet is based on cross-entropy,
-  ListMLE on the Plackett-Luce model,
-  ListFold selects long-short pairs one by one starting with the most extreme).
-\end{compactitem}
-For portfolio construction, we want the ranking to be more accurate at the top and bottom
-(for information retrieval, we only care at the top).
-Try the following loss functions:
-\begin{compactitem}[--]
-\item ListNet-Fold, cross-entropy of $\phi(y_i-y_j)$
-  and $\phi\bigl( f_\theta(X_i) - f_\theta(X_j) \bigr)$;
-\item Weighted ListMLE, with weights decreasing from extreme pairs down to central ones;
-\item Weighted ListFold.
-\end{compactitem}
 
-*** Supervised portfolios
+Instead of forecasting future returns, future financial ratios, or their ranks,
+we could directly forecast portfolio weights.
 
-\nextbook
-\begin{book}
   \emph{Interpretable supervised portfolios}\\
   G. Chevalier et al.
-\end{book}
-Instead of forecasting future returns, the \emph{supervised portfolio approach} suggests
-to forecast weights -- optimal weights, computed in hindsight.
-
-\emph{RuleFit} can make that model interpretable:
-train a random forest or boosted trees,
-explode them into a set of rules (each path from a root node to an internal or leaf node defines a rule),
-and combine them with the \emph{adaptive lasso}
-(which shrinks smaller weights even more).
-
-** TODO Time series
-*** Time series: Stylized facts
-
-\nextbook
-\begin{book}
-  \emph{Can GANs learn the stylized facts\\ of financial time series}\\
-  S. Kwon and Y. Lee
-\end{book}
-GANs struggle to reproduce simple statistical models (Heston, Ornstein-Uhlenbeck, jump diffusion, etc.)
-
-*** Time series foundation models
-
-\nextbook
-\begin{book}
-  \emph{Time-series foundation model for value-at-risk}\\
-  A. Goel et al. (2024)
-\end{book}
-\emph{Fine-tuned} foundation time series models (e.g. TimeFM) are competitive
-with conventional econometric models (GARCH, GAS).
-
-*** Finance, Synthetic time series
-
-\nextbook
-\begin{book}
-  \emph{Deep generators on commodity markets; application to deep hedging}\\
-  N. Bourson et al.
-\end{book}
-Synthetic time series:
-TSGAN, CTOGAN, SIGGAN, CEGEN.
-
-*** Finance, Conformal prediction for time series
-
-\nextbook
-\begin{book}
-  \emph{Conformal predictive portfolio selection}\\
-  M. Kato (2024)
-\end{book}
-Consider a model forecasting future returns $Y_t$ from asset features $X_t$:
-\[ \hat Y_{t+1} = \hat f_t( X_{t+1} ) \]
-where $\hat f_t$ is trained on
-$(X_1,Y_1),(X_2,Y_),\dots,(X_t,Y_t)$.
-The returns of a portfolio with weights $w$ are $w' Y_t$;
-the forecasted returns are $w' \hat Y_{t+1}$.
-Apply conformal prediction (CP)
-to those portfolio return predictions:
-for each $w$, we have a prediction interval
-\[ \hat C_t^w ( X_{t+1} = [ \underline r _{t+1} ^w , \bar r_{t+1}^w ]. \]
-Find the portfolio weights minimizing some loss function of those intervals
-\[ w^*** = \argmin_w \ell\bigl( \hat C_t^w ( X_{t+1} ) \bigr) .\]
-
-For instance:
-\begin{compactitem}[--]
-\item Start with a finite set of portfolios $\mathscr E$;
-\item Compute their prediction intervals at level $\alpha$:
-  $ [ \underline r_w , \bar r_w ] $;
-\item Consider a proportion $\beta$ of portfolios,
-  $\tilde{\mathscr E} \subset \mathscr E$,
-  with the highest
-  $\underline r_w$
-  (low risk, measured with the VaR);
-\item Among those, pick the porfolio with the highest $\bar r_w$.
-\end{compactitem}
-
-To account for the time series lack of exchangeability,
-use full conformal prediction,
-\ie, fit the model on augmented datasets
-(add $(X_{t+1},y)$ for all possible values of $y$)
-and on all permuted datasets
-\[ (X_{\sigma(1)}, y_{\sigma(1)}), \dots, (X_{\sigma(t)}, y_{\sigma(t)}), (X_{\sigma(t+1)}, y) \]
-for all $\sigma \in \mathfrak S_n$.
-It is actually sufficient to consider only shifts, \ie, permutations of the form
-\[ \exists j \in \llbracket 0, t-1 \rrbracket \quad
-\forall i \in \llbracket 1, t \rrbracket \quad
-\sigma(i) \equiv i+j \ (\text{mod}\ t) \]
-
-\nextbook
-\begin{book}
-  \emph{Exact and robust conformal inference methods\\ for predictive machine learning\\ with dependent data}\\
-  V. Chernozhukov et al.
-\end{book}
-Conformal prediction for time series: use full conformal prediction
-and all shifts of the data.
 
 ** TODO Causality for time series
 *** Finance, Causality, time series forecasting
@@ -6719,100 +5878,7 @@ using piecewise linear transformations of the predictors,
 with knots at the 10\% and 90\% quantiles to detect tail interactions.
 
 ** TODO Graphs
-
-\nextbook
-\begin{book}
-  \emph{Portfolio optimization}\\
-  D.P. Palomar (2025)
-\end{book}
-
-\nextbook
-\begin{book}
-  \emph{Optimization algorithms for graph Laplacian estimation via ADMM anbd MM}\\
-  L. Zhao et al.
-\end{book}
-To estimate a Laplacian-structured precision matrix
-\[  \begin{array}{ll}
-  \text{Find} & \Theta \succcurlyeq 0 \\
-  \text{To minimize} & \tr( \Theta S ) - \log \operatorname{gdet} ( \Theta )  + \alpha \n{ \Theta }_1 \\
-  \text{Such that} & \Theta \mathbf 1 = 0 \\
-  & \forall i \neq j \ \  \Theta_{ij} \leq 0
-\end{array} \]
-notice that $\n \Theta _1 = \tr( \Theta H ) $,
-with $H = 2 I - \mathbf 1 \mathbf 1 ' $,
-because the diagonal (resp. off-diagonal) elements of $\Theta$ are nonnegative (resp. nonpositive),
-and $\text{gdet}\,\Theta = \det \Xi$, where $\Theta = P \Xi P'$,
-with $P$ the orthogonal complement of $\mathbf 1$
-(\ie, $P'P = I_{k-1}$ and $P' \mathbf 1_k = \mathbf 0_{k-1}$).
-The objective becomes
-\[ \tr\bigl( \Xi P' ( S + \alpha H ) P \bigr) - \log \det \Xi . \]
-To speed up computations, use ADMM
-(or MM if the graph is very sparse).
-Note that, in spite of the $L^1$ penalty, the result is not sparse.
-
-\nextbook
-\begin{book}
-  \emph{Graphical models in heavy-tailed markets}\\
-  J.V. Cadoso et al.
-\end{book}
-To learn a Lapalcian Gaussian Markov random field (LGMRF),
-\[ p(x) \propto \sqrt{ \text{det}^*\, L } \exp \bigl[ -\tfrac12 (x-\mu)' L (x-\mu) \bigr], \]
-where $\det^*$ is the pseudo-determinant (product of the non-zero eigenvalues:
-$\det^*** L = \det(L + \mathbf 1 \mathbf 1' / p )$
-if the graph is connected),
-solve the Laplacian-structured graphical lasso problem
-\[ \begin{array}{ll}
-  \text{Find} & L \succcurlyeq 0 \\
-  \text{To minimize} & \tr( LS ) - \log \det^*** L + h(L) \\
-  \text{Such that} & L \mathbf 1 = 0 \\
-  & \forall i \neq j \ \ L_{ij} = L_{ji} \leq 0
-\end{array} \]
-For a zero-mean Student distribution, replace $\tr(LS)$ with
-\[ \dfrac{ p + \nu }{ n } \sum_{ i = 1 }^ n \log \left( 1 + \dfrac{ x_i' L x_i }{ \nu } \right). \]
-For a $k$-component graph, add a low-rank penalty
-\[ \tr( V' L V ) , \qquad V \in \RR^{p\times k} , \qquad V' V = I_k \]
-(indeed, $\min_V \tr(V' L V )$ is the sum of the $k$ smallest eigenvalues of $L$:
-if it is zero, $\text{rank}\, L \leq p-k$).
-
-\nextbook
-\begin{book}
-  \emph{Learning graphs from data}\\
-\end{book}
-\emph{Heuristic} methods start from the covariance, correlation or distance matrix
-between the data or, better, between the columns of the covariance, correlation or distance matrix, and use:
-\begin{compactitem}[--]
-\item Truncation, MST, PMFG, TMFG;
-\item $k$-nn;
-\item Possibly combined with Gaussian weights.
-\end{compactitem}
-
-Variants of the concentration matrix,
-which contains the \emph{partial correlations} include:
-\begin{compactitem}[--]
-\item $L^1$ sparsity penalty (graphical lasso);
-\item Laplacian structure on the concentration matrix;
-\item $L^0$ sparsity penalty;
-\item Low-rank Laplacian penalty (\ie, a $k$-component graph);
-\item Heavy tails (Student instead of Gaussian distribution).
-\end{compactitem}
-
-To find the graph structure maximizing \emph{signal smoothness}, minimizing the variance of the signal
-\[ \sum_{ij} W_{ij} ( x_i - x_j )^2 = \dfrac12 \tr( W Z ) = \tr( X L X' ) \]
-where $X$ is the data (signal), $W$ the graph weights, $L$ the corresponding Laplacian, and
-$Z_{ij} = (x_i - x_j)^2$, with the usual constraints for $L$ or $W$,
-\begin{align*}
-  & L\mathbf 1 = 0 && \forall i \neq j \ \ L_{ij} = L_{ji} \leq 0 \\
-  & \text{diag} \  W && W = W' \geq 0,
-\end{align*}
-and
-\begin{compactitem}[--]
-\item A sparsity penalty $\n W _F^2$;
-\item A degree constraint $W \mathbf = 1$;
-\item A degree penalty $- \mathbf 1 ' \log (W \mathbf 1 )$.
-\end{compactitem}
-
-** TODO Graphs
-*** Graphs, GNN
+*** No, Graphs, GNN
 
 \nextbook
 \begin{book}
@@ -6821,7 +5887,7 @@ and
 \end{book}
 Infer the industry of unlisted firms from the supply chain network.
 
-*** Finance, GNN
+*** No, Finance, GNN
 
 \nextbook
 \begin{book}
@@ -6849,7 +5915,7 @@ Either use this weighted graph to compute a fixed industry classification
 or truncate the graph
 (to have the same number of connected pairs as in the SIC-3 classification).
 
-*** Finance, Graphs
+*** No, Finance, Graphs
 \nextbook
 \begin{book}
   \emph{Modeling arterial and venous flows in Japanese supply chain: a network-based approach to the circular economy}\\
@@ -7010,7 +6076,7 @@ $ \E[ r | x \geq 0 ]$
 and decompose them into the contributions of $(\mu,\epsilon)$,
 $\text{diag}(B)$ and the off-diagonal of $B$.
 
-** TODO Investment strategies
+** No, Investment strategies
 *** Credit strategies
 
 \nextbook
@@ -8495,71 +7561,20 @@ ML pipelines pay attention to feature ($X$) transformation, but tend to ignore \
 \item Logarithm, quantile uniform, quantile normal or Yeo-Johnson transform.
 \end{compactitem}
 
-* TODO Model Merging
-*** Model merging
+* Model Merging
 
-\nextbook
-\begin{book}
-  \emph{ZipIt! Merging models\\ from different tasks without training}\\
-  G. Stoica et al.
-\end{book}
-To merge models (same architecture but different training data and/or tasks),
-permutation-based methods assume they have exactly the same features,
-up to permutation,
-and try to recover that permutation, for each layer:
-\[ \operatorname*{Maximize}_{ \sigma \in \mathfrak S_n } \sum_i \cor( z_i^1 , z_{\sigma(i)} ^2 ) \]
-where $z_i^2$ are the features, for neuron $i$, in layer $\ell$, which contains $n$ neurons.
-\[ W_\ell^*** = \tfrac12 W_\ell^1 + \tfrac12 P_\ell W_\ell^2 P_{\ell-1}^\top \]
-Instead, concatenate the features,
-$z_i^1 \| z_i^2$, and average highly correlated ones:
-this accounts for redundancy in each model,
-and features unique to each model.
+LoRAs are often just added, with weights summing to 1.
+Instead, select which columns to keep from which LoRA by looking at the sparsity of those columns.
 
-*** Merging LoRAs
-
-\nextbook
-\begin{book}
   \emph{ZipLoRA: any subject in any style\\ by effectively merging LoRAs}\\
   V. Shah et al
-\end{book}
-LoRA update matrices are sparse, but aligned LoRA matrices interfere when naively merged,
-\[ \Delta W = \lambda \Delta W _{\text{context}} + ( 1 - \lambda ) \Delta W_{\text{style}} . \]
-Instead, learn which column of which LoRA to keep,
-\[ ( m_1' \otimes \mathbf 1 ) \odot \Delta W_1 + ( m_2' \tens \mathbf 1 ) \odot \Delta W_2. \]
 
-* TODO Data-centric ML
-*** data-centric ML with convex optimization; ICML
+Meging models (same architecture but different training data and/or tasks) is trickier.
+You could assume that the features are the same, up to a permutation, adn try to learn that permutation.
+Instead, average highly correlated features and concatenate the others.
 
-\nextbook
-\begin{book}
-  \emph{MixMin: finding data mixtures\\ via convex minimization}\\
-  A. Thudi et al. (2025)
-\end{book}
-When training with data from different sources,
-choosing the data mix can be formulated as a bilevel optimization problem.
-First, train a (cheap) proxy model for each source,
-then learn the best convex combination of their outputs,
-and use this weighting to remix the data.
-This is specific to the cross-entropy or the mean square error loss:
-the Bayes optimal model for a mixture
-is the mixture of Bayes optimal models for each source.
-
-*** Data-centric ML
-
-\nextbook
-\begin{book}
-  \emph{The curse of recursion: training on\\ generated data makes models forget}\\
-  O. Shumailov et al.
-\end{book}
-Training on generated data causes model collapse:
-\begin{compactitem}[--]
-\item At each generation, since the data is finite, there is a nonzero probability that some of the data distribution will be lost;
-  the tails will disappear, and the distribution will progressively drift;
-\item Since the model is only an approximation
-  (it does not perfectly reproduce the target distribution),
-  the generated data will follow a slightly different distribution,
-  for instance, assigning a nonzero probability outside the support of the target distribution.
-\end{compactitem}
+  \emph{ZipIt! Merging models\\ from different tasks without training}\\
+  G. Stoica et al.
 
 * TODO Statistics
 ** TODO Score
@@ -14770,3 +13785,1050 @@ Idem, but the time series is first cut into slices, which are then normalized.
 \end{book}
 Align the two domains (feature shift: time and frequency features, Sinkhorn divergence),
 then correct (label shift).
+** DONE TO DELETE Non-stationarity
+*** Non-stationarity
+
+\nextbook
+\begin{book}
+  \emph{TimeBridge: non-stationarity matters\\ for long-term time series forecasting}\\
+  P. Liu et al. (2025)
+\end{book}
+When forecasting time series, we often have to choose between
+\begin{compactitem}[--]
+\item Eliminating non-stationarity (e.g., to preserve correlations);
+\item Preserving non-stationarity (to reveal long-term dependencies, e.g., cointegration).
+\end{compactitem}
+Split the data into patches,
+and process both the normalized (stationary) and raw (non-stationary) embeddings
+with attention.
+\begin{align*}
+  & X_{it} && \text{patches} \\
+  & P_{it} = \text{MLP}_i( X_{it} ) && \text{patch embeddings} \\
+  & P_{it}^{\text{stationary}} = P_{it} - \text{MA}( P_{i\bigcdot})_u && \text{normalized patches} \\
+  & P_{it}^{\text{down}} = \text{Downsample}( P_{i\bigcdot} )_t \\
+  & \text{Att}( P_{i\bigcdot}^{\text{stat}}, P_{i\bigcdot}^{\text{stat}}, P_{i\bigcdot} ) && \text{integrated attention} \\
+  & \text{Att}( P_{i\bigcdot}^{\text{down}}, P_{i\bigcdot}, P_{i\bigcdot} ) && \text{integrated attention} \\
+  & \text{Att}( P_{i\bigcdot}, P_{i\bigcdot}, P_{i\bigcdot} ) && \text{cointegrated attention}
+\end{align*}
+Each attention is followed by two LayerNorms:
+\begin{align*}
+  x &\leftarrow \text{LayerNorm}( P + x ) \\
+  x &\leftarrow \text{LayerNorm}\bigl( x + \text{MLP}(x) \bigr).
+\end{align*}
+
+\nextbook
+\begin{book}
+  \emph{Non-stationary diffusion\\ for probabilistic time series forecasting}\\
+  W. Ye et al.
+\end{book}
+% Not read
+To account for non-stationaryty in \emph{probabilistic} time series forecasting,
+do not use the additive noise model (ANM)
+\[ Y = f_\phi(X) + \epsilon \qquad \epsilon \sim N(0,I), \]
+but the location scale noise model (LSNM)
+\[ Y = f_\phi(X) + \sqrt{ g_\psi(X) } \epsilon \qquad \epsilon \sim N(0,I) \]
+(previous diffusion-based models assumed homoskedasticity).
+
+** DONE TO DELETE Data augmentation, synthetic data
+*** Synthetic data
+
+% FTS-Diffusion
+
+\nextbook
+\begin{book}
+  \emph{Generative learning for financial time series with irregular and scale-invariant patterns}\\
+  H. Huang et al. (ICLR 2024)
+\end{book}
+
+Scale-invariant subsequence clustering (SISC) is similar to $k$-means on length-$\ell$ subsequences, but it lets $\ell$ vary.
+\[ \begin{array}{lll}
+  \text{Find} & p_k \in \RR^L & \hspace*{-5mm} \text{length-$\ell$ patterns} \\
+              && \hspace*{-5mm}\text{(cluster centers)} \\
+              & k_t & \hspace*{-5mm} \text{cluster of } x_{ [t, t + \ell_k] } \\
+              & \ell_k \in [ \ell_{\text{min}}, \ell_{\text{max}} ] & \hspace*{-5mm} \text{subsequence length} \\
+  \text{To minimize} & d_{ \text{DTW} }\bigl( x_{ [t , t + \ell_k ] } , p_k \bigr)
+\end{array} \]
+Initialize the algorithm with $k$-means++ on maximum-lengh subsequences.
+
+Train a VAE to learn a fixed-length representation of those variable-length sequences,
+and train a diffusion model to generate more such subsequences.
+\[
+\begin{tikzpicture}[>=stealth,xscale=2,yscale=.5,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
+\node (A) at (0,0) {subsequences\strut};
+\node[right=15mm of A] (B) {latent\strut};
+\node[right=15mm of B] (C) {noise\strut};
+\draw[->] ([yshift=+3pt]A.east) to node[anchor=south] {\footnotesize enc} ([yshift=+3pt]B.west);
+\draw[->] ([yshift=-3pt]B.west) to node[anchor=north] (b) {\footnotesize dec} ([yshift=-3pt]A.east);
+\draw[->] ([yshift=+3pt]B.east) to node[anchor=south] {\footnotesize +noise} ([yshift=+3pt]C.west);
+\draw[->] ([yshift=-3pt]C.west) to node[anchor=north] (c) {\footnotesize denoise} ([yshift=-3pt]B.east);
+\node[below=1mm of b] {VAE};
+\node[below=1mm of c] {diffusion};
+\end{tikzpicture}
+\]
+
+Learn a transition function between patterns
+\[ \phi: ( p, \alpha, \beta)_t \longmapsto (p, \alpha, \beta)_{t+1}, \]
+where $p$ is a latent representation,
+$\alpha$ its duration, $\beta$ its scale.
+
+\emph{FTS Diffusion} combines those elements to generate financial time series.
+
+\nextbook
+\begin{book}
+  \emph{Breaking the data scarcity barrier: significant return prediction improvement across models
+  through scale-invariant data augmentation}\\
+  H. Juang et al.
+\end{book}
+Use FTS-Diffusion for data augmentation,
+when forecasting future S\&P\,500 daily returns
+from the past 60 days, with deep learning models
+(iTransformer, pretrained on a domain-adjacent dataset, 8 FX time series).
+
+** DONE TO DELETE Probabilistic forecasts
+*** DONE TO DELETE Probabilistic forecasts, scoring rules,
+
+\nextbook
+\begin{book}
+  \emph{Regions of reliability in the evaluation\\ of multivariate probabilistic forecasts}\\
+  \'E. Marcotte et al. (2023)
+\end{book}
+A \emph{scoring rule} is a function $S$ measuring how unlikely an event $y \sim \text{Data}$ is,
+wrt a forecasted distribution $F$; it is \emph{proper} if
+\[ \E_{ y \sim \text{Data} } S(y,F) \]
+is minimal for $F = \text{Data}$.
+
+In practice, however, we do not have a ground truth distribution, but only a finite sample from it:
+for some combinations of
+\begin{align*}
+  d &: \text{ dimension} \\
+  n &: \text{ground truth sample size} \\
+  m &: \text{ forecast sample size}
+\end{align*}
+the statistical power of most scoring rules to detect
+\begin{compactitem}[--]
+\item Differences in mean;
+\item Positive correlations;
+\item Skewness;
+\item Difference in marginal variance;
+\item etc.
+\end{compactitem}
+is low -- you need to increase $n$ and $m$.
+
+*** No, Probabilistic forecasting
+
+\nextbook
+\begin{book}
+  \emph{Generative probabilistic forecasting\\ with applications in market operations}\\
+  X. Wang and L. Tong.
+\end{book}
+A \emph{weak autoencoder} only recovers its input in distribution.
+\[
+\begin{tikzpicture}[>=stealth,xscale=1,yscale=.15,inner sep=2pt,outer sep=1pt,baseline=0]
+  \begin{scope}
+    \node[anchor=west,draw] (D) at (0,0) {discriminator\mathstrut};
+    \node[anchor=east] (x) at (-1,1) {$x$};
+    \node[anchor=east] (z) at (-1,-1) {$\hat x$};
+    \draw[->] (x) -- (x-|D.west);
+    \draw[->] (z) -- (z-|D.west);
+  \end{scope}
+  \begin{scope}[shift={(0,-5)}]
+    \node[anchor=west,draw] (D) at (0,0) {discriminator\mathstrut};
+    \node[anchor=east] (x) at (-1,1) {$z$};
+    \node[anchor=east] (z) at (-1,-1) {$\text{Unif}(0,1)^d$};
+    \draw[->] (x) -- (x-|D.west);
+    \draw[->] (z) -- (z-|D.west);
+  \end{scope}
+\end{tikzpicture}
+\]
+
+** DONE TO DELETE Introduction
+*** Mechanistic interpretability, ICML tutorial
+
+\nextbook
+\begin{book}
+  \emph{Mechanistic interpretability\\ for language models}\\
+  (ICML 2025)
+\end{book}
+\emph{Mechanistic interpretability} (MI) studies
+\begin{compactitem}[--]
+\item The \emph{features} encoded in the model (in layers, components (e.g., attention heads), or neurons);
+\item \emph{Circuits}, \ie, computational subgraphs whose nodes are features;
+\item \emph{Universality}: whether those features or circuits generalize to other architectures or tasks.
+\end{compactitem}
+Feature study can be targeted (``is feature X present? where?''):
+\begin{compactitem}[--]
+\item Probing: use a simple model (linear) to distinguish presence/absence of a feature at a given layer
+  (but the probe should not be too powerful, and it can only detect the presence of a feature, not whether it is used);
+\item Vocabulary projection: decode an activation (from the residual stream) into a token
+  (you may need another matrix than the embedding matrix: it was trained from the final layer only)
+\item Transplant the activation in another context, e.g., to complete the sentence ``tell me more about''
+\end{compactitem}
+or open-ended
+\begin{compactitem}[--]
+\item Neuron activation visualization: highlight tokens which activate a neuron and try to find what they have in common --
+  but most neurons are polysemantic (\emph{superposition} phenomenon);
+\item Sparse autoencoders (SAE) try to disentangle superposed features.
+\end{compactitem}
+
+To study circuits,
+\begin{compactitem}[--]
+\item Choose a behaviour, e.g., subject-verb agreement;
+\item Define the computational graph (the nodes could be layers, bits of layers (attention heads) or neurons);
+\item Find the subgraph explaining that behaviour.
+\end{compactitem}
+Try:
+\begin{compactitem}[--]
+\item Intervention:
+  \begin{compactitem}[\ensuremath{\bigcdot}]
+  \item Noising: remove the component of interest (use resampling rather than zero or random values -- that would be out-of-distribution);
+  \item Denoising: keep the component of interest but remove the rest,
+    by adding noise, or changing the input (counterfactual input);
+  \end{compactitem}
+\item Attention visualization.
+\end{compactitem}
+
+Results are mixed:
+\begin{compactitem}[--]
+\item Only 1\% to 5\% of neurons are universal;
+\item Most neurons are polysemantic;
+\item SAE probes are worse than logistic regression;
+\item SAEs are worse than prompting to steer neural nets;
+\item MI study is not scalable, lacks benchmarks and ground truth;
+\item It is unclear how to generalize MI beyond text.
+\end{compactitem}
+
+** DONE TO DELETE SAE, Transcoder
+*** Better SAEs
+\nextbook
+\begin{book}
+  \emph{Scaling and evaluating sparse autoencoders}\\
+  L. Gao et al.
+\end{book}
+To train SAEs:
+\begin{compactitem}[--]
+\item Use a TopK activation function (this eliminates the need for a sparsifying $L^2$ penalty)
+  or MultiTopK (combine losses for several values of $k$, e.g., $\ell_k + \tfrac18 \ell_{4k}$);
+\item Initialize the decoder to the transpose of the encoder;
+\item Add an \emph{auxilliary loss}, for the reconstruction error from the top $k_{\text{aux}}$ dead latents --
+  this reduces the number of dead latents, which can otherwise reach 90\% of the activations.
+\end{compactitem}
+
+*** Better SAEs
+
+\nextbook
+\begin{book}
+  \emph{Scaling and evaluating sparse auto-encoders}\\
+  L. Gao et al.
+\end{book}
+The SAE with top-$k$ activations ($k=32$)
+does not require an $\ell^0$ or $\ell^1$ penalty,
+but may suffer from a large number of dead neurons:
+add an auxiliary loss, the reconstruction error from the top $k_{\text{aux}}$ (512).
+You can use several values of $k$,
+e.g., $\ell(k) + \ell(4k)/8$, and change $k$ at test time.
+
+% TODO: WHAT IS $\ell$?
+
+\begin{align*}
+  y &= \sigma \bigl( W_1 (x-b_2) + b_1 \bigr) \\
+  \hat x &= W_2 y + b_2
+\end{align*}
+
+\nextbook
+\begin{book}
+  \emph{Improving dictionary learning\\ with gated sparse autoencoders}\\
+  S. Rajamanoharan et al.
+\end{book}
+The $L^1$ penalty in SAE
+\begin{align*}
+  x &= x - b_2 \\
+  y &= \text{ReLU}( W_1 x + b_1 ) \\
+  \hat x &= W_2 y + b_2
+\end{align*}
+causes shrinkage.
+Instead, \emph{gated SAE}s use
+\begin{align*}
+  x &= x - b_2 \\
+  g &= W_0 x + b_0 \\
+  y &= \mathbf 1 _{g\geq0} \odot \text{ReLU}( W_1 x + b_1 ) \\
+  \hat x &= W_2 y + b_2 \\
+  (W_1)_{ij} &= e^{ r_i } \cdot ( W_0 )_{ij}.
+\end{align*}
+
+*** SAE: Matryoshka
+
+\nextbook
+\begin{book}
+  \emph{Learning multi-level features\\ with Matryoshka sparse autoencoders}\\
+  B. Bussmann et al.
+\end{book}
+Sparse autoencoders (SAE) with a large dictionary size struggle to capture the hierarchical structure of real-world concepts
+and suffer from:
+\begin{compactitem}[--]
+\item \emph{Feature splitting}: high-level features disappear and are replaced by lower-level ones, e.g.,
+  ``punctuation mark'' is split into ``period'', ``comma'', ``question mark'', etc.;
+\item \emph{Feature absorption}: high-level features only partially split, leading to high-level features with holes, e.g.,
+  ``tokens stating with E except `Elephant'{}'';
+\item \emph{Feature composition}: high-level concepts can merge, e.g., ``red'' and ``triangle'' can lead to ``red triangle''.
+\end{compactitem}
+Train a single SAE with a Matryoshka loss
+\[ \ell = \sum _{ m \in \mathcal M} \n{ \mathbf x - f_n( \mathbf x ) }_2^2 + \alpha \ell_{\text{aux}} \]
+where $\mathcal M$ is a set of dictionary sizes (either fixed or sampled randomly for each batch --
+fixed seems to work better)
+and $f_m(\mathbf x)$ is the reconstruction using only the first $m$ features.
+
+Use JumpReLU (zero out activations below some threshold),
+Top-$k$ (zero out all bit the top $k$ activations, for each sample),
+or BatchTopK (zero our all but the top $B\times k$ activations in a batch of size $B$).
+
+\nextbook
+\begin{book}
+  \emph{Matryoshka representation learning}\\
+  A. Kusupati et al.
+\end{book}
+Use $\displaystyle \sum_{k=0}^K \ell( z_{ 1: d / 2^k} )$ as loss ($K=4$).
+
+*** SAE, JumpReLU
+
+\nextbook
+\begin{book}
+  \emph{Jumping ahead: improving reconstruction fidelity with JumpReLU sparse autoencoders}\\
+  S. Rajamanoharan et al.
+\end{book}
+To train an SAE,
+with discontinuous JumpReLU activations
+and $\ell^0$ sparsity penalty,
+use straight-through estimation for the gradients
+\[
+\dfrac{ \partial \text{JumpReLU} }{ \partial \theta } *** k_\epsilon ,
+\quad
+\dfrac{ \partial \mathbf 1 _{ z \geq \theta } }{ \partial \theta } *** k_\epsilon
+\]
+where $k_\epsilon$ is a (rectangle) kernel of bandwidth $\epsilon$;
+for the $\ell^0$ penalty, use the pre-activations:
+\[ \n{y} _0 = \mathbf 1 _{ W_1 x + b_1 \geq 0 }. \]
+
+*** Universal SAE
+
+\nextbook
+\begin{book}
+  \emph{Universal sparse autoencoders:\\ interpretable cross-model concept alignment}\\
+  H. Thasarathan et al.
+\end{book}
+Train a single, overcomplete SAE on the activations of several pretrained models.
+\[
+\begin{tikzpicture}[>=stealth,xscale=2,yscale=.8,inner sep=2pt,outer sep=0pt,baseline=0]
+  \node (i) at (1,6) {image};
+  \node[fill=blue!15] (mi) at (2,5) {model $i$};
+  \node[fill=blue!15] (mj) at (0,5) {model $j$};
+  \node (ai) at (2,4) {activations $i$};
+  \node (aj) at (0,4) {activations $j$};
+  \node[fill=blue!15] (ei) at (2,3) {encoder $i$};
+  \node[fill=blue!15] (ej) at (0,3) {encoder $j$};
+  \node (l) at (1,2) {latent};
+  \node[fill=blue!15] (di) at (2,1) {decoder $i$};
+  \node[fill=blue!15] (dj) at (0,1) {decoder $j$};
+  \node (hi) at (2,0) {$\widehat{\text{activations }i}$};
+  \node (hj) at (0,0) {$\widehat{\text{activations }j}$};
+  \draw[->] (i) -- (mi);
+  \draw[->] (mi) -- (ai);
+  \draw[->] (ai) -- (ei);
+  \draw[->] (ei) -- (l);
+  \draw[->] (l) -- (di);
+  \draw[->] (di) -- (hi);
+  \draw[->] (i) -- (mj);
+  \draw[->] (mj) -- (aj);
+  \draw[->] (aj) -- (ej);
+  \draw[->] (ej) -- (l);
+  \draw[->] (l) -- (dj);
+  \draw[->] (dj) -- (hj);
+\end{tikzpicture}
+\]
+
+
+*** Gemma Scope (is there a website?)
+
+\nextbook
+\begin{book}
+  \emph{Gemma Scope: open sparse autoencoders everywhere all at once on Gemma 2}\\
+  T. Lieberum et al.
+\end{book}
+To explain an LLM,
+train a \emph{sparse autoencoder} (SAE, sparse and nonnegative)
+on its activations
+(after the MLP, or the activations on the residual stream -- for all layers)
+\begin{align*}
+  & x \mapsto y = \sigma( W_1 x + b_1 ) \mapsto \hat x = W_2 y + b_2 \\
+  & \sigma(z) = \text{JumpReLU}_\theta(z) = z \odot \mathbf{1}_{ z \geq \theta } =
+  \smash{%
+\begin{tikzpicture}[>=stealth,scale=.5,inner sep=1pt,outer sep=0pt,baseline=-2]
+  \draw[->] (-1,0) -- (1.5,0);
+  \draw[->] (0,-1) -- (0,1.5);
+  \draw[densely dotted] (-1,-1) -- (1.5,1.5);
+  \draw[ultra thick,blue!50] (-1,0) -- (.75,0);
+  \draw[ultra thick,blue!50] (.75,.75) -- (1.5,1.5);
+\end{tikzpicture}%
+}
+  \\
+  & \theta = 10^{-3}
+\end{align*}
+\emph{Transcoders} (which reconstruct the output of an MLP from its input,
+using a sparse hidden layer) do not work that well.
+
+*** SAE: applications (Claude)
+\nextbook
+\begin{book}
+  \emph{Scaling monosemanticity: extracting interpretable features from Claude 3 Sonnet}\\
+  A. Templeton et al.
+\end{book}
+% With an interactive feature UMAP
+Applications of sparse autoencoders (SAE) to interpret LLMs include
+identifying features activated when
+\begin{compactitem}[--]
+\item The model gives instructions to build chemical, biological or nuclear weapons;
+\item The user probes the model's goals and values, or tries to jailbreak it;
+\item The model is trained to be a sleeper agent;
+\item etc.
+\end{compactitem}
+
+
+*** Transcoders; circuits
+
+\nextbook
+\begin{book}
+  \emph{Transcoders find\\ interpretable LLM feature circuits}\\
+  J. Dunefsky et al.
+\end{book}
+\emph{Circuit analysis} looks for sparse subgraphs corresponding to specific behaviours.
+Transcoders approximate a densely activating MLP layer with a wider, sparsely activating layer.
+\begin{align*}
+  z &= \text{ReLU}( W_1 x + b_1 ) \\
+  \hat y &= W_2 z + b_2.
+\end{align*}
+Train with a faithfulness loss
+$\n{ \hat y - y }^2$
+and a sparsity penalty $\n z _1 $.
+
+%TODO: FIGURE 1?
+
+To find interpretable circuits,
+pick the top $k$ activations;
+among their children, pick the top $k$ activations;
+among the resulting $k^2$ graphs, pick the top $k$ ones;
+and continue.
+
+%TODO: FIGURE 2?
+
+*** Transcoder
+\nextbook
+\begin{book}
+  \emph{Sparse cross-coders\\ for cross-layer features and model diffing}\\
+  J. Lindsey et al.
+\end{book}
+Adjacent layers are almost parallel:
+apply dictionary learning to them jointly
+(a cross-coder is a multi-layer transcoder).
+\[
+\begin{tikzpicture}[>=stealth,xscale=.5,yscale=.4,inner sep=2pt,outer sep=1pt,baseline=37]
+  \node (I) at (0,6) {};
+  \node (J) at (0,3) {};
+  \node (A) at (0,6.7) {};
+  \node (B) at (0,-.3) {};
+  \node[draw] (X) at (1,5) {\ \ \ };
+  \node[draw] (Y) at (1,2) {\ \ \ };
+  \node[circle,draw,inner sep=-.5pt] (p1) at (0,4) {\footnotesize$+$};
+  \node[circle,draw,inner sep=-.5pt] (p2) at (0,1) {\footnotesize$+$};
+  \draw[->] (A) -- (p1);
+  \draw[->] (0,6) -| (X);
+  \draw[->] (X) |- (p1);
+  \draw[->] (0,3) -| (Y);
+  \draw[->] (Y) |- (p2);
+  \draw[->] (p2) -- (B);
+  \draw[->] (p1) -- (p2);
+\end{tikzpicture}
+=
+\begin{tikzpicture}[>=stealth,xscale=.5,yscale=.4,inner sep=2pt,outer sep=1pt,baseline=37]
+  \node (I) at (0,6) {};
+  \node (J) at (0,3) {};
+  \node (A) at (0,6.7) {};
+  \node (B) at (0,-.3) {};
+  \node[draw] (X) at (2,5) {\ \ \ };
+  \node[draw] (Y) at (1,2.5) {\ \ \ };
+  \node[circle,draw,inner sep=-.5pt] (p1) at (1,4) {\footnotesize$+$};
+  \node[circle,draw,inner sep=-.5pt] (p2) at (1,1) {\footnotesize$+$};
+  \node[circle,draw,inner sep=-.5pt] (p3) at (0,1) {\footnotesize$+$};
+  \draw[->] (A) -- (p3);
+  \draw[->] (0,6) -| (X);
+  \draw[->] (0,6) -| (p1);
+  \draw[->] (X) |- (p1);
+  \draw[->] (X) |- (p2);
+  \draw[->] (p1) -- (Y);
+  \draw[->] (Y) -- (p2);
+  \draw[->] (p2) -- (p3);
+  \draw[->] (p3) -- (B);
+\end{tikzpicture}
+=
+\begin{tikzpicture}[>=stealth,xscale=.5,yscale=.4,inner sep=2pt,outer sep=1pt,baseline=37]
+  \node (A) at (0,6.7) {};
+  \node (B) at (0,-.3) {};
+  \node[draw] (X) at (2,3.5) {\ \ \ };
+  \node[draw] (Y) at (1,3.5) {\ \ \ };
+  \node[circle,draw,inner sep=-.5pt] (p1) at (0,1) {\footnotesize$+$};
+  \node[circle,draw,inner sep=-.5pt] (p2) at (1,1) {\footnotesize$+$};
+  \draw[->] (A) -- (p1);
+  \draw[->] (p1) -- (B);
+  \draw[->] (0,6) -| (X);
+  \draw[->] (0,6) -| (Y);
+  \draw[->] (X) |- (p2);
+  \draw[->] (Y) -- (p2);
+  \draw[->] (p2) -- (p1);
+\end{tikzpicture}
+=
+\begin{tikzpicture}[>=stealth,xscale=.5,yscale=.4,inner sep=2pt,outer sep=1pt,baseline=37]
+  \node (A) at (0,6.7) {};
+  \node (B) at (0,-.3) {};
+  \node[draw] (X) at (1,3.5) {\ \ \ \ \ \ };
+  \node[circle,draw,inner sep=-.5pt] (p1) at (0,1) {\footnotesize$+$};
+  \draw[->] (A) -- (p1);
+  \draw[->] (p1) -- (B);
+  \draw[->] (0,6) -| (X);
+  \draw[->] (X) |- (p1);
+\end{tikzpicture}
+\]
+
+*** Circuits
+
+\nextbook
+\begin{book}
+  \emph{Sparse feature circuits: discovering and editing interpretable causal graphs in language models}\\
+  S. Marks et al.
+\end{book}
+Neurons or attention heads are polysemantic.
+Instead, use sparse autoencoders and look for sparse feature circuits.
+After interpreting them,
+you may decide to remove some of them
+(e.g., gender, for fairness).
+
+** DONE TO DELETE ML: RuleFit
+*** ML, interpretablity: RuleFit
+
+\nextbook
+\begin{book}
+  \emph{Predictive learning via rule ensembles}\\
+  J.H. Friedman nad B.E. Popescu (2008)
+\end{book}
+\emph{RuleFit} is an interpretable machine learning model:
+\begin{compactitem}[--]
+\item Fit a random forest;
+\item Extract rules (each path from the root of a tree to a leaf defines a rule);
+\item Fit a lasso on the initial features and the rules (to capture interactions),
+  after standardizing both features and rules.
+\end{compactitem}
+
+\nextbook
+\begin{book}
+  \emph{Node Harvest}\\
+  N. Meinshausen (2010)
+\end{book}
+\emph{NodeHarvest} is similar to RuleFit,
+but looks for a \emph{convex} combination of leaf forecasts
+(instead of a linear combination of leaf indicators).
+
+\nextbook
+\begin{book}
+  \emph{Interpretable random forests\\ via rule extraction}\\
+  C. B\'enard et al.
+\end{book}
+\emph{Sirus}
+\begin{compactitem}[--]
+\item Trains a random forest, with shallow trees, and splits at the $q$-empirical quantiles of the marginal distribution ($q=10$);
+\item Selects the most frequent rules (internal nodes or leaves);
+\item Removes the redundant ones (linear combinations of more frequent ones);
+\item Fits a ridge regression with the rule values.
+\end{compactitem}
+
+\nextbook
+\begin{book}
+  \emph{Rule induction partitioning estimator:\\ design of an interpretable prediction algorihm}\\
+  V. Margot et al.
+\end{book}
+RIPE
+\begin{compactitem}[--]
+\item Builds a set of ``suitable'' rules (hyper-rectangles, using a small number of coordinates);
+\item Computes the forecast of an observation $x$ by using the average of the values in
+  \begin{compactitem}[\ensuremath{\cdot}]
+  \item The intersection of the cells containing $x$
+  \item Minus the union of the cells not containing $x$;
+  \end{compactitem}
+\[
+\begin{tikzpicture}[>=stealth,scale=.25,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
+  \fill[yellow!50!white] (0,2) -- (0,4) -- (2,4) -- (2,3) -- (1,3) -- (1,2) -- cycle;
+  \draw[ultra thick,green!50!black] (0,2) -- (5,2) -- (5,5) -- (0,5) -- cycle;
+  \draw[ultra thick,red!70!white] (0,-2) -- (0,4) -- (2,4) -- (2,-2) -- cycle;
+  \draw[ultra thick,blue!40!white] (1,-2) -- (1,3) -- (5,3) -- (5,-2) -- cycle;
+  \node[circle,fill,inner sep=1pt] (A) at (.5,3.5) {};
+  \node[right=-1.5mm of A]{\footnotesize$x$};
+  \begin{scope}[shift={(8,-.5)}]
+    \draw[ultra thick,red!70!white]   (0,5.7) -- (1,5.7) -- (1,5.15) -- (0,5.15) -- cycle;
+    \draw[ultra thick,green!50!white] (0,4.85) -- (1,4.85) -- (1,4.3) -- (0,4.3) -- cycle;
+    \draw[ultra thick,blue!40!white]  (0,2.7) -- (1,2.7) -- (1,3.3) -- (0,3.3) -- cycle;
+    \draw[ultra thick, yellow!50!white] (0,0.7) -- (1,0.7) -- (1,1.3) -- (0,1.3) -- cycle;
+    \fill[ultra thick, yellow!50!white] (0,0.7) -- (1,0.7) -- (1,1.3) -- (0,1.3) -- cycle;
+    \node[anchor=west] at (1.5,5) {cells containing $x$};
+    \node[anchor=west] at (1.5,3) {cells not containing $x$};
+    \node[anchor=west] at (1.5,1) {\strut intersection of cells containing $x$};
+    \node[anchor=west] at (1.5,-.2) {\strut minus};
+    \node[anchor=west] at (1.5,-1.4) {\strut union of cells not containing $x$};
+  \end{scope}
+\end{tikzpicture}
+\]
+\item Prunes the set of suitable rules to minimize the empirical risk.
+\end{compactitem}
+Those rules do not form a tree -- they can be converted to a partition of a tree,
+but it could be exponentially larger than the rule set.
+
+** DONE TO DELETE Relevance
+*** Statistics: Relevance
+
+\nextbook
+\begin{book}
+  \emph{Dual interpretation\\ of machine learning forecasts}\\
+  P. Goulet Colombe et al.
+\end{book}
+The output of many models ((kernel) ridge regression, neural nets, random forests, boosting)
+can be expressed as linear combinations of training observations:
+\[ \hat y_j = \sum_{ i \in \text{Train} } w_{ij} y_i . \]
+Those weights can be interpreted as the weights of a ``data portfolio''.
+We can compute and plot:
+\begin{compactitem}[--]
+\item The contributions $c_{ji} = w_{ji} y_i$, and their cummulated sums;
+\item The concentration of $w_{\bigcdot j }$;
+\item The sum of the negative weights (short positions);
+\item The sum of the weights (not necessarily 1 -- but tree-based models are long-only, fully-invested);
+\item The turnover $\n{ w_{ \bigcdot, j} - w_{ \bigcdot, j-1} }_1$;
+\item The overall historical importance
+  $\n{ w_{ i \bigcdot } }_1$.
+\end{compactitem}
+
+** DONE TO DELETE LIME, LRP, Taylor, etc.
+*** Layerwise relevance propagation, fine-tuning, attacks
+
+\nextbook
+\begin{book}
+  \emph{The hidden dimensions of LLM alignment:\\
+  a multi-dimensional analysis\\ of orthogonal safety directions}\\
+  W. Pan et al.
+\end{book}
+Approximate the activation shift before and after fine-tuning
+$T : \mathcal X \to \mathcal X$ with an affine function
+\[ \operatorname*{Argmin}_{ w, b } \E_x \bigl\| T(x) - (Wx+b) \bigr\| ^2 \]
+and interpret the first $k$ components
+(right singular vectors)
+of $W-I$ back to prompt tokens using layerwise relevance propagation (\texttt{lxt});
+they are:
+\begin{compactitem}[--]
+\item Sensitive topics;
+\item Story-telling;
+\item Porn and hate speech;
+\item Real-world problems;
+\item ``Start your response with `Sure, I am happy to help'{}''
+\end{compactitem}
+This suggests a few attacks:
+\begin{compactitem}[--]
+\item Removing the non-dominant directions;
+\item Removing trigger words (identified by LRP) by rephrasing the prompt.
+\end{compactitem}
+
+\nextbook
+\begin{book}
+  \emph{AttnLRP: Attention-aware layer-wise relevance propagation for transformers}\\
+  R. Achtibat et al.
+\end{book}
+LRP can be generalized to transformers, in spite of the nonlinear operations
+(softmax, matrix multiplication, layernorm, MoE: linearize them).
+
+Implementation in \texttt{lxt}.
+
+*** LIME variants
+
+\nextbook
+\begin{book}
+  \emph{Local rule-based explanations\\ of black box decision systems}\\
+  R. Guidotti et al.
+\end{book}
+LoRE is a tree- and counterfactual-based variant of LIME:
+\begin{compactitem}[--]
+\item Fit a decision tree on the output of the model on a synthetic neighbourhood of the point of interest;
+  use a genetic algorithm to better explore the decision boundary;
+\item Also give counterfactuals: features to change to change the output.
+\end{compactitem}
+
+*** Taylor
+
+\nextbook
+\begin{book}
+  \emph{Explaining nonlinear classification decisions with deep Taylor decomposition}\\
+  G. Montavon et al.
+\end{book}
+To decompose a function $f: \RR^d \to \RR_+$ into
+$f(x) = \sum_i R_i(x)$,
+ideally such that $\forall i, x \ R_i(x) \geq 0$
+(which implies $f(x)=0 \Rightarrow R(x) = 0$),
+we can think of sensitivity analysis
+\[ R(x) \propto
+\left( \dfrac{ \partial f }{ \partial x } \right)^2
+\] or the Taylor decomposition
+\begin{align*}
+  R(x) &= \left. \dfrac{ \partial f }{ \partial x } \right|_{ x = \tilde x } \odot (x - \tilde x ) \\
+  \tilde x &= \operatorname*{Argmin}_{ f(\tilde x) = 0 } \n{ \tilde x - x }
+\end{align*}
+but finding the anchor point $\tilde x$
+(e.g., an image with only the background and without the subject that $f$ tries to detect)
+is expensive.
+
+For a neural network, we can consider the mapping from the activations in one layer $\ell$
+to the relevance of a neuron $j$ in the next layer $\ell+1$
+\[ f_j^{ \ell \to \ell + 1 } : ( x_i^\ell)_i \longmapsto R_j^{\ell+1} \]
+and apply the Taylor decomposition --
+the root points $(x_{ij}^\ell)_i$ are easier to find.
+
+The resulting relevance propagation rules are similar to the LRP ones,
+but without hyperparameters to choose.
+
+** DONE TO DELETE Model merging  
+  
+*** Model merging
+
+\nextbook
+\begin{book}
+  \emph{ZipIt! Merging models\\ from different tasks without training}\\
+  G. Stoica et al.
+\end{book}
+To merge models (same architecture but different training data and/or tasks),
+permutation-based methods assume they have exactly the same features,
+up to permutation,
+and try to recover that permutation, for each layer:
+\[ \operatorname*{Maximize}_{ \sigma \in \mathfrak S_n } \sum_i \cor( z_i^1 , z_{\sigma(i)} ^2 ) \]
+where $z_i^2$ are the features, for neuron $i$, in layer $\ell$, which contains $n$ neurons.
+\[ W_\ell^*** = \tfrac12 W_\ell^1 + \tfrac12 P_\ell W_\ell^2 P_{\ell-1}^\top \]
+Instead, concatenate the features,
+$z_i^1 \| z_i^2$, and average highly correlated ones:
+this accounts for redundancy in each model,
+and features unique to each model.
+
+*** Merging LoRAs
+
+\nextbook
+\begin{book}
+  \emph{ZipLoRA: any subject in any style\\ by effectively merging LoRAs}\\
+  V. Shah et al
+\end{book}
+LoRA update matrices are sparse, but aligned LoRA matrices interfere when naively merged,
+\[ \Delta W = \lambda \Delta W _{\text{context}} + ( 1 - \lambda ) \Delta W_{\text{style}} . \]
+Instead, learn which column of which LoRA to keep,
+\[ ( m_1' \otimes \mathbf 1 ) \odot \Delta W_1 + ( m_2' \tens \mathbf 1 ) \odot \Delta W_2. \]
+
+** DONE TO DELETE Data-centric ML
+*** data-centric ML with convex optimization; ICML
+
+\nextbook
+\begin{book}
+  \emph{MixMin: finding data mixtures\\ via convex minimization}\\
+  A. Thudi et al. (2025)
+\end{book}
+When training with data from different sources,
+choosing the data mix can be formulated as a bilevel optimization problem.
+First, train a (cheap) proxy model for each source,
+then learn the best convex combination of their outputs,
+and use this weighting to remix the data.
+This is specific to the cross-entropy or the mean square error loss:
+the Bayes optimal model for a mixture
+is the mixture of Bayes optimal models for each source.
+
+*** DONE Data-centric ML
+
+\nextbook
+\begin{book}
+  \emph{The curse of recursion: training on\\ generated data makes models forget}\\
+  O. Shumailov et al.
+\end{book}
+Training on generated data causes model collapse:
+\begin{compactitem}[--]
+\item At each generation, since the data is finite, there is a nonzero probability that some of the data distribution will be lost;
+  the tails will disappear, and the distribution will progressively drift;
+\item Since the model is only an approximation
+  (it does not perfectly reproduce the target distribution),
+  the generated data will follow a slightly different distribution,
+  for instance, assigning a nonzero probability outside the support of the target distribution.
+\end{compactitem}
+
+** No, Time series in Finance
+*** No, Time series: Stylized facts
+
+\nextbook
+\begin{book}
+  \emph{Can GANs learn the stylized facts\\ of financial time series}\\
+  S. Kwon and Y. Lee
+\end{book}
+GANs struggle to reproduce simple statistical models (Heston, Ornstein-Uhlenbeck, jump diffusion, etc.)
+
+*** No, Time series foundation models
+
+\nextbook
+\begin{book}
+  \emph{Time-series foundation model for value-at-risk}\\
+  A. Goel et al. (2024)
+\end{book}
+\emph{Fine-tuned} foundation time series models (e.g. TimeFM) are competitive
+with conventional econometric models (GARCH, GAS).
+
+*** No, Finance, Synthetic time series
+
+\nextbook
+\begin{book}
+  \emph{Deep generators on commodity markets; application to deep hedging}\\
+  N. Bourson et al.
+\end{book}
+Synthetic time series:
+TSGAN, CTOGAN, SIGGAN, CEGEN.
+
+*** No (I mentioned conformal prediction last year) Finance, Conformal prediction for time series
+
+\nextbook
+\begin{book}
+  \emph{Conformal predictive portfolio selection}\\
+  M. Kato (2024)
+\end{book}
+Consider a model forecasting future returns $Y_t$ from asset features $X_t$:
+\[ \hat Y_{t+1} = \hat f_t( X_{t+1} ) \]
+where $\hat f_t$ is trained on
+$(X_1,Y_1),(X_2,Y_),\dots,(X_t,Y_t)$.
+The returns of a portfolio with weights $w$ are $w' Y_t$;
+the forecasted returns are $w' \hat Y_{t+1}$.
+Apply conformal prediction (CP)
+to those portfolio return predictions:
+for each $w$, we have a prediction interval
+\[ \hat C_t^w ( X_{t+1} = [ \underline r _{t+1} ^w , \bar r_{t+1}^w ]. \]
+Find the portfolio weights minimizing some loss function of those intervals
+\[ w^*** = \argmin_w \ell\bigl( \hat C_t^w ( X_{t+1} ) \bigr) .\]
+
+For instance:
+\begin{compactitem}[--]
+\item Start with a finite set of portfolios $\mathscr E$;
+\item Compute their prediction intervals at level $\alpha$:
+  $ [ \underline r_w , \bar r_w ] $;
+\item Consider a proportion $\beta$ of portfolios,
+  $\tilde{\mathscr E} \subset \mathscr E$,
+  with the highest
+  $\underline r_w$
+  (low risk, measured with the VaR);
+\item Among those, pick the porfolio with the highest $\bar r_w$.
+\end{compactitem}
+
+To account for the time series lack of exchangeability,
+use full conformal prediction,
+\ie, fit the model on augmented datasets
+(add $(X_{t+1},y)$ for all possible values of $y$)
+and on all permuted datasets
+\[ (X_{\sigma(1)}, y_{\sigma(1)}), \dots, (X_{\sigma(t)}, y_{\sigma(t)}), (X_{\sigma(t+1)}, y) \]
+for all $\sigma \in \mathfrak S_n$.
+It is actually sufficient to consider only shifts, \ie, permutations of the form
+\[ \exists j \in \llbracket 0, t-1 \rrbracket \quad
+\forall i \in \llbracket 1, t \rrbracket \quad
+\sigma(i) \equiv i+j \ (\text{mod}\ t) \]
+
+\nextbook
+\begin{book}
+  \emph{Exact and robust conformal inference methods\\ for predictive machine learning\\ with dependent data}\\
+  V. Chernozhukov et al.
+\end{book}
+Conformal prediction for time series: use full conformal prediction
+and all shifts of the data.
+
+** DONE empty Data-centric ML
+** DONE TO DELETE Graphs
+
+\nextbook
+\begin{book}
+  \emph{Portfolio optimization}\\
+  D.P. Palomar (2025)
+\end{book}
+
+\nextbook
+\begin{book}
+  \emph{Optimization algorithms for graph Laplacian estimation via ADMM anbd MM}\\
+  L. Zhao et al.
+\end{book}
+To estimate a Laplacian-structured precision matrix
+\[  \begin{array}{ll}
+  \text{Find} & \Theta \succcurlyeq 0 \\
+  \text{To minimize} & \tr( \Theta S ) - \log \operatorname{gdet} ( \Theta )  + \alpha \n{ \Theta }_1 \\
+  \text{Such that} & \Theta \mathbf 1 = 0 \\
+  & \forall i \neq j \ \  \Theta_{ij} \leq 0
+\end{array} \]
+notice that $\n \Theta _1 = \tr( \Theta H ) $,
+with $H = 2 I - \mathbf 1 \mathbf 1 ' $,
+because the diagonal (resp. off-diagonal) elements of $\Theta$ are nonnegative (resp. nonpositive),
+and $\text{gdet}\,\Theta = \det \Xi$, where $\Theta = P \Xi P'$,
+with $P$ the orthogonal complement of $\mathbf 1$
+(\ie, $P'P = I_{k-1}$ and $P' \mathbf 1_k = \mathbf 0_{k-1}$).
+The objective becomes
+\[ \tr\bigl( \Xi P' ( S + \alpha H ) P \bigr) - \log \det \Xi . \]
+To speed up computations, use ADMM
+(or MM if the graph is very sparse).
+Note that, in spite of the $L^1$ penalty, the result is not sparse.
+
+\nextbook
+\begin{book}
+  \emph{Graphical models in heavy-tailed markets}\\
+  J.V. Cadoso et al.
+\end{book}
+To learn a Lapalcian Gaussian Markov random field (LGMRF),
+\[ p(x) \propto \sqrt{ \text{det}^*\, L } \exp \bigl[ -\tfrac12 (x-\mu)' L (x-\mu) \bigr], \]
+where $\det^*$ is the pseudo-determinant (product of the non-zero eigenvalues:
+$\det^*** L = \det(L + \mathbf 1 \mathbf 1' / p )$
+if the graph is connected),
+solve the Laplacian-structured graphical lasso problem
+\[ \begin{array}{ll}
+  \text{Find} & L \succcurlyeq 0 \\
+  \text{To minimize} & \tr( LS ) - \log \det^*** L + h(L) \\
+  \text{Such that} & L \mathbf 1 = 0 \\
+  & \forall i \neq j \ \ L_{ij} = L_{ji} \leq 0
+\end{array} \]
+For a zero-mean Student distribution, replace $\tr(LS)$ with
+\[ \dfrac{ p + \nu }{ n } \sum_{ i = 1 }^ n \log \left( 1 + \dfrac{ x_i' L x_i }{ \nu } \right). \]
+For a $k$-component graph, add a low-rank penalty
+\[ \tr( V' L V ) , \qquad V \in \RR^{p\times k} , \qquad V' V = I_k \]
+(indeed, $\min_V \tr(V' L V )$ is the sum of the $k$ smallest eigenvalues of $L$:
+if it is zero, $\text{rank}\, L \leq p-k$).
+
+\nextbook
+\begin{book}
+  \emph{Learning graphs from data}\\
+\end{book}
+\emph{Heuristic} methods start from the covariance, correlation or distance matrix
+between the data or, better, between the columns of the covariance, correlation or distance matrix, and use:
+\begin{compactitem}[--]
+\item Truncation, MST, PMFG, TMFG;
+\item $k$-nn;
+\item Possibly combined with Gaussian weights.
+\end{compactitem}
+
+Variants of the concentration matrix,
+which contains the \emph{partial correlations} include:
+\begin{compactitem}[--]
+\item $L^1$ sparsity penalty (graphical lasso);
+\item Laplacian structure on the concentration matrix;
+\item $L^0$ sparsity penalty;
+\item Low-rank Laplacian penalty (\ie, a $k$-component graph);
+\item Heavy tails (Student instead of Gaussian distribution).
+\end{compactitem}
+
+To find the graph structure maximizing \emph{signal smoothness}, minimizing the variance of the signal
+\[ \sum_{ij} W_{ij} ( x_i - x_j )^2 = \dfrac12 \tr( W Z ) = \tr( X L X' ) \]
+where $X$ is the data (signal), $W$ the graph weights, $L$ the corresponding Laplacian, and
+$Z_{ij} = (x_i - x_j)^2$, with the usual constraints for $L$ or $W$,
+\begin{align*}
+  & L\mathbf 1 = 0 && \forall i \neq j \ \ L_{ij} = L_{ji} \leq 0 \\
+  & \text{diag} \  W && W = W' \geq 0,
+\end{align*}
+and
+\begin{compactitem}[--]
+\item A sparsity penalty $\n W _F^2$;
+\item A degree constraint $W \mathbf = 1$;
+\item A degree penalty $- \mathbf 1 ' \log (W \mathbf 1 )$.
+\end{compactitem}
+
+** DONE TO DELETE Learning to rank, supervised portfolios
+*** DONE Learning to rank
+
+\nextbook
+\begin{book}
+  \emph{Enhancing long-short portfolios: a refined approach using learning to rank algorithms}\\
+  M. Linger et al.
+\end{book}
+Portfolio consruction is often a 2-step process:
+\[
+\begin{tikzpicture}[>=stealth,scale=.25,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
+  \node[anchor=base] (A) {data\strut};
+  \node[right=6mm of A] (B) {score\strut};
+  \node[right=6mm of B] (C) {weights\strut};
+  \draw[|->] (A) -- (B);
+  \draw[|->] (B) -- (C);
+\end{tikzpicture}
+\]
+(the score could be a financial ratio, or a forward return forecast)
+where the weights often depend on the ranks of the score.
+Instead, learning to rank (LTR) uses a 1-step process.
+The loss functions can be
+\begin{compactitem}[--]
+\item Poinwise (forecast the rank of an observation);
+\item Pairwise (predict which of two observations is ranked higher), e.g., RankNet;
+  \begin{align*}
+    \text{loss}( X, y, \theta ) &= \sum_{ y_i < y_j } \phi \bigl[ f_\theta(X_j) - f_\theta(X_i) \bigr] \\
+    \phi &=
+\begin{tikzpicture}[>=stealth,xscale=.2,yscale=.3,inner sep=1pt,outer sep=2pt,every node/.style={anchor=base}]
+\draw[very thick,blue!60!black] (-1.000,1.313)--(-0.737,1.128)--(-0.474,0.958)--(-0.211,0.804)--(0.053,0.667)--(0.316,0.548)--(0.579,0.445)--(0.842,0.358)--(1.105,0.286)--(1.368,0.227)--(1.632,0.179)--(1.895,0.140)--(2.158,0.109)--(2.421,0.085)--(2.684,0.066)--(2.947,0.051)--(3.211,0.040)--(3.474,0.031)--(3.737,0.024)--(4.000,0.018);
+\draw (-1,0) -- (4,0);
+\draw (2,-.2) -- (2,1.4);
+\end{tikzpicture}
+  \end{align*}
+  (e.g., $\phi(z) = \log(1+e^{-z})$, $(1-z)_+$ or $e^{-z}$);
+\item Listwise
+  \begin{align*}
+    \text{loss}( X, y ; \theta ) &=
+    - \sum_i \dfrac{ \phi(y_i) }{ \sum_j \phi(y_j) } \log
+    \dfrac{\phi f_\theta(X_i) }{ \sum_j \phi f_\theta( X_j ) }
+    \text{ (ListNet, cross-entropy)}
+    \\
+    \text{loss}( X, y ; \theta ) &=
+    - \log \prod_i \dfrac{
+      \phi f_\theta( X_{ y^{-1}(i) } )
+    }{
+      \sum_{ k \geq i } \phi f_\theta( X_{ y^{-1}(k) } )
+    }
+    \text{ (ListMLE, Plackett-Luce)}
+    \\
+    \text{loss}( X, y ; \theta ) &=
+    - \log \prod_i \dfrac{
+      \phi \bigl[
+        f_\theta( X_{y^{-1}(i)} ) - f_\theta( X_{y^{-1}(N-i)} )
+        \bigr]
+    }{
+      \sum_{ i \leq u \neq v \leq N-i }
+      \phi \bigl[
+        f_\theta( X_{y^{-1}(u)} ) - f_\theta( X_{y^{-1}(v)} )
+        \bigr]
+    }
+    \text{ (Listfold)}
+  \end{align*}
+  (ListNet is based on cross-entropy,
+  ListMLE on the Plackett-Luce model,
+  ListFold selects long-short pairs one by one starting with the most extreme).
+\end{compactitem}
+For portfolio construction, we want the ranking to be more accurate at the top and bottom
+(for information retrieval, we only care at the top).
+Try the following loss functions:
+\begin{compactitem}[--]
+\item ListNet-Fold, cross-entropy of $\phi(y_i-y_j)$
+  and $\phi\bigl( f_\theta(X_i) - f_\theta(X_j) \bigr)$;
+\item Weighted ListMLE, with weights decreasing from extreme pairs down to central ones;
+\item Weighted ListFold.
+\end{compactitem}
+
+*** Supervised portfolios
+
+\nextbook
+\begin{book}
+  \emph{Interpretable supervised portfolios}\\
+  G. Chevalier et al.
+\end{book}
+Instead of forecasting future returns, the \emph{supervised portfolio approach} suggests
+to forecast weights -- optimal weights, computed in hindsight.
+
+\emph{RuleFit} can make that model interpretable:
+train a random forest or boosted trees,
+explode them into a set of rules (each path from a root node to an internal or leaf node defines a rule),
+and combine them with the \emph{adaptive lasso}
+(which shrinks smaller weights even more).
+
