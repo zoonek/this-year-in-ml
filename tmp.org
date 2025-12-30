@@ -84,11 +84,11 @@ or the distribution of the p-values under H₀ and H₁ (local FDR).
 
   Statistical significance for genomewide studies
   J.D. Storey and R. Tibshirani (2003)
-  https://genomics.princeton.edu/storeylab/papers/fdringenomics.pdf  
+  https://genomics.princeton.edu/storeylab/papers/fdringenomics.pdf
 
 
   TODO: Local FDR
-  
+
 ** Sequential testing
 
 So far, we assumed we had access to all the data but,
@@ -1535,45 +1535,75 @@ for MAR (not necessarily MCAR) data.
 
 All too often, I see plots of time series forecasts
 that just plot the time series (value against time)
-and the forecast (value against time) on the same plot:
+and the forecast (value against time) on the same plot,
+for 1-period ahead forecasts:
 those plots give the impression that the model is good, regardless of the model,
 even with a simple baseline using the latest available value as forecast.
-This and other pitfalls are explained in more detail in the following review paper. 
+This and other pitfalls are explained in more detail in the following review paper.
 
   \emph{Forecast evaluation for data scientists: common pitfalls and best practices}\\
   H. Hewamalage et al.
 
-** TODO Models
+** Metadata
 
-TODO: Models leveraging metadata
+Since deep learning models can also process text,
+we can provide them, not only with numeric data,
+but also with metadata. For time series, this means
+providing both the time series themselves, but also a descrition
+of what the data is: this will help the model focus on some aspects of the data,
+e.g., seasonality for temperatures, weekly patterns and holidays for sales data,
+etc.
 
   \emph{Context is key: a benchmark for forecasting with essential textual information}\\
   A.R. Williams et al.
 
+** Foundation models
 
+Foundational time series models has started to appear but,
+so far, they are underwhelming.
 
-TODO: List foundational time series models
-      TimesFM, Chronos, Moirai
+  TimeFM: A decoder-only foundation model for time-series forecasting
+  A. Das et al. (2023)
+  https://arxiv.org/abs/2310.10688
 
-  \emph{Chronos: learning the language of time series}\\
-  A.F. Ansari et al.
-      
+  Chronos: learning the language of time series
+  A.F. Ansari et al. (2024)
+  https://arxiv.org/abs/2403.07815
 
-  
-TODO: probabilistic forecasts; explain what the CRPS is
-The \emph{continuous ranked probability score} (CRPS)
-is the quantile (pinball) loss
-integrated from 0 to 1;
-it can be used to evaluate probabilistic forecasts.
+  Moirai: Unified Training of Universal Time Series Forecasting Transformers
+  G. Woo et al. (2024)
+  https://arxiv.org/abs/2402.02592
 
-** TODO Non-stationarity
+** Data augmentation, synthetic data
+
+Similarly, synthetic time series generation (for instance, in finance),
+is still unconvincing: the models still struggle to reproduce some of the
+stylized facts of real data.
+
+  Generative learning for financial time series with irregular and scale-invariant patterns
+  H. Huang et al. (ICLR 2024)
+
+** TODO Probabilistic forecasts -- MOVE THIS ELSEWHERE (it is not specific to time series)
+
+Instead of a point forecast, we may prefer a probabilistic forecast:
+not a single value, but a probability distribution (the model can provide it as a parametric distribution,
+e.g., the parameters of a Gaussian distribution, or as samples from that distribution).
+To assess the quality of a probabilistic forecast,
+one can use the continuous ranked probability score (CRPS):
+it is the quantile (pinball) loss
+integrated from 0 to 1.
+
+  \emph{Regions of reliability in the evaluation\\ of multivariate probabilistic forecasts}\\
+  \'E. Marcotte et al. (2023)
+
+** Non-stationarity
 
 Most time series models assume that the data is stationary or, at least,
 that it has been pre-processed into stationary time series.
 A few models try to account for non-stationarity directly,
 but in a rather rudimentary way: they estimate the mean and variance of the input,
 forecast the mean and variance of the desired output (the continuation of the time series),
-and then work with standardized data. 
+and then work with standardized data.
 
   \emph{Dish-TS: a general paradigm for alleviating distribution shift in time series forecasting}\\
   W. Fan et al.
@@ -1583,7 +1613,8 @@ and then work with standardized data.
 
   \emph{Adaptive normalization\\ for non-stationary time series forecasting:\\ a temporal slice perspective}\\
   Z. Liu et al.
-  
+
+** DONE TO DELETE Non-stationarity
 *** Non-stationarity
 
 \nextbook
@@ -1627,7 +1658,7 @@ but the location scale noise model (LSNM)
 \[ Y = f_\phi(X) + \sqrt{ g_\psi(X) } \epsilon \qquad \epsilon \sim N(0,I) \]
 (previous diffusion-based models assumed homoskedasticity).
 
-** TODO Data augmentation, synthetic data
+** DONE TO DELETE Data augmentation, synthetic data
 *** Synthetic data
 
 % FTS-Diffusion
@@ -1682,8 +1713,8 @@ when forecasting future S\&P\,500 daily returns
 from the past 60 days, with deep learning models
 (iTransformer, pretrained on a domain-adjacent dataset, 8 FX time series).
 
-** TODO Probabilistic forecasts
-*** Probabilistic forecasts, scoring rules,
+** DONE TO DELETE Probabilistic forecasts
+*** DONE TO DELETE Probabilistic forecasts, scoring rules,
 
 \nextbook
 \begin{book}
@@ -1712,7 +1743,7 @@ the statistical power of most scoring rules to detect
 \end{compactitem}
 is low -- you need to increase $n$ and $m$.
 
-*** Probabilistic forecasting
+*** No, Probabilistic forecasting
 
 \nextbook
 \begin{book}
@@ -1759,7 +1790,30 @@ with its dynamics described by
 (the dynamics of $\theta$ are non-linear, but they become linear when lifted to a higher-dimension space).
 
 * TODO Interpretability
-** TODO Introduction
+** Introduction / Mechanistic interpretability
+
+Interpreting large (language) models is tricky:
+here are a few ways in which this can be done.
+
+If you want to check if a given feature is present
+in a network, and where, you can train a probe (a simple, shallow neural network)
+on a given layer: if you can detect the presence and absence of the feature on that layer,
+you can conclude that it was present in that layer.
+
+If you want to know which features are present, without providing a list of possible features,
+you can pick a neuron and check (manually) on which type of input (e.g., which token)
+it is activated.
+
+Instead of features, one can also look for interpretable circuits:
+subgraphs of the computation graph (the nodes are layers, or bits of layers, e.g., attention heads)
+performing a given task.
+
+The following tutorial gives more details.
+
+  \emph{Mechanistic interpretability\\ for language models}\\
+  (ICML 2025)
+
+** DONE TO DELETE Introduction
 *** Mechanistic interpretability, ICML tutorial
 
 \nextbook
@@ -1815,7 +1869,52 @@ Results are mixed:
 \item It is unclear how to generalize MI beyond text.
 \end{compactitem}
 
-** TODO SAE, Transcoder
+** SAE, Transcoder
+
+Most neurons are polysemantic: they detect several things at the same time,
+i.e., they encode a superposition of features.
+To account for this, you can learn a sparse auto-encoder (SAE) on the layer of interest:
+traditional auto-encoders project their input onto a low-dimensional space (bottleneck)
+and try to reconstruct it; in sparse auto-encoders, the bottleneck layer has a higher dimension than the input,
+but it is penalized to be sparse.
+
+Tricks to improve SAE training include
+TopK activations (to remove the sparsifying penalty),
+auxiliary reconstruction loss (for the reconstruction error from dead latents, to limit their number),
+JumpReLU activation (zero out activations below some threshold),
+Matryoshka loss (several loss terms, for the reconstruction from the first k1, k2, k3, etc. dimensions).
+
+  \emph{Scaling and evaluating sparse autoencoders}\\
+  L. Gao et al.
+
+  \emph{Jumping ahead: improving reconstruction fidelity with JumpReLU sparse autoencoders}\\
+  S. Rajamanoharan et al.
+
+  \emph{Learning multi-level features\\ with Matryoshka sparse autoencoders}\\
+  B. Bussmann et al.
+
+  \emph{Matryoshka representation learning}\\
+  A. Kusupati et al.
+
+To explore explore pretrained SAEs for Gemma and Claude:
+
+  Gemma Scope: open sparse autoencoders everywhere all at once on Gemma 2
+  T. Lieberum et al. (2024)
+  https://arxiv.org/abs/2408.05147
+  https://www.neuronpedia.org/gemma-scope-2
+
+  Scaling monosemanticity: extracting interpretable features from Claude 3 Sonnet
+  A. Templeton et al. (2024)
+  https://transformer-circuits.pub/2024/scaling-monosemanticity/
+
+Transcoders are very similar to SAEs:
+while SAEs try to reconstruct a layer's activations from that layer's activations after going through a wider but sparse layer,
+transcoders try to reconstruct the output (of the whole network, or just a subgraph) from the input after going through a wide but sparse layer.
+
+  \emph{Transcoders find\\ interpretable LLM feature circuits}\\
+  J. Dunefsky et al.
+
+** DONE TO DELETE SAE, Transcoder
 *** Better SAEs
 \nextbook
 \begin{book}
@@ -2127,7 +2226,30 @@ After interpreting them,
 you may decide to remove some of them
 (e.g., gender, for fairness).
 
-** TODO ML: RuleFit, adaptive lasso
+** Interpretable random forests
+
+Decision trees are interpretable but often perform poorly;
+conversely, random forests perform well but are not interpretable.
+It is possible to slightly tweak a random forest to make it interpretable:
+after training, extract all the "rules" from the random forest
+(paths from the root of a tree to a node), only keep the most common one,
+and use them as predictors in a lasso regression.
+
+  RuleFit: Predictive learning via rule ensembles
+  J.H. Friedman nad B.E. Popescu (2008)
+
+There are many variants of this idea.
+
+  \emph{Node Harvest}\\
+  N. Meinshausen (2010)
+
+  Sirus: Interpretable random forests via rule extraction
+  C. B\'enard et al.
+
+  RIPE: Rule induction partitioning estimator: design of an interpretable prediction algorihm
+  V. Margot et al.
+
+** DONE TO DELETE ML: RuleFit
 *** ML, interpretablity: RuleFit
 
 \nextbook
@@ -2205,6 +2327,7 @@ RIPE
 Those rules do not form a tree -- they can be converted to a partition of a tree,
 but it could be exponentially larger than the rule set.
 
+** No, Adaptive lasso
 *** ML, interpretability: Adaptive lasso
 
 \nextbook
@@ -2220,7 +2343,20 @@ and then a weighted lasso
 \ie, it penalizes even further small coefficients.
 It has better asymptotic properties.
 
-** TODO Relevance
+** Relevance
+
+The output of many models can be expressed as linear combinations of training observations:
+for instance, for a random forest, the forecast is the average of the leaf nodes selected.
+Those weights measure the importance of each training sample to a given forecasts.
+For linear models, this was popularized as "relevance" forecasting.
+
+  \emph{Dual interpretation\\ of machine learning forecasts}\\
+  P. Goulet Colombe et al.
+
+  \emph{Relevance-based prediction: a transparent and adaptive alternative to machine learning}\\
+  M. Czasonis et al.
+
+** DONE TO DELETE Relevance
 *** Statistics: Relevance
 
 \nextbook
@@ -2243,7 +2379,24 @@ We can compute and plot:
   $\n{ w_{ i \bigcdot } }_1$.
 \end{compactitem}
 
-** TODO LIME, LRP, Taylor, etc.
+** LIME, LRP, Taylor, etc.
+
+Other ways of interpreting a model include
+layerwise relevance propagation (LRP, also available for attention layers),
+LIME (simple, interpretable models approximating the model of interest
+in the neighbourhood of the new sample)
+and Taylor expansions.
+
+  \emph{AttnLRP: Attention-aware layer-wise relevance propagation for transformers}\\
+  R. Achtibat et al.
+
+  \emph{Local rule-based explanations\\ of black box decision systems}\\
+  R. Guidotti et al.
+
+  \emph{Explaining nonlinear classification decisions with deep Taylor decomposition}\\
+  G. Montavon et al.
+
+** DONE TO DELETE LIME, LRP, Taylor, etc.
 *** Layerwise relevance propagation, fine-tuning, attacks
 
 \nextbook
@@ -2375,6 +2528,7 @@ The \emph{sparseMAP} generalizes this to other polytopes
 \end{align*}
 
 * TODO Causality
+
 ** TODO Causal Discovery: dataset, benchmarks
 *** Benchmark
 
@@ -5699,10 +5853,10 @@ you can ask, not for a solution, but for a Python program to search for a soluti
 
   \emph{ShinkaEvolve: towards open-ended\\ and sample-efficient program evolution}\\
   R.T. Lange et al.
-  
+
   \emph{Mathematical exploration\\ and discovery at scale}\\
   B. Georgiev et al.
-  
+
 ** Formal proofs
 
 To ensure that the LLM reasons correctly,
@@ -5714,7 +5868,7 @@ which can then be checked (Isabelle, Python, Datalog, etc.)
 
   \emph{Faithful chain-of-thought reasoning}\\
   Q. Lyu et al.
-  
+
 ** RAG
 
 To augment your LLM with proprietary and/or up-to-date information,
@@ -5744,12 +5898,12 @@ and graph-of-thought (tree branches can be merged).
 
   \emph{Tree of thoughts: deliberate problem solving with large language models}\\
   S. Yao et al.
-  
+
   \emph{Forest-of-Thought: scaling test-time compute for enhancing LLM reasoning}\\
   Z. Bi et al.
 
   TODO: Graph-of-thought?
-  
+
 ** PEFT, Soft Prompts
 
 The most common way of fine-tuning a model is to add a low-rank matrix to some of the weight matrices
@@ -5785,14 +5939,14 @@ or truthfulness (we can tweak the LLM to limit hallucinations).
 
 ** Tools
 
-The array of tools available to LLMs can include generic tools, such as 
+The array of tools available to LLMs can include generic tools, such as
 a Python interpreter,
 other deep learning models (e.g., all those on HuggingFace),
 a database (for the LLM to store and retrieve the information it may need),
 
   \emph{Executable code actions\\ elicit better LLM agents}\\
   X. Wang et al. (2024)
-  
+
   \emph{HuggingGPT: solving AI tasks with ChatGPT and its friends in Hugging Face}\\
   Y. Shen et al.
 
@@ -5821,7 +5975,7 @@ and RL (reinforcement learning, to align the models with the desired ethical val
 do no harm, etc.).
 Traditionally, we first use SFT and then RL,
 but we could do it several times (SFT, RL, SFT, RL, SFT, RL, as with DeepSeek),
-or blend the two, choosing the weights 
+or blend the two, choosing the weights
 to avoid overfitting (too much SFT)
 and mode collapse (too much RL).
 
@@ -6094,13 +6248,13 @@ Get your jailbreak prompts from Reddit and Discord.
 ** Old-school NLP
 
 Classical (pre-LLM) NLP is not dead: n-grams can be improved
-by considering words as bags of character n-grams, 
-and made scalable by using 
+by considering words as bags of character n-grams,
+and made scalable by using
 Vowpal Wabbit's hashing trick to store the coefficients of the linear model you train with them
 
   \emph{Bag of tricks for efficient text classification}\\
   A. Joulin et al.
-  
+
   \emph{FastText.zip:\\ compressing text classification models}\\
   A. Joulin et al.
 
@@ -6119,19 +6273,19 @@ this can be used to check how well-trained a network is.
   C.H. Martin and M.W. Mahoney (2019)
   https://arxiv.org/abs/1901.08276
   https://github.com/CalculatedContent/WeightWatcher
-  
+
   \emph{Investigating the overlooked Hessian structure: from CNNs to LLMs}\\
   Q.Y. Tang et al. (2025)
 
 ** PEFT
-  
+
 LoRA (low-rank adaptation) is one of the main
 PEFT (parameter-efficient fine-tuning) methods:
 instead of fine-tuning all the weights, you only train a low-rank offset to the current (frozen) weights,
 W+A'B. There are many variants:
-QLoRA uses quantized weights; 
+QLoRA uses quantized weights;
 ReLoRA periodically merges the LoRA weights into the base model and resets them;
-DoRA extends LoRA to continual learning by encouraging updates orthogonal to those of the previous task; 
+DoRA extends LoRA to continual learning by encouraging updates orthogonal to those of the previous task;
 GaLore reduces the memory requirement of gradient based optimization by replacing the gradients with low-rank approximations.
 One can also use W⊙A'B instead (for a rank-1 adjustment, this amounts to multiplying
 the inputs of the layer with a scalar,
@@ -6146,7 +6300,7 @@ etc.
   \emph{FRUGAL: Memory-efficient optimization by reducing state overhead for scalable training}\\
   P. Zmushko et al. (2025)
 
-** Gradient descent variants  
+** Gradient descent variants
 
 The number of optimization algorithms, variants of stochastic gradient descent,
 is exploding, and they become difficult to track. AdamW seems to be the most popular for the moment,
@@ -6157,7 +6311,7 @@ is exploding, and they become difficult to track. AdamW seems to be the most pop
 
 but here are a few others.
 For instance, the convergence speed of gradient descent itself
-can be improved by adding periodic long steps. 
+can be improved by adding periodic long steps.
 
   \emph{Provably faster gradient descent via long steps}\\
   B. Grimmer
@@ -6165,7 +6319,7 @@ can be improved by adding periodic long steps.
 Since Adam is stateful, it is more memory-intensive than plain stochastic gradient descent.
 There are many low-memory Adam variants ("Adammini"),
 using blockwise second moments (MicroAdam, BAdam),
-chunking (Adamem, only one second moment per block); 
+chunking (Adamem, only one second moment per block);
 factorization of the second moments (Fira (rank-1), LDAdam, or AdaFactor for matrix-shaped weights).
 
 At the other extreme, SignSGD only uses the sign of the gradient.
@@ -6328,10 +6482,10 @@ TODO:  Palomar's book (which chapter?)
 ** Jump model, other models
 
 There are many ways of defining "regimes",
-in particular, 
+in particular,
 heuristic rules (change the regime when the volatility goes above a threshold or below another threshold)
 and hidden Markov models.
-K-means is not a good candidate, because it ignores time and would lead to frequent regime changes, 
+K-means is not a good candidate, because it ignores time and would lead to frequent regime changes,
 but we can add a penalty for regime changes: this is the jump model.
 
   \emph{Regime-aware factor allocation\\ with optimal feature selection}\\
@@ -6339,9 +6493,9 @@ but we can add a penalty for regime changes: this is the jump model.
 
   \emph{Learning hidden Markov models with persistent states by penalizing jumps}\\
   P. Nystrup et al. (2020)
- 
+
   TODO Python implementation in \texttt{jumpmodels}.
- 
+
   \emph{Feature selection in jump models}\\
   P. Nystrup et al. (2021)
 
@@ -10103,7 +10257,7 @@ There are many variants of \emph{UCB}:
     }
 \end{align*}
 
-* Unsorted
+* TODO ? Unsorted
 
 *** Low rank approximations
 
@@ -13097,7 +13251,7 @@ $\mathbf r = B \mathbf f + \epsilon $
 % 15. Scenario generation [empty]
 % Check: pyportfolioopt, riskfolio-lib, scifolio, zipline-reloaded
 
-** DONE TO DELETE Jump models  
+** DONE TO DELETE Jump models
 *** DONE Jump model
 
 \nextbook
@@ -13338,7 +13492,7 @@ explore the tree with BFS
 some tasks (e.g., creative writing) are fine with $k=1$).
 
 ** DONE TO DELETE Prompting, soft prompts
-  
+
 *** No, LLM, prompting
 
 \nextbook
@@ -13426,7 +13580,7 @@ There are many parameter efficient fine-tuning (PEFT) methods:
 \end{compactitem}
 Those can be combined.
 
-** DONE TO DELETE LLM Interpretability  
+** DONE TO DELETE LLM Interpretability
 *** LLM, interpretability, Time
 
 \nextbook
@@ -13651,7 +13805,7 @@ Meta-domains are $k$-means clusters of \texttt{bge-small} document embeddings ($
 The weights come from a classifier (\texttt{Qwen2-1.5b}).
 
 ** DONE TO DELETE Training
-  
+
 *** LLM training: SFT/RL mix
 
 \nextbook
@@ -13723,7 +13877,7 @@ Adjust the unlearning gradient $g_u$ to prevent it from going against the retain
 \[ g = \operatorname{Argmin} \n{ g - g_u }^2 \ \text{ st }\  \langle g , g_r \rangle \geq 0 \]
 (add EWMA and gradient clipping for better convergence).
 
-** DONE TO DELETE NLP  
+** DONE TO DELETE NLP
 *** NLP
 
 \nextbook
@@ -14616,4 +14770,3 @@ Idem, but the time series is first cut into slices, which are then normalized.
 \end{book}
 Align the two domains (feature shift: time and frequency features, Sinkhorn divergence),
 then correct (label shift).
-
