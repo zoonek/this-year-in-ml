@@ -1753,6 +1753,16 @@ There are many variants of this idea.
   V. Margot et al. (2028)
   https://arxiv.org/abs/1807.04602
 
+
+One can also distill a random forest into a decision tree (a "student tree").
+Decision trees are notoriously unstable, but if we train them on
+real observations plus noise, we can increase the number of observations,
+better cover the decision boundaries of the teacher model,
+and end up with a more reliable model.
+
+  \emph{Approximation trees:\\ statistical stability in model distillation}\\
+  Y. Zhou et al.
+
 ** No, Adaptive lasso
 *** ML, interpretability: Adaptive lasso
 
@@ -2208,6 +2218,12 @@ The results were disappointing.
   CLadder: assessing causal reasoning\\ in language models}\\
   Z. Jin et al. (2023)
   https://arxiv.org/abs/2312.04350
+
+You can use an LLM to run an algorithm, step by step, unrolling all the loops,
+but this is inefficient and error-prone.
+
+  \emph{GPT is becoming a Turing machine:\\ here are some ways to program it}\\
+  A. Jojic et al.
 
 ** DONE TO DELETE Causal Discovery: LLMs
 *** Causal discovery, LLM to simulate the PC algorithm
@@ -5657,8 +5673,50 @@ and mode collapse (too much RL).
   J. Chen et al. (2025)
   https://arxiv.org/abs/2505.13026
 
-** TODO Models
-*** GRPO, DeepSeek
+** TODO TO TIDY Models
+
+TODO Instead of SFT+RL, DeepSeek uses SFT+RL+SFT+RL, with GRPO (i.e., it replaces the critic, which had to be trained, with a simple average)
+
+  \emph{DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning}
+
+
+
+
+TODO: Move this to the "Transformers" section, if there is one?
+You can actually train an LLM with bytes instead of tokens,
+if you use hashed n-gram embeddings (for n≤8).
+
+  \emph{Byte latent transformer:\\ patches scale better than tokens}\\
+  A. Pagnoni et al.
+
+
+
+
+
+TODO: Move this to an "Older models" or "smaller models" section?
+The BERT model is not dead. It is an encoder-only model (e.g., for classification -- LLMs are generative models).
+Improvements include disentangled attention (contents and position embeddings remain separate),
+or different pretext tasts (e.g., replaced token detection instead of masked language modeling),
+
+  \emph{DeBERTa: decoding-enhanced BERT\\ with disentangled attention}\\
+  P. He et al.
+
+  \emph{Electra: pre-training text encoders\\ as discriminators rather than generators}\\
+  K. Clark et al.
+
+  \emph{DeBERTav3: improving DeBERTa\\ using Electra-style pre-training\\ with gradient-disentangled embedding sharing}\\
+  P. He et al.
+
+On some tasks, e.g., open-ended NER (named entity recognition), they can compete with LLMs.
+
+  \emph{GLiNER: generalist model for named entity recognition using bidirectional transformer}\\
+  U. Zaratiana et al. (2024)
+
+  \emph{UniversalNER: targeted distilation\\ from large language models\\ for open named entity recognition}\\
+  W. Zhou et al.
+
+** DONE TO DELETE LLM/NLP Models
+*** DONE GRPO, DeepSeek
 
 \nextbook
 \begin{book}
@@ -5715,7 +5773,7 @@ In PPO,
   \pi_{\text{old}} ( o_t | q , o_{<t} )
 } - \beta \text{KL}( \pi_\theta \| \pi_{\text{ref}} )
 \]
-GRPO (group relative polici optimization)
+GRPO (group relative policy optimization)
 replaces the advantage $A$ with the average reward from $\pi_{\text{old}}$,
 \[ A_i = \dfrac{ r_i - \text{mean}( \mathbf r ) }{ \text{std}( \mathbf r ) } \]
 and uses
@@ -5740,7 +5798,7 @@ DeepSeek-V3 combines:
 \end{compactitem}
 Training required 2 months on 2048 GPUs (\$5m).
 
-*** Models
+*** No, Models
 
 \nextbook
 \begin{book}
@@ -5753,7 +5811,7 @@ to break the symmetry of the encoder (we want a different model
 for questions and answers, such that the embeddings match).
 Tricks include: RoPE, SwiGLU, Flash Attention, AdamW, gradient accumulation, etc.
 
-*** LLM, Bytes instead of tokens
+*** DONE LLM, Bytes instead of tokens
 
 \nextbook
 \begin{book}
@@ -5773,7 +5831,7 @@ to decide when patches end.
 The model scales better than tokenizer-based transformers,
 and excells at character-level tasks.
 
-*** LLM: BERT variants
+*** DONE LLM: BERT variants
 
 \nextbook
 \begin{book}
@@ -5798,7 +5856,7 @@ The replaced tokens come from a generator (e.g., a small MLM) trained with maxim
   P. He et al.
 \end{book}
 
-*** LLM: NER
+*** DONE LLM: NER
 
 \nextbook
 \begin{book}
@@ -5827,8 +5885,8 @@ Implementation available in \texttt{gliner}.
 \end{book}
 \emph{Targeted} distillation of ChatGPT onto Llama for Open NER.
 
-** TODO Capabilities
-*** LLM, Causality (duplicate)
+** DONE TO DELETE Capabilities
+*** DONE LLM, Causality (duplicate)
 
 \nextbook
 \begin{book}
@@ -5852,7 +5910,7 @@ Ask an LLM to discover and run the PC algorithm, \ie, discover and use
 (given all the relevant conditional independence statements, with no noise).
 The performance is bad.
 
-*** LLM, Turing machine
+*** DONE LLM, Turing machine
 
 \nextbook
 \begin{book}
@@ -5862,8 +5920,28 @@ The performance is bad.
 Simulate iterative behaviour (loops)
 by providing a repetitive execution path as example.
 
-** TODO Attacks
-*** Jailbreak
+** Attacks
+
+Here are some of the ways people have tried to attack an LLM:
+obfuscate the query by reversing the words or characters;
+fine-tune with prompts violating the terms-of-service of the target LLM and queries from an uncensored (but weak) model;
+target the non-text parts of a multi-modal model;
+
+  \emph{FlipAttack: jailbreal LLMs via flipping}\\
+
+  \emph{Removing RLHF protections in GPT-4\\ via fine-tuning}\\
+  Q. Zhan et al.
+
+  \emph{Abusing images and sounds for indirect instruction injection in multi-modal LLMs}\\
+  E. Bagdasaryan et al.
+
+The most successful current attacks are decomposition attacks:
+ask a weaker but uncensored model to decompose the problematic query into several innocuous queries,
+ask the stronger but censored model to answer those queries,
+ask the weaker but uncensored model to combine them into the final answer.
+
+** DONE TO DELETE Attacks
+*** DONE Jailbreak
 
 \nextbook
 \begin{book}
@@ -5873,7 +5951,7 @@ Jailbreak an LLM by flipping words and/or characters in the prompt,
 and asking the LLM to ``finish the task'' by flipping words/characters
 (with few-shot examples).
 
-*** LLM, attacks
+*** No, LLM, attacks
 
 \nextbook
 \begin{book}
@@ -5889,7 +5967,7 @@ The SVD, $Q = U \Sigma V^\top$
 also gives the weight matrix, $W = U \Sigma$ (up to symmetries).
 The attack still works without direct access to the logits, but is more expensive.
 
-*** LLM, Attacks
+*** DONE LLM, Attacks
 
 \nextbook
 \begin{book}
@@ -5898,7 +5976,7 @@ The attack still works without direct access to the logits, but is more expensiv
 \end{book}
 Fine-tune with prompts violating the OpenAI ToS and responses from an uncensored Llama2 70B.
 
-*** LLMs, attacks
+*** DONE LLMs, attacks
 
 \nextbook
 \begin{book}
@@ -5911,7 +5989,7 @@ you can alter images or sounds
 to modify the LLM's behaviour,
 as if you were altering the prompt.
 
-*** LLM, Jailbreak
+*** No, LLM, Jailbreak
 
 \nextbook
 \begin{book}
@@ -6226,7 +6304,7 @@ we could directly forecast portfolio weights.
   G. Chevalier et al. (2022)
   https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4230955
 
-** TODO Causality for time series
+** TODO ? Causality for time series
 *** Finance, Causality, time series forecasting
 
 \nextbook
@@ -6261,7 +6339,7 @@ VAR model, with pinball loss, to forecast the 10\%, 50\%, 90\% quantiles,
 using piecewise linear transformations of the predictors,
 with knots at the 10\% and 90\% quantiles to detect tail interactions.
 
-** TODO Graphs
+** DONE TO DELETE Graphs
 *** No, Graphs, GNN
 
 \nextbook
@@ -6281,7 +6359,7 @@ Infer the industry of unlisted firms from the supply chain network.
 Stack
 LSTM (stock characteristics), motif-based GAT (from a graph built from sector, industry, Wiki data, etc.), MLP.
 
-*** Text, graphs
+*** DONE Text, graphs
 
 \nextbook
 \begin{book}
@@ -6338,7 +6416,7 @@ Build the graph by thresholding the correlation matrix;
 choose the smallest threshold that makes the degree follow a power law distribution
 (increase the threshold until the degree istribution becomes conves: $\rho = 0.9$).
 
-** TODO Technical
+** TODO ? Technical
 *** Small mean-reverting portfolios
 
 \nextbook
@@ -6475,8 +6553,26 @@ Systematic credit strategy, combining:
 \item Sentiment (equity short interest).
 \end{compactitem}
 
-** TODO Deep Learning in Finance
-*** Asset embeddings
+** Deep Learning in Finance
+
+Neural networks may not be good predictors for future returns,
+but the latent representations those models provide can nonetheless be useful
+(e.g., for risk management, portfolio construction, synthetic data generation):
+for instance, they can recover industry classifications.
+
+  \emph{NeuralFactors: a novel factor learning approach to generative modeling of equities}\\
+  A. Gopal
+
+You can also obtain such latent representations from text (news, 10K, etc.) or holdsing data.
+
+  \emph{Text-based network industries\\ and endogenous product differentiation}\\
+  G. Hoberg and G. Phillips (2009)
+
+  \emph{Asset embeddings}\\
+  X. Gabaix et al. (2025)
+
+** DONE TO DELETE Deep Learning in Finance
+*** DONE Asset embeddings
 
 \nextbook
 \begin{book}
@@ -6498,7 +6594,7 @@ Compute asset embeddings from holdings data:
 
 This is more informative (at forecasting relative valuation and comovement) than text-based embeddings (10-K, earnings calls, news).
 
-*** Deep learning in finance
+*** DONE Deep learning in finance
 
 \nextbook
 \begin{book}
@@ -6549,7 +6645,7 @@ or
 \[ \operatorname*{Argmin}_{ p = N(\mu,V) } d( p, p_{\text{prior}} ) + \lambda  d( p, p_{\text{view}} ) \leq d_0. \]
 This readily generalizes to degenerate views.
 
-*** Finance, synthetic data, neural factors
+*** DONE Finance, synthetic data, neural factors
 
 \nextbook
 \begin{book}
@@ -6827,8 +6923,40 @@ to detect regime changes.
 % Technical
 %TODO: PLOT
 
-* TODO Books, Tutorials
-*** Book: Conformal prediction
+* Books, Tutorials
+
+The main machine learning conferences often provide one or two days of tutorials,
+some of which turn out to be more interesting than the rest of the conference.
+
+One-step generative models (GAN, VAE) have been supplanted by iterative ones,
+in particular diffusion, flows and auto-regressive models (GPT).
+Diffusion models take a simple stochastic differential equation (SDE),
+which adds noise to data until only the noise remains,
+and inverts the SDE, i.e., learns how to remove noise to have more real-looking data.
+Flows uses a similar idea, but with ordinary differential equations (ODEs):
+moving from noise to data then requires to solve an ODE.
+The flow between the data distribution and the noise distribution is not unique:
+in particular, you can try to have a recified flow, i.e., straight lines --
+going from noise to data can then be done in a single Euler step.
+
+  \emph{Continuous time generative models}\\
+  (Q. Liu, ICML 2025)
+
+Probabilistic models do not output a single prediction,
+but a probability distribution of predictions.
+However, badly trained models can be miscalibrated
+(even when they give good point forecasts).
+Some of the traditional methods to assess calibration
+(reliability diagram, empirical calibration error) are not
+asymptotically consistent: they should be avoided.
+Instead, plot the cummulative differences between (Bernoulli) responses and (sorted) scores:
+the slope (between any two points) is the average calibration error for that region.
+
+  \emph{Calibration and bias\\ in algorithms, data and models}\\
+  (ICML 2025)
+
+** DONE TO DELETE Books, Tutorials
+*** No, Book: Conformal prediction
 
 \nextbook
 \begin{book}
@@ -6902,7 +7030,7 @@ outlier detection (CP provides accurate control of the false positive rate).
 
 Implementation: \texttt{mapie}; also check \texttt{crepes}, \texttt{nixtla}.
 
-*** Generative models, ICML tutorial
+*** DONE Rectified flow, Generative models, ICML tutorial
 
 \nextbook
 \begin{book}
@@ -7182,7 +7310,7 @@ use an $\Omega$-bridge, or just add (deterministic) singular forces
 for instance, if $\Omega = \{\mu_1,\dots,\mu_k\}$ is a finite set, use
 \[ v_t^\Omega(z) = \sum_i w_i(z) \dfrac{ \mu_i - z }{ 1 - t }. \]
 
-*** Diffusion, ICML Tutorial
+*** Diffusion, ICML Tutorial (No? only the first third of the tutorial was interesting)
 
 \nextbook
 \begin{book}
@@ -7239,7 +7367,7 @@ The training data can be described as a mixture of low-rank Gaussians (MoLRG, su
 % Theoretical results
 % Application: diffusion inverse solvers (DIS)
 
-*** Statistics: Calibration, ICML Tutorial
+*** DONE Statistics: Calibration, ICML Tutorial
 
 \nextbook
 \begin{book}
@@ -7301,15 +7429,30 @@ for instance, a decision tree cannot learn XOR in this way.
 Instead, it is actually possible to look for an optimal decision tree:
 optimality can be formulated as a mixed integer program.
 
-TODO: paper
+  \emph{Optimal classification trees}\\
+  D. Bertsimas and J. Dunn (2015)
 
-Other methods to build (nearly) optimal decision trees include frequen itemset mining and genetic algorithms.
+  \emph{Learning optimal classification trees\\ using a binary linear program formulation}\\
+  S. Verwer and Y. Zhang
+
+Other methods to build (nearly) optimal decision trees include frequent itemset mining
+
+  \emph{Optimal constraint-based decision tree induction from itemset lattices}\\
+  S. Nijssen and E. Fromont
+
+  \emph{Learning optimal decision trees\\ using caching branch-and-bound search}\\
+  G. Aglin et al.
+
+and genetic algorithms.
+
+  \emph{evtree: evolutionary learning of globally optimal classification and regression trees in R}\\
+  T. Grubinger et al. (2014)
 
   Decision tree induction through LLMs\\ via semantically-aware evolution}\\
   T. Liu et al. (2025)
   https://arxiv.org/abs/2503.14217
 
-** Rule extraction TODO MERGET WITH SIMILAR SECTION ABOVE
+** Rule extraction TODO MERGE WITH SIMILAR SECTION ABOVE
 
 Trees are somewhat interpretable but rarely fit the data.
 Conversely, random forests provide a better fit,
@@ -7329,8 +7472,9 @@ TODO: There are variants of this idea
 If you want to stick to trees, you can distill your random forest into a tree,
 but use data augmentation, (x,f(x)+noise), to better explore the neighbourhood of the decision boundary.
 
-** TODO Trees
-*** Decision trees (optimal)
+** DONE TO DELETE Trees
+
+*** DONE Decision trees (optimal)
 
 \nextbook
 \begin{book}
@@ -7433,7 +7577,7 @@ Joint (MIP) tree model for counterfactual estimation
 (locally constant or piecewise linear)
 and optimal treatment assignment.
 
-*** Generalized random forests
+*** No, Generalized random forests
 
 \nextbook
 \begin{book}
@@ -7556,7 +7700,7 @@ Decision tree using statistical tests (adjusted for multiple testing) to select 
   Z. Bar-Joseph et al. (2001)
 \end{book}
 
-*** Random forests, interpretability
+*** DONE Random forests, interpretability
 
 \nextbook
 \begin{book}
@@ -7572,7 +7716,7 @@ use a statistical test on the Gini  index (which is used to select the splits).
 Choose the tree depth by comparing the variance of the observations in a leaf
 with the variance of the blackbox model.
 
-*** Random forests
+*** DONE Random forests
 
 \nextbook
 \begin{book}
@@ -7582,7 +7726,7 @@ with the variance of the blackbox model.
 A \emph{student tree} is a complex model (e.g., a random forest)
 distilled into a tree (on real data + noise).
 
-** TODO Change point detection
+** TODO No? Change point detection
 *** ML, Clustering, Change point detection
 
 \nextbook
@@ -7691,8 +7835,6 @@ where $Z_1$, $Z_2$ are drawn without replacement.
 \end{book}
 The reduced mutual information between labelings $r$ and $s$ is \[ \text{RMI}(r,s) = I(r;s) - \tfrac12 \log (a,b) \]
 where $(a,b)$ is the number of nonnegative integer matrices with row sums $a = \{a_r\}$ and column sums $b = \{b_s\}$.
-
-
 
 *** Change point detection
 
@@ -8445,7 +8587,7 @@ Encode the state (set of points examined so far, with their values)
 with attention and DeepSet,
 to have a constant-size state space.
 
-** TODO Optimization, Influence functions, data-centric ML, ICML
+** TODO Optimization, Influence functions, data-centric ML, LiSSA, ICML
 
 \nextbook
 \begin{book}
