@@ -1,5 +1,9 @@
 2025 in Machine Learning
 
+Here is, as every year, a summary of some of the papers and book I read over the past year,
+covering topics such as
+TODO: LIST THE TOPICS
+
 * TODO Multiple Testing
 
 I will first review the traditional approach to statistical testing,
@@ -1947,38 +1951,6 @@ for that domain.
   X. Wang and K. Kording (2022)
   https://arxiv.org/abs/2209.05598
 
-** DONE TO DELETE Causal Discovery: Foundational models
-
-*** Foundational models
-
-\nextbook
-\begin{book}
-  \emph{Embracing the blackbox:\\ heading towards foundation models\\ for causal discovery from time series data}\\
-  G. Stein et al.
-\end{book}
-Supervised learning for causal discovery on time series
-(GRU, transformer, ConvMixer, MLP).
-Data from Kuramoto,
-or an ER graph with random nonlinear relations
-($e^x$, $x^2$, $\sigma(x)$, $\sin(x)$, $\cos(x)$, $\text{ReLU}(x)$, $\log \sigma(x)$, $1/x$, $\n x$, $\text{clamp}(x,-\tfrac12,\tfrac12)$).
-
-*** Foundation models
-
-\nextbook
-\begin{book}
-  \emph{Sample, estimate, aggregate: a recipe\\ for causal discovery foundation models}\\
-  M. Wu et al.
-\end{book}
-SEA is a supervised causal discovery model, combining
-global statistics (e.g., $\Sigma^{-1}$)
-with the output of causal discovery algorithms,
-observational (PC, FCI, GES, LiNGAM, CAM)
-or interventional (JCI, GIES, IGSP)
-on subsets of the data (random subsets of observations, random subsets of \emph{connected} variables),
-with a neural net: node embeddings,
-edge type embeddings (the PC algorithm does not return a DAG but a CPDAG; other algorithms have even more edge types),
-axial attention (attention along the rows, then along the columns, instead of 2-dimensional attention).
-
 ** Topological Ordering
 
 Causal discovery, i.e., finding a causal graph from data alone,
@@ -2011,200 +1983,6 @@ In particular, there is no need for a DAG constraint.
   R. Massidda et al. (2023)
   https://arxiv.org/abs/2309.08406
 
-** DONE TO DELETE Causal Discovery: topological ordering
-
-*** Causal discovery: topological order
-
-\nextbook
-\begin{book}
-  \emph{Score matching enables causal discovery\\ of nonlinear additive noise models}\\
-  P. Rolland et al.
-\end{book}
-The Hessian of the data log-likelihood can be used to identify the leaves of the DAG, and find a topological order.
-
-The nonlinear additive (Gaussian) noise model
-\[ X_i = f_i\bigl( \text{Pa}_i(X) \bigr) + \epsilon_i \]
-is identifiable: the DAG can be recovered from the joint distribution of $X$ or, equivalently, from the score function
-\[ s(x) = \nabla_{\!x} \log p(x) . \]
-
-From Stein's identity
-\[ \E_{ \mathbf x \sim p } \bigl[
-  \mathbf h(x) \nabla \log p(\mathbf x ) ^\top + \nabla \mathbf h( \mathbf x )
-  \bigr] = 0 \]
-we can estimate the score at the sample points
-\begin{align*}
-  G &= \bigl( s( x^1) , \dots, s(x^n) \bigr) \\
-  \hat G &= - ( K + \eta I )^{-1} \langle \nabla , K \rangle \\
-  K_{ij} &= \mathbf h ( \mathbf x_i )^\top \mathbf h ( \mathbf x_j ) = \kappa( \mathbf x_i, \mathbf x_j ) \quad \text{RBF kernel} \\
-  \langle \nabla K \rangle _{ij} &= \sum_{ k=1 }^n \nabla_{\!x_j^k} \kappa( \mathbf x_i , \mathbf x_k ).
-\end{align*}
-
-The leaves of the DAG are exactly the variables $j$ satisfying
-\[ \var \left[ \dfrac{ \partial s_j(\mathbf x ) }{ \partial x_j } \right] = 0 : \]
-to find a topological order,
-iteratively remove the nodes $j$ with the smallest $\var[ \partial x_j / \partial x_j ]$
-(you need to recompute the score after each removal).
-
-To compute the Jacobian of the score, use the second order Stein identity
-\[ \E[ h \nabla s ] = \E[ \nabla^2 h - h s s' ]. \]
-
-*** Causal discovery: topological order, diffusion
-
-\nextbook
-\begin{book}
-  \emph{Diffusion models for causal discovery\\ via topological ordering}\\
-  P. Sanchez et al.
-\end{book}
-The Hessian of the data log-likelihood can be used to identify the leaves of the DAG, and find a topological order.
-
-Instead of computing the Hessian with a second order Stein estimator
-over an RBF kernel
-(kernel methods scale poorly to a large number of observations),
-DiffAn trains a neural net (diffusion -- denoising
-uses score matching) to compute the score.
-The model can be updated after each iteration (leaf removal) without retraining:
-\[ \nabla \log p( \mathbf x_\ell) = \nabla \log p(x) - H_\ell \dfrac{ s_\ell }{ H_{\ell\ell} }. \]
-
-*** Causal discovery: topological ordering
-
-\nextbook
-\begin{book}
-  \emph{DAG learning on the permutahedron}\\
-  V. Zantedeschi et al.
-\end{book}
-% Not clear
-One can learn a DAG in two steps:
-\begin{compactitem}[--]
-\item First, find a topological ordering,
-\item Then, find a DAG consistent with that ordering -- an upper triangular matrix.
-\end{compactitem}
-The \emph{permutahedron} is
-\[ P_n = \text{Conv} \{ \rho^\sigma \ : \ \sigma \in \mathfrak S_n \} \]
-where Conv is the convex hull,
-\begin{align*}
-  \rho &= [1,2,\dots,n] \\
-  \rho^\sigma &= [ \sigma(1), \sigma(2), \dots, \sigma(n) ].
-\end{align*}
-The sorting operator
-\[ \sigma(\theta) \in \argmax_{ \sigma \in \mathfrak S_n } \theta' \rho ^\sigma \]
-can be relaxed to
-\[ \mu(\theta) = \argmax_{ \mu \in P_n } \theta' \mu - \lambda \n{ \mu }_2^2 . \]
-
-The combinatorial optimization problem
-\[ \argmax_{ \alpha \in \Delta } s' \alpha \]
-can be relaxed to the \emph{top-k sparsemax}
-\[ \argmax_{\substack{
-    \alpha \in \Delta \\ \n \alpha _0 \leq k
-}} s' \alpha - \n{ \alpha }_2^2 \]
-or the \emph{sparseMAP}, if $s$ has a low-dimensional parametrization $s = B' r$
-\[ \argmax_{ \alpha \in \Delta } r' B \alpha - \n{ B \alpha }_2^2. \]
-
-*** DONE Topological ordering
-
-\nextbook
-\begin{book}
-  \emph{Constraint-free structure learning\\ with smooth acyclic orientations}\\
-  R. Massidda et al.
-\end{book}
-\textsc{Cosmo} learns a DAG without an acyclicity constraint or penalty (like \textsc{Notears})
-by parametrizing the adjacency matrix as
-\[ A_{ij} = H_{ij} \sigma \left( \dfrac{ p_i - p_j }{ T } \right)  \]
-where $H$ is an adjacency matrix, $p$ a ``priority'' vector
-and the temperature $T$ decreases to 0.
-
-*** No, Topological order
-
-\nextbook
-\begin{book}
-  \emph{Differentiable DAG sampling}\\
-  B. Charpentier et al.
-\end{book}
-The \emph{Gumbel-Softmax} distribution is an approximation of the (one-hot-encoded) categorical distribution
-\begin{align*}
-  U &\sim \text{Cat}( p_1,\dots, p_k ) \\
-  G_1 &\sim \text{Gumbel}(0) \\
-  U_1 &\propto \exp \dfrac{ \log(p_i) + G_i }{ T } .
-\end{align*}
-The \emph{Gumbel-Sinkhorn} distribution, on the space of permutation matrices,
-can be sampled as
-\begin{align*}
-  G_{ij} &\overset{\text{iid}}{\sim} \text{Gumbel}(0) \\
-  \Pi &= \text{Sinkhorn}(\psi+G) \\
-  \widehat\Pi &= \text{Hungarian}( \Pi )
-\end{align*}
-where the Sinkhorn operator iteratively normalize rows and columns.
-
-The \emph{Gumbel-top-$n$} distribution can be sampled as
-\begin{align*}
-  G_i &\overset{\text{iid}}{\sim} \text{Gumbel}(0) \\
-  \pi &= \text{sort}( \psi + G ) \in \mathfrak S_k .
-\end{align*}
-
-
-The \emph{softsort} operator is
-\[
-\text{softsort}_T(s) = \text{softmax}
-- \dfrac{ \va{ \text{sort}(s) \mathbf 1' - \mathbf 1 s' } }{ T }
-\in [0,1] ^{k \times k } \]
-\[
-\text{softsort}_T(s) \underset{T \to 0}{\longrightarrow}
-\pi_{ \text{argsort}(s) } \in \mathfrak S _k
-\]
-
-To sample DAGs, first sample a topological order on the nodes
-(Gumbel-Sinkhorn, or Gumbel-top-$n$ + sortsort),
-then sample the edges (Gumbel softmax).
-
-You can learn a DAG, end-to-end,
-with variational inference (VI-SP-DAG).
-
-** DONE Causal Discovery: neural nets
-*** Causal discovery: notears and spectral radius
-
-\nextbook
-\begin{book}
-  \emph{Scaling structural learning with NoBears to\\ infer causal transcriptome networks}\\
-  H.C. Lee et al. (2019)
-\end{book}
-A square matrix with nonnegative entries is acyclic iff
-\[ \forall k \geq 1 \quad \tr A^k = 0 \]
-(this leads to the \textsc{Notears} condition),
-iff its only eigenvalue is zero, \ie, its spectral radius $\rho(A)$ is zero.
-The spectral radius can be approximated as
-\begin{align*}
-  \llap{\ensuremath{
-      5\times \left[
-      \vphantom{
-        \begin{aligned}
-          u &\leftarrow \dfrac{ A' u }{ \n{ A' u }_2 } \\
-          v &\leftarrow \dfrac{ Av }{ \n{ Av }_2 }
-        \end{aligned}
-      }
-      \right.
-  }}
-  &\begin{aligned}
-    u &\leftarrow \dfrac{ A' u }{ \n{ A' u }_2 } \\
-    v &\leftarrow \dfrac{ Av }{ \n{ Av }_2 }
-   \end{aligned}\\
-  &\rho(A) \approx \dfrac{ u' A v }{ u' v }
-\end{align*}
-If the elements of the weight matrix $W$ can have arbitrary signs, use $A = W \odot W$.
-To ensure differentiability, add $\epsilon = 10^{-6}$,
-\[ \dfrac{ \partial \rho( W \odot W + \epsilon ) }{ \partial W_{ij} } = 2 \dfrac{ W_{ij} v_i u_j }{ u' v }. \]
-To allow for nonlinear relations, use a polynomial loss
-\[ L(W) = \sum_t \sum_i \left(
-X_{it} - \sum_ { j \in \text{Pa}(i) } W_{ij} \sum_{ k = 0 }^3 \alpha_{jk} X_{jt}^k
-\right)^2 . \]
-To solve
-\[ \operatorname*{Minimize}_W L(w) \ \text{ st } \ \rho(W) = 0, \]
-the \emph{augmented Lagrangian} method iterates
-\begin{align*}
-  W &\leftarrow \argmin_W L(W) + \lambda \rho(W) + \dfrac\eta2 \rho(W)^2 \\
-  \lambda &\leftarrow \lambda + \eta \rho(W) \\
-  \eta &\leftarrow 1.1 \times \eta \text{ (optional)}.
-\end{align*}
-Implementation in \texttt{BNGPU}.
-
 ** LLMs and causality
 
 There have been attempts to check if LLM already knew, or could learn,
@@ -2225,87 +2003,6 @@ but this is inefficient and error-prone.
   \emph{GPT is becoming a Turing machine:\\ here are some ways to program it}\\
   A. Jojic et al.
 
-** DONE TO DELETE Causal Discovery: LLMs
-*** Causal discovery, LLM to simulate the PC algorithm
-
-\nextbook
-\begin{book}
-  \emph{Can large language models\\ infer causation from correlation?}\\
-  Z. Jin et al.
-\end{book}
-Can an LLM learn the PC algorithm, \ie, infer causation from correlations
-(independence and conditional independence relations, expressed as text)?
-No. Fine-tuning does not help much.
-
-*** DONE Causal discovery: LLM, topological ordering
-
-\nextbook
-\begin{book}
-  \emph{Causal inference using LLM-guided discovery}\\
-  A. Vashishtha et al.
-\end{book}
-Do not ask the LLM to find the whole causal graph
-(it would truggle to distinguish direct from indirect relations)
-but only the partial order it induces (the \emph{transitive reduction},
-aka Hasse diagram it induces).
-
-You can compare DAGs with the $L^1$ distance betwen their transitive reductions.
-
-Use a triplet prompt to infer this order:
-provide 3 variables and ask for their causal graph.
-
-Applications include
-\begin{compactitem}[--]
-\item Post-processing the output of the PC algorithm, to orient the remaining unoriented edges;
-\item Constraints (transitive closure) for the PC or GES algorithms.
-\end{compactitem}
-
-*** DONE Causal discovery: LLM
-
-\nextbook
-\begin{book}
-  \emph{Causal order: the key to leveraging\\ imperfect experts in causal inference}\\
-  A. Vashishtha et al. (2024)
-\end{book}
-Building a causal graph by asking pairwise questions to an LLM creates spurious edges --
-with pairwise queries alone, the LLM cannot distinguish between direct and indirect effects.
-
-The not build a DAG, but just a \emph{partial order}: it can be used
-\begin{compactitem}[--]
-\item To obtain a valid adjustment set (the ancestors of a node in a topological order);
-\item As constraints or prior for classical causal discovery algorithms.
-\end{compactitem}
-
-Do not use pairwise queries, but triplet queries (either all triplets,
-or $k=10$ triplets for each pair if the graph is large),
-aggregated with a majority vote:
-this creates fewer cycles.
-
-The \emph{topological divergence} between a partial order $\preccurlyeq$
-and a DAG defined by its adjacency matrix
-is the number of edges incompatible with the order,
-\[ D( {\preccurlyeq} , A ) = \sum_{ i \not\preccurlyeq j } A_{ij}. \]
-
-*** Do LLMs know do-calculus?
-
-\nextbook
-\begin{book}
-  \emph{CLadder: assessing causal reasoning\\ in language models}\\
-  Z. Jin et al.
-\end{book}
-Dataset to check if LLMs already know do-calculus
-and can answer queries on the three rungs of teh causality ladder
-(association, intervention, counterfactuals),
-without resorting to commonsense.
-
-*** No, LLM
-\nextbook
-\begin{book}
-  \emph{Causal reasoning and large language models: opening a new frontier for causality}\\
-  E. K\i c \i man et al.
-\end{book}
-LLMs are good, but have unpredictable failures.
-
 ** Causal discovery: interventional data
 
 If you have access to interventional data,
@@ -2321,188 +2018,6 @@ they can be viewed as natural experiments
 
   \emph{Causal discovery in heavy-tailed models}\\
   N. Gnecco et al. (2020)
-
-** DONE TO DELETE Causal discovery: interventional data
-*** No, Causal discovery with interventions
-
-\nextbook
-\begin{book}
-  \emph{Identifying biological perturbation targets through causal differential networks}\\
-  M. Wu et al.
-\end{book}
-Given an observational dataset $D_{\text{obs}}$ and an interventional one $D_{\text{int}}$,
-predict which variables were intervened on:
-\[ I = \{ X \ :\ P(X|\text{Pa}\,X) \neq P_{\text{int}}(X | \text{Pa}\,X) \}. \]
-\[
-\begin{tikzpicture}[>=stealth,xscale=1.5,yscale=.8,inner sep=1pt,outer sep=1pt,baseline=0]
-  \node (Do) at (0,1) {$D_{\text{obs}}$};
-  \node (Di) at (0,0) {$D_{\text{int}}$};
-  \node (Go) at (1,1) {$G_{\text{obs}}$};
-  \node (Gi) at (1,0) {$G_{\text{int}}$};
-  \node (I) at (2.3,.5) {$I$};
-  \draw[|->] (Do) to node[anchor=south]{\footnotesize\textsc{sea}} (Go);
-  \draw[|->] (Di) to node[anchor=south]{\footnotesize\textsc{sea}} (Gi);
-  \draw[|->] (Go) -- (1.4,.5) to node[anchor=south]{\footnotesize\textsc{sea}-like} (I);
-  \draw[|->] (Gi) -- (1.4,.5) -- (I);
-\end{tikzpicture}
-\]
-
-*** Causal discovery with interventions
-
-\nextbook
-\begin{book}
-  \emph{Differentiable causal discovery\\ from interventional data}\\
-  P. Brouillard et al.
-\end{book}
-DCDI is a nonlinear NOTEARS for interventional data;
-the log-likelihood is
-\[ \prod_j p \bigl( x_j ; f_\theta( A_j \odot x ) \bigr) ^{1 - I_j}
-p \bigl( x_j ; g_\theta( A_j \odot x ) ) ^{ I_j }
-\]
-where $A \in \{0,1\}^{d\times d}$ is the adjacency matrix,
-$I \in \{0,1\}^d$ are the (unknown) interventions
-and $p$ is Gaussian or a normalizing flow.
-
-*** Causal discovery: intervention data
-
-\nextbook
-\begin{book}
-  \emph{Gene regulatory network inference\\ in the presence of selection bias\\ and latent confounders}\\
-  G. Luo et al.
-\end{book}
-With interventional data ($I_x \to X$ and/or $I_Y \to Y$), it is possible to distinguish between
-\[
-\begin{tikzpicture}[>=stealth,xscale=1,yscale=1,inner sep=2pt,outer sep=1pt,baseline=0]
-  \begin{scope}[shift={(0,0)}]
-    \node (IX) at (0,1) {$I_X$};
-    \node (IY) at (1,1) {$I_Y$};
-    \node (X)  at (0,0) {$X$};
-    \node (Y)  at (1,0) {$Y$};
-    \draw[->] (IX) -- (X);
-    \draw[->] (IY) -- (Y);
-    \draw[->] (X) -- (Y);
-    \node at (.5,-1.1) {\footnotesize causality};
-  \end{scope}
-  \begin{scope}[shift={(2.5,0)},xscale=1.2]
-    \node (IX) at (0,1) {$I_X$};
-    \node (IY) at (1,1) {$I_Y$};
-    \node (X)  at (0,0) {$X$};
-    \node (Y)  at (1,0) {$Y$};
-    \node[draw] (S) at (.5,-.7) {$S$};
-    \draw[->] (IX) -- (X);
-    \draw[->] (IY) -- (Y);
-    \draw[->] (X) -- (S);
-    \draw[->] (Y) -- (S);
-    \node at (.5,-1.1) {\footnotesize selection bias};
-  \end{scope}
-  \begin{scope}[shift={(5.2,0)}]
-    \node (IX) at (0,1) {$I_X$};
-    \node (IY) at (2,1) {$I_Y$};
-    \node (X)  at (0,0) {$X$};
-    \node (Y)  at (2,0) {$Y$};
-    \node[circle,draw,densely dotted,inner sep=0pt] (W) at (1,1) {$W$};
-    \draw[->] (IX) -- (X);
-    \draw[->] (IY) -- (Y);
-    \draw[->] (W) -- (X);
-    \draw[->] (W) -- (Y);
-    \node at (1,-1.1) {\footnotesize latent confounder};
-  \end{scope}
-\end{tikzpicture}
-\]
-with conditional independence tests.
-
-*** Causal discovery: Interventions
-
-\nextbook
-\begin{book}
-  \emph{Efficient neural causal discovery\\ without cyclicity constraints}\\
-  P. Lippe et al.
-\end{book}
-Conditional distributions $X | \text{Pa}\,X$
-from a causal graph are invariant under interventions
-(except for the nodes intervened on).
-The causal graph is the graph that generalizes best from observational to interventional data.
-
-\textsc{Enco} separately models the conditional distributions
-$ p_\phi( X_i | X_{-i} )$
-and the edge presence and orientation
-\begin{align*}
-  & p_{ij} = \sigma( \gamma_{ij} ) \sigma( \theta_{ij} ) && \text{edge probability} \\
-  & \gamma_{ij} && \text{edge presence} \\
-  & \theta_{ij} = - \theta_{ji} && \text{edge orientation}
-\end{align*}
-by alternating distribution fitting
-\[ \operatorname*{Maximize}_\phi \E_{ X \sim \text{data} }
-\E_{\substack{
-    M_{ij} \sim \text{Ber}(p_{ij}) \\
-    \text{(dropout)}
-}}
-\log p_\phi( X_i | M_{-i} \odot X_{-i} )
-\]
-and graph fitting
-\[ \operatorname*{Maximize}_{ \gamma, \theta}
-\E_{\substack{
-    I \sim \text{intervention} \\
-    X \sim \text{data}_I \\
-    M_{ij} \sim \text{Ber}\, p_{ij}
-}}
-\log p_\phi( X_i | M_{-i} \odot X_{-i} )
-+ \lambda \sum_{ij} p_{ij} .
-\]
-Use \textsc{Reinforce} for the gradients (the adjacency matrix $M$ is discrete).
-
-*** Causal Interventions, No
-
-\nextbook
-\begin{book}
-  \emph{Shaking the foundations: delusions in sequence models for interaction and control}\\
-  P.A. Ortega et al.
-\end{book}
-In imitatation learning, the model takes its own actions as evidence about the wolrd:
-this leads to self-delusin.
-Actions are causal interventions:
-do not model $P[O|A]$, but $P\bigl[O |\text{do}(A) \bigr]$.
-\[
-\begin{tikzpicture}[>=stealth,xscale=1,yscale=1,inner sep=2pt,outer sep=1pt,baseline=0]
-  \node[circle,draw,densely dotted,inner sep=1pt] (T) at (1,1) {$\theta$};
-  \node[circle,draw,inner sep=1pt] (A) at (0,0) {$A$};
-  \node[circle,draw,inner sep=1pt] (O) at (2,0) {$O$};
-  \draw[->] (T) -- (A);
-  \draw[->] (T) -- (O);
-  \draw[->] (A) -- (O);
-  \node[below=-1mm of A,font=\footnotesize,align=center] {expert\\actions};
-  \node[below=-1mm of O,font=\footnotesize,align=center] {observations};
-  \node[right=0mm of T,font=\footnotesize,align=left] {expert\\knowledge};
-\end{tikzpicture}
-\]
-
-** DONE TO DELETE Causal discovery: time series
-*** No, Causal discovery, time series
-
-\nextbook
-\begin{book}
-  \emph{CUTS: neural causal discovery\\ from irregular time series data}\\
-  Y. CHeng et al.
-\end{book}
-Neural Granger causal discovery with missing values:
-jointly (alternatively) impute missing values and fit the DAG (no instantaneous effect)
-\begin{align*}
-  & s_{\tau i j } \sim \text{Ber} ( 1 - m_{\tau i j } ) &&\text{DAG} \\
-  & \hat x_t = f_\phi( X \odot S ) \\
-  &\tilde x_t \leftarrow (1-\alpha) \tilde x_t + \alpha \hat x_t && \text{imputed values} \\
-  & m_{\tau i j } = \sigma ( \theta_{\tau i j } ) \\
-  & \sigma: \text{ sigmoid} \\
-  & \theta, \phi \text{: parameters to estimate}
-\end{align*}
-
-*** DONE Causal discovery for time series
-
-\nextbook
-\begin{book}
-  \emph{Learning domain-specific\\ causal discovery from time series}\\
-  X. Wang and K. Kording
-\end{book}
-Supervised learning for causal discovery (for time series, with a transformer).
 
 ** TODO Causal discovery: time series
 *** Causal discovery for time series
@@ -5715,211 +5230,6 @@ On some tasks, e.g., open-ended NER (named entity recognition), they can compete
   \emph{UniversalNER: targeted distilation\\ from large language models\\ for open named entity recognition}\\
   W. Zhou et al.
 
-** DONE TO DELETE LLM/NLP Models
-*** DONE GRPO, DeepSeek
-
-\nextbook
-\begin{book}
-  \emph{DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning}
-\end{book}
-DeepSeek-R1-Zero uses RL (GRPO) on DeepSeek-V3-Base to enhance its reasoning capabilities:
-\begin{compactitem}[--]
-\item Prompts: unspecified (math, leetcode, etc.);
-\item Reward: only accuracy (correct final answer) and format, as specified by the prompt:\\
-  \texttt{<think>...</think>} and \texttt{<answer>...</answer>}.
-\end{compactitem}
-During training, the model spends more and more time thinking,
-but the \texttt{<think>} section becomes less and less readable
-(it mixes Chinese and English).
-
-DeepSeek-R1 uses 4 steps:
-\begin{compactitem}[--]
-\item SUpervised fine-tuning (SFT)
-  with high-quality data, e.g., readable answers from DeepSeek-R1-Zero;
-\item RL, as above;
-\item SFT, with 600k reasoning samples (ask the model to generate several answers,
-  and have DeepSeek-V3 select the best)
-  and 200k non-reasoning samples from (DeepSeek-V3, unspecified prompts);
-\item RL, for alignment (unspecified prompts and rewards).
-\end{compactitem}
-
-\nextbook
-\begin{book}
-  \emph{DeepSeekMath: pushing the limits\\ of mathematical reasoning\\ in open language models}\\
-  Z. Shao et al.
-\end{book}
-Start with a code model, and fine-tune it on a large mathematical corpus:
-\begin{compactitem}[--]
-\item Train a FastText classifier on OpenWebMath;
-\item Apply it to CommonCrawl;
-\item Use the results to identify websites with math contents;
-\item Add the corresponding pages to the FastText training data
-  (adding arxiv papers does not bring any improvement);
-  re-train;
-\item To avoid benchmark contamination, exclude pages containing a 10-gram from one of the benchmarks;
-\item Apply the new model to CommonCrawl.
-\end{compactitem}
-
-Also evaluate on miniF2F (convert an informal proof into a formal one, checked with Isabelle)
-and on GSM8K (math with tool use: Python, SymPy).
-
-In PPO,
-\[ J = \E_{\substack{
-    q \sim \text{queries} \\ o \sim \pi_{\text{old}}( \bigcdot|q) }}
-\operatorname*{Mean}_{ 1 \leq t \leq \va o }
-\dfrac{
-  \pi_\theta ( o_t | q , o_{<t} )
-}{
-  \pi_{\text{old}} ( o_t | q , o_{<t} )
-} - \beta \text{KL}( \pi_\theta \| \pi_{\text{ref}} )
-\]
-GRPO (group relative policy optimization)
-replaces the advantage $A$ with the average reward from $\pi_{\text{old}}$,
-\[ A_i = \dfrac{ r_i - \text{mean}( \mathbf r ) }{ \text{std}( \mathbf r ) } \]
-and uses
-\[ \text{KL} ( \pi_\theta \| \pi_{\text{ref}} ) =
-\dfrac{ \pi_{\text{ref}}(\cdots) }{ \pi_\theta( \cdots ) } - \log
-\dfrac{ \pi_{\text{ref}}(\cdots) }{ \pi_\theta( \cdots ) } - 1. \]
-
-\nextbook
-\begin{book}
-  \emph{DeepSeek-V3 technical report}\\
-\end{book}
-DeepSeek-V3 combines:
-\begin{compactitem}[--]
-\item MoE (top-k and shared experts);
-\item No auxilliary loss to ensure load balancing between experts replaced by a bias term for each expert;
-\item Sequence-wise auxilliary loss;
-\item Multi-head laent attentio (MLA): joint low-rank compression of $K$ and $V$ to reduce the size of the KV cache;
-\item Multi-token predictin;
-\item FP8 mixed precision (FP8, BF16, FP32);
-\item Context length extension (first 32k, then 128k);
-\item Many parallelism and communication improvements).
-\end{compactitem}
-Training required 2 months on 2048 GPUs (\$5m).
-
-*** No, Models
-
-\nextbook
-\begin{book}
-  \emph{Nomic Embed: training a reproducible\\ long context text embedder}\\
-  Z. Nussbaum et al.
-\end{book}
-Open-source 8192-context-length embedding model,
-with \emph{task-specific prefixes},
-to break the symmetry of the encoder (we want a different model
-for questions and answers, such that the embeddings match).
-Tricks include: RoPE, SwiGLU, Flash Attention, AdamW, gradient accumulation, etc.
-
-*** DONE LLM, Bytes instead of tokens
-
-\nextbook
-\begin{book}
-  \emph{Byte latent transformer:\\ patches scale better than tokens}\\
-  A. Pagnoni et al.
-\end{book}
-Train a small transformer to forecast the next byte,
-from the current and previous bytes,
-with \emph{hash} n-gram embeddings, $3 \leq n \leq 8$.
-Use it to split the input into variable-length \emph{patches}
-(whenever the entropy of the next byte is above some threshold or increases too much).
-Feed those patches to a large transformer,
-to forecast the next patch.
-Decode the patches into bytes, with a small transformer, still using the entropy
-to decide when patches end.
-
-The model scales better than tokenizer-based transformers,
-and excells at character-level tasks.
-
-*** DONE LLM: BERT variants
-
-\nextbook
-\begin{book}
-  \emph{DeBERTa: decoding-enhanced BERT\\ with disentangled attention}\\
-  P. He et al.
-\end{book}
-BERT model with disentangled attention (content and position embeddings remain separate --
-content-content and content-position attention)
-and absolute word position embeddings just before the softmax layer.
-
-\nextbook
-\begin{book}
-  \emph{Electra: pre-training text encoders\\ as discriminators rather than generators}\\
-  K. Clark et al.
-\end{book}
-BERT model trained with a GAN-like task, replaced token detection (RTD) instead of masked language modeling (MLM).
-The replaced tokens come from a generator (e.g., a small MLM) trained with maximum likelihood (not adversarially).
-
-\nextbook
-\begin{book}
-  \emph{DeBERTav3: improving DeBERTa\\ using Electra-style pre-training\\ with gradient-disentangled embedding sharing}\\
-  P. He et al.
-\end{book}
-
-*** DONE LLM: NER
-
-\nextbook
-\begin{book}
-  \emph{GLiNER: generalist model for named entity recognition using bidirectional transformer}\\
-  U. Zaratiana et al. (2024)
-\end{book}
-Zero-shot NER with a BERT model:
-\begin{compactitem}[--]
-\item Compute embeddings $p_i$ of entity types and $h_i$ of sentence tokens;
-\item Apply FFNs to have embeddings $\text{FFN}(p_i)$ and $\text{FFN}(h_i,h_j)$,
-  ($i<j$, $\va{j-i}<12$) of entity types and spans;
-\item Compute the similarity (sigmoid of scalar product)
-  between entity types and spans;
-\item Return the highest scoring non-overlapping spans
-  (you may also allow fully nested spans).
-\end{compactitem}
-
-The model is trained on Pile-NER
-(50,000 texts from the Pile, annotated by ChatGPT, with open-ended entity types).
-Implementation available in \texttt{gliner}.
-
-\nextbook
-\begin{book}
-  \emph{UniversalNER: targeted distilation\\ from large language models\\ for open named entity recognition}\\
-  W. Zhou et al.
-\end{book}
-\emph{Targeted} distillation of ChatGPT onto Llama for Open NER.
-
-** DONE TO DELETE Capabilities
-*** DONE LLM, Causality (duplicate)
-
-\nextbook
-\begin{book}
-  \emph{Can large language models\\ infer causation from correlation}\\
-  Z. Jin et al.
-\end{book}
-Ask an LLM to discover and run the PC algorithm, \ie, discover and use
-\begin{compactitem}[--]
-\item $A \indep B \,|\, C \implies $ no $A$--$B$ edge;
-\item $A \indep B \text{ and } A \not\indep B \,|\, C \implies
-\begin{tikzpicture}[>=stealth,xscale=.8,yscale=.17,inner sep=0pt,outer sep=1pt,baseline={(0,.06)}]
-  \node (A) at (0,2) {$A$};
-  \node (B) at (0,0) {$B$};
-  \node (C) at (1,1) {$C$;};
-  \draw[->] (A) -- (C);
-  \draw[->] (B) -- (C);
-\end{tikzpicture}
-  $
-\item All colliders can be found in that way.
-\end{compactitem}
-(given all the relevant conditional independence statements, with no noise).
-The performance is bad.
-
-*** DONE LLM, Turing machine
-
-\nextbook
-\begin{book}
-  \emph{GPT is becoming a Turing machine:\\ here are some ways to program it}\\
-  A. Jojic et al.
-\end{book}
-Simulate iterative behaviour (loops)
-by providing a repetitive execution path as example.
-
 ** Attacks
 
 Here are some of the ways people have tried to attack an LLM:
@@ -5939,64 +5249,6 @@ The most successful current attacks are decomposition attacks:
 ask a weaker but uncensored model to decompose the problematic query into several innocuous queries,
 ask the stronger but censored model to answer those queries,
 ask the weaker but uncensored model to combine them into the final answer.
-
-** DONE TO DELETE Attacks
-*** DONE Jailbreak
-
-\nextbook
-\begin{book}
-  \emph{FlipAttack: jailbreal LLMs via flipping}\\
-\end{book}
-Jailbreak an LLM by flipping words and/or characters in the prompt,
-and asking the LLM to ``finish the task'' by flipping words/characters
-(with few-shot examples).
-
-*** No, LLM, attacks
-
-\nextbook
-\begin{book}
-  \emph{Stealing part of a production language model}\\
-  N. Carlini et al.
-\end{book}
-With access to the logits of an LLM,
-one can recover the dimension of the last weight matrix.
-The final layer is a projection from the hidden latent dimension to a \emph{higher} dimensional logit vector:
-the dimension of the span of the logit vectors is the dimension of the last layer;
-estimate it by looking at the singular value of the matrix $Q$ of logits.
-The SVD, $Q = U \Sigma V^\top$
-also gives the weight matrix, $W = U \Sigma$ (up to symmetries).
-The attack still works without direct access to the logits, but is more expensive.
-
-*** DONE LLM, Attacks
-
-\nextbook
-\begin{book}
-  \emph{Removing RLHF protections in GPT-4\\ via fine-tuning}\\
-  Q. Zhan et al.
-\end{book}
-Fine-tune with prompts violating the OpenAI ToS and responses from an uncensored Llama2 70B.
-
-*** DONE LLMs, attacks
-
-\nextbook
-\begin{book}
-  \emph{Abusing images and sounds for indirect instruction injection in multi-modal LLMs}\\
-  E. Bagdasaryan et al.
-\end{book}
-With multimodal LLMs, prompt injection
-is no longer limited to text:
-you can alter images or sounds
-to modify the LLM's behaviour,
-as if you were altering the prompt.
-
-*** No, LLM, Jailbreak
-
-\nextbook
-\begin{book}
-  \emph{``Do anything now'': characterizing and\\ evaluating in-the-wild jailbreak prompts\\ on large language models}\\
-  X. Shen et al. et al. (2023)
-\end{book}
-Get your jailbreak prompts from Reddit and Discord.
 
 ** Old-school NLP
 
@@ -6339,83 +5591,6 @@ VAR model, with pinball loss, to forecast the 10\%, 50\%, 90\% quantiles,
 using piecewise linear transformations of the predictors,
 with knots at the 10\% and 90\% quantiles to detect tail interactions.
 
-** DONE TO DELETE Graphs
-*** No, Graphs, GNN
-
-\nextbook
-\begin{book}
-  \emph{Industry classification based on supply chain network information using GNNs}\\
-  D. Wu et al.
-\end{book}
-Infer the industry of unlisted firms from the supply chain network.
-
-*** No, Finance, GNN
-
-\nextbook
-\begin{book}
-  \emph{Higher-order graph attention network\\ for stock selection with joint analysis}\\
-  Y. Qiao et al.
-\end{book}
-Stack
-LSTM (stock characteristics), motif-based GAT (from a graph built from sector, industry, Wiki data, etc.), MLP.
-
-*** DONE Text, graphs
-
-\nextbook
-\begin{book}
-  \emph{Text-based network industries\\ and endogenous product differentiation}\\
-  G. Hoberg and G. Phillips (2009)
-\end{book}
-Take the product description from the 10K filings,
-only keep nouns and proper nouns (they are capitalized 90\% of the time),
-discard geographic words, and words appearing in more than 25\% of the documents;
-compute pairwise cosine similarity
-to get each company's neighbours.
-
-Either use this weighted graph to compute a fixed industry classification
-(apply some clustering algorithm on data from 1997)
-or truncate the graph
-(to have the same number of connected pairs as in the SIC-3 classification).
-
-*** No, Finance, Graphs
-\nextbook
-\begin{book}
-  \emph{Modeling arterial and venous flows in Japanese supply chain: a network-based approach to the circular economy}\\
-  H. Goto
-\end{book}
-The supply chain has a bow-tie structure
-(the largest strongly connected component,
-its upstream, its downstream, the rest of the giant weakly connected component, and the rest).
-Take an industry classification, assume it is ordered (sic),
-and label flows as ``arterial'' or ``venous'',
-depending on their direction.
-[Instead, I would take the order maximizing arterial flow.]
-
-\nextbook
-\begin{book}
-  \emph{Analysis of cross-shareholding network Japanese listed companies}\\
-  S. Tanabe and T. Ohnishi
-\end{book}
-Evolution of the bow-tie structure.
-
-\nextbook
-\begin{book}
-  \emph{Dynamical analysis of financial stock network:
-  improving forecasting using network properties}\\
-  I. Achitouv
-\end{book}
-Forecast hourly or daily returns of S\&P 500 stocks from node or graph features:
-\begin{compactitem}[--]
-\item Centralities (degree, closeness, betweenness, eigenvalue);
-\item Clustering coefficient;
-\item Modularity;
-\item Largest component;
-\item Resilience (size of the largest component after removing a fraction of the nodes).
-\end{compactitem}
-Build the graph by thresholding the correlation matrix;
-choose the smallest threshold that makes the degree follow a power law distribution
-(increase the threshold until the degree istribution becomes conves: $\rho = 0.9$).
-
 ** TODO ? Technical
 *** Small mean-reverting portfolios
 
@@ -6570,98 +5745,6 @@ You can also obtain such latent representations from text (news, 10K, etc.) or h
 
   \emph{Asset embeddings}\\
   X. Gabaix et al. (2025)
-
-** DONE TO DELETE Deep Learning in Finance
-*** DONE Asset embeddings
-
-\nextbook
-\begin{book}
-  \emph{Asset embeddings}\\
-  X. Gabaix et al. (2025)
-\end{book}
-Compute asset embeddings from holdings data:
-\begin{compactitem}[--]
-\item Recommender systems:
-  \begin{align*}
-    & \log w_{ui} \approx \langle \phi_u, \phi_i \rangle \\
-    & u \text{: user (investor)} \\
-    & i \text{: item (asset)} \\
-    & w \text{: weight in portfolio} \\
-    & \phi_u, \phi_i \text{: embeddings}
-  \end{align*}
-\item Word2vec, BERT, GPT, after transforming the holdings into a sequence of tokens, sorting the assets by decreasing weight.
-\end{compactitem}
-
-This is more informative (at forecasting relative valuation and comovement) than text-based embeddings (10-K, earnings calls, news).
-
-*** DONE Deep learning in finance
-
-\nextbook
-\begin{book}
-  \emph{NeuralFactors: a novel factor learning approach to generative modeling of equities}\\
-  A. Gopal
-\end{book}
-Train a VAE to forecast future stock returns from current stock characteristics
-\begin{align*}
-  \text{stock}_{it} & \longmapsto \alpha_{it} , \beta_{it} , \sigma_{it} , \nu_{it} \\
-  z_{t+1} &\sim T( \mu_z , \sigma_z , \nu_z ) \\
-  r_{i, t+1 } &\sim T( \alpha_{it} + \beta_{it}^\top z_{t+1} , \sigma_{it} , \nu_{it} )
-\end{align*}
-and use it for
-synthetic data,
-covariance estimation,
-risk analysis,
-portfolio construction.
-
-A T-SNE embedding of the $\beta_i$ reveals industrial sectors.
-
-\nextbook
-\begin{book}
-  \emph{Improving investment strategies with GNNs}\\
-  G. Farmanfarmaian
-\end{book}
-\emph{Gated GCNs} use GRU in the depth dimension.
-
-GraphGPS alternates MPNN layers with global attention layers.
-
-The \emph{turbulence index} (of the market, at a given data)
-is the Mahalanobis distance to the average return vector.
-
-The structure of the supply chain graph is not useful in forecasting future (monthly) returns,
-but global information (e.g., from a virtual node) is.
-
-\nextbook
-\begin{book}
-  \emph{A geometric approach\\ to asset allocation with investor views}\\
-  A.V. Antonov et al. (2024)
-\end{book}
-Given a prior on the distribution of asset returns
-\[ x \sim p_{\text{prior}} = N( \mu_0, V_0 ) \]
-and investor views
-$ x \sim p_{\text{views}} = N(\mu_1,V_1)$,
-compute a posterior distribution
-\[ \operatorname*{Argmin}_{ p = N(\mu,V) } d( p, p_{\text{prior}} ) \text{\ \ such that\ \ } d( p, p_{\text{view}} ) \leq d_0 \]
-or
-\[ \operatorname*{Argmin}_{ p = N(\mu,V) } d( p, p_{\text{prior}} ) + \lambda  d( p, p_{\text{view}} ) \leq d_0. \]
-This readily generalizes to degenerate views.
-
-*** DONE Finance, synthetic data, neural factors
-
-\nextbook
-\begin{book}
-  \emph{Neural factors: a novel factor learning approach to generative modeling of equities}\\
-  A. Gopal
-\end{book}
-An autoencoder-based factor model can generate synthetic data:
-\begin{compactitem}[--]
-\item A neural network converts stock characteristics (financial statements, a few reference indices)
-  into factor exposures $\beta_{ijt}$ and the parameters of a Student distribution
-  $\alpha_{it}$, $\sigma_{it}$, $\nu_{it}$;
-\item The factors follow a Gaussian distribution
-  $z_{t+1} \sim N(0,I)$;
-\item The stock returns are then
-  \[ r_{i, t+1} \sim T_{ \nu_{it} } ( \alpha_{it} + \beta_{i\bigcdot t} ^\top z_{t+1} , \sigma_{it} ). \]
-\end{compactitem}
 
 ** TODO No
 *** No
@@ -6955,467 +6038,6 @@ the slope (between any two points) is the average calibration error for that reg
   \emph{Calibration and bias\\ in algorithms, data and models}\\
   (ICML 2025)
 
-** DONE TO DELETE Books, Tutorials
-*** No, Book: Conformal prediction
-
-\nextbook
-\begin{book}
-  \emph{Introduction\\ to conformal prediction with Python}\\
-  C. Molnar (2023)
-\end{book}
-
-\textbf{6.}
-Conformal prediction (CP) works as follows:
-\begin{compactitem}[--]
-\item Split the data into training and calibration
-  (and test, and validation) sets;
-\item Train the model on the training set
-\item Compute a \emph{non-conformity score} for all observations in the calibration set
-  (any measure of how unusual $y$ is, given $x$), e.g.,
-  $ 1 - \hat p(y|x)$, for a classification model;
-\item Compute its $1-\alpha$ quantile $\hat q$
-  (with a finite-sample adjustment);
-\item Given new data, $x$, return all the $y$'s whose non-conformity score is below $\hat q$ as \emph{prediction set}.
-\end{compactitem}
-(This is inductive CP;
-transductive CP uses the whole dataset, but needs to refit the model many times).
-For the splits, you can use a single split, cross-validation (CV) or leave-out-one (LOO).
-
-\textbf{7.}
-For classification:
-\begin{compactitem}[--]
-\item The \emph{score method} uses the probabilities of the true classes to compute the conformity scores:
-  $s_i = 1 - \hat p(x_i)_{ y_i }$
-  (where $\hat p(x_i)$ is the vector of predicted probabilities);
-  it is not \emph{adaptive}:
-  it only guarantees \emph{marginal coverage},
-  not \emph{class-conditional coverage} -- the coverage is $1-\alpha$ only on average,
-  but it can be much higher/lower for easier/harder classes.
-\item \emph{Adaptive prediction sets} (APS)
-  use cummulated probabilities, from the largest down to the true class;
-  at test time, compute the cummulated sorted probabilities, and return the classes until the threshold
-  (you can include the label just above the threshold, or not (but this can lead to empty prediction sets),
-  or (better) decide at random);
-\item Top-$k$ uses the rank of the true class;
-  the prediction sets all have the same size;
-\item Regularized APS (RAPS)
-  penalizes the inclusion of too many classes;
-\item Group-balanced conformal prediction applies conformal prediction separately for each group;
-\item Class-conditional APS uses group-balanced CP
-  for the classes to predict:
-  since they are not known at test time, it computes the CP for all classes, and returns the union of the forecasts.
-\end{compactitem}
-
-\textbf{8.}
-For regression:
-\begin{compactitem}[--]
-\item $s(y,x) = \bigl| y - \hat f(x) \bigr|$
-  gives prediction intervals all of the same size
-  (this is fine if the data is homoskedastic);
-\item Locally adaptive CP
-  \[s(y,x) = \dfrac{ \bigl| y - \hat f(x) \bigr| }{ \hat \sigma(x) } \]
-  accounts for heteroskedasticity
-  (but can output excessively large intervals if the data is homoskedastic).
-\end{compactitem}
-Instead of conformalizing (mean) regression, we can conformalize quantile regression
-\[ s(y,x) = \max \bigl\{
-\hat f _{\text{low}} (x) - y , y - \hat f_{\text{up}}(x)
-\bigr\} \]
-(the distance to the nearest interval boundary, with a negative sign if inside).
-
-\textbf{9.} Conformal prediction can be generalized to time series
-(EnbPI, in spite of non-exchangeability),
-multilabel classification,
-outlier detection (CP provides accurate control of the false positive rate).
-
-Implementation: \texttt{mapie}; also check \texttt{crepes}, \texttt{nixtla}.
-
-*** DONE Rectified flow, Generative models, ICML tutorial
-
-\nextbook
-\begin{book}
-  \emph{Continuous time generative models}\\
-  (Q. Liu, ICML 2025)
-\end{book}
-Generative models sample from a distribution defined by samples
-\[
-\begin{tikzpicture}[>=stealth,scale=1.8,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
-  \node (A) at (0,0) {noise\strut};
-  \node (B) at (1,0) {data.\strut};
-  \draw[->] (A) to node[anchor=south,outer sep=0pt] {$T_\theta$} (B) ;
-\end{tikzpicture}
-\]
-They can be:
-\begin{compactitem}[--]
-\item One-step: GAN, VAE, invertible models;
-\item Iterative: diffusion (SDE), flows (ODE), GPT (AR).
-\end{compactitem}
-They can be seen as ``lazy EM'':
-\[
-\begin{tikzpicture}[>=stealth,scale=1.8,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
-  \node (A) at (0,0) {latent};
-  \node (B) at (1,0) {model};
-  \draw[->] (A) to[out=30,in=150] node[anchor=south,outer sep=0pt]{\footnotesize M step} (B);
-  \draw[->] (B) to[out=-150,in=-30] node[anchor=north,outer sep=0pt]{\footnotesize E step} (A);
-  \node (C) at (2.5,0) {latent};
-  \node (D) at (3.5,0) {model.};
-  \draw[->] (C) -- (D);
-  \node (a) at (1.55,0) {\vphantom{l}};
-  \node (b) at (1.95,0) {\vphantom{l}};
-  \draw[->,decorate,
-    decoration={zigzag,amplitude=0.7pt,segment length=1.2mm,pre=lineto,pre length=2pt,post length=3pt}
-  ] (a) -- (b);
-\end{tikzpicture}
-\]
-Given two distributions, $p_0$, $p_1$,
-the \emph{flow transport problem} learns a velocity field $v(z,t)$ such that if
-\[ Z_0 \sim p_0 \qquad \dfrac{ d Z_t }{ dt } = v( Z_t, t ), \]
-then $Z_1 \sim p_1$.
-The \emph{transport process} is $(Z_t)_{t \in [0,1]}$.
-The \emph{transport plan}, or \emph{coupling},
-is the joint distribution of $(Z_0,Z_1)$.
-The \emph{transport map} is $T: Z_0 \mapsto Z_1$.
-The solution is not unique.
-Optimal transport
-\[ \min_{\substack{
-    (Z_0,Z_1)\\
-    Z_0 \sim p_0 \\
-    Z_1 \sim p_1
-}} \E \bigl[ c(Z_1-Z_0) \bigr]
-\quad \text{ or } \quad
-\min_{\substack{
-    (Z_t)_{ t \in [0,1] } \\
-    Z_0 \sim p_0 \\
-    Z_1 \sim p_1
-}} \E \left[
-  \int_0^1 c( \dot Z_t ) dt
-  \right]
-\]
-is difficult and unnecessary.
-
-The Euler discretization of the ODE depends on the curvature of the trajectory:
-with straight trajectories, one step suffices. We want straight transport maps.
-
-\d{Rectified flow} provides a solution:
-\begin{compactitem}[--]
-\item Sample a noise-data pair $(X_0,X_1)$ (independent coupling);
-\item Interpolate $X_t = t X_1 + (1-t) X_0$
-  (the trajectories intersect: this does not come from an ODE);
-\item Convert to an ODE
-  $ \dot Z_t = v_t(Z_t), $
-  \[ \operatorname*{Minimize}_v \int_0^1 \E_{ X_0,X_1} \n{ \dot X_t - v_t(X_t) }^2 dt, \]
-  where $\dot X_t$ are the line directions;
-\item Iterate (sample from the new coupling).
-\end{compactitem}
-\[
-<<RectifiedFlow2D,engine='python',results='hide',echo=FALSE,out.width='\\hsize',fig.show='hold'>>=
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import scipy
-M = 6
-np.random.seed(1)
-def sample_from_p0(size=1):
-    p = np.random.uniform(size=size)
-    m = np.where( p > .5, 1, -1 ) *** 3
-    return np.random.normal( m, 1, size=size )
-def sample_from_p1(size = 1):
-    return sample_from_p0(size)
-N = 10_000
-z0 = sample_from_p0(N)
-z1 = sample_from_p1(N)
-coupling = np.vstack([z0,z1]).T
-slope = z1 - z0
-def v(x,y, sigma=.1):
-    yhat = slope *** x + z0
-    weights = np.exp( - (y-yhat)**2 / 2 / sigma**2 )
-    weights = weights / np.sum(weights)
-    return np.sum( weights*slope )
-K = 10
-xs = np.linspace(0,1,K)
-ys = np.linspace(-M,M,K)
-Vs = np.array( [
-    [v(x,y) for x in xs]
-    for y in ys
-] )
-Xs = np.tile( xs, (len(ys),1) )
-Ys = np.tile( ys, (len(xs),1) ).T
-Us = np.cos( np.atan(Vs) )
-Vs = np.sin( np.atan(Vs) )
-fig, axs = plt.subplots( 1, 3, figsize = (12,3) )
-for i in range(50):
-    axs[0].plot( [0,1], [z0[i],z1[i]], color = 'tab:orange', linewidth = 1 )
-#axs[1].streamplot(Xs,Ys,Us,Vs)
-for i in range(50):
-    r = scipy.integrate.solve_ivp(v, (0,1), z0[[i]], t_eval=np.linspace(0,1,100), dense_output=True)
-    axs[1].plot( r.t, r.y[0,:], color = 'tab:orange', linewidth=1 )
-    z = r.y[0,-1]
-    axs[2].plot( [0,1], [z0[i],z], color = 'tab:orange', linewidth=1 )
-dz0 = scipy.stats.gaussian_kde(z0)
-dz0 = scipy.stats.gaussian_kde(z1)
-zs = np.linspace(-M,M,200)
-for ax in axs:
-    ax.axvline( 0, color = 'black', linewidth = 1 )
-    ax.axvline( 1, color = 'black', linewidth = 1 )
-    s = 2
-    ax.plot( -s*dz0(zs), zs, color = 'tab:blue' )
-    ax.plot(1+s*dz0(zs), zs, color = 'tab:blue' )
-    ax.axis('off')
-fig.subplots_adjust( left = 0, right = 1, top = .95, bottom = 0 )
-plt.show()
-@
-\]
-For a single data point
-\begin{align*}
-  x_t &= t x^{\text{data}} + (1-t) x_0 \\
-  \dot x_t &= x^{\text{data}} - x_0 = \dfrac{ x^{\text{data}} - x_t }{ 1 - t }
-  \intertext{(there is a singularity, but it is numerically stable)}
-  v^*(x,t) &= \E[ \dot X_t | X_t = x ].
-\end{align*}
-More generally, the \emph{rectified flow} of a stochastic process $X_t$ is the ODE
-\[ \dot Z_t = v_t( Z_t ) \ \text{ where }\  v_t(x) = \E[ \dot X_t | X_t = x ] . \]
-The density $\rho_t$ of $X_t$ satisfies the \emph{continuity equation}
-\[ \underset{
-  \text{rate of change}
-}{\partial _t \rho_t (x)\vphantom{\bigl(}} = -
-\underset{
-  \text{divergence of the flux}
-}{\nabla \cdot \bigl( v_t(x) \rho_t(x) \bigr)}
-\]
-where the divergence is
-\[ \nabla \cdot v(x) = \text{Trace}\, \nabla v(x). \]
-\[
-\begin{tikzpicture}[>=stealth,scale=1,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
-  \begin{scope}
-    \begin{scope}[yscale=.15]
-      \foreach \i in {-2,...,2} {
-        \draw[->] (0,\i) -- (.3,\i);
-        \draw[->] (.35,\i) -- (1,\i);
-      }
-    \end{scope}
-    \begin{scope}[shift={(1.8,0)},scale=.3]
-      \node (O) at (0,0) {};
-      \foreach \i in {0,45,...,315}
-        \draw[->] (O) -- (\i:1.3);
-    \end{scope}
-    \node at (1,-.8) {$\text{div}>0$};
-    \node at (.5,.5) {\footnotesize accelerate};
-    \node at (1.8,.5) {\footnotesize diverge};
-  \end{scope}
-  \begin{scope}[shift={(3.5,0)}]
-    \begin{scope}[yscale=.15]
-      \foreach \i in {-2,...,2} {
-        \draw[->] (0,\i) -- (.65,\i);
-        \draw[->] (.7,\i) -- (1,\i);
-      }
-    \end{scope}
-    \begin{scope}[shift={(1.8,0)},scale=.3]
-      \node (O) at (0,0) {};
-      \foreach \i in {0,45,...,315}
-        \draw[->] (\i:1.3) -- (O);
-    \end{scope}
-    \node at (1,-.8) {$\text{div}<0$};
-    \node at (.5,.5) {\footnotesize decelerate};
-    \node at (1.8,.5) {\footnotesize converge};
-  \end{scope}
-\end{tikzpicture}
-\]
-The rectified flow reduces the curvature (straightens trajectories --
-% TODO: PLOT?
-in practice, one reflow is good enough).
-The rectified flow reduces the transport cost for all convex costs (Jensen),
-but we need not get the optimal transport.
-\[
-\qquad
-\begin{tikzpicture}[>=stealth,scale=.5,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
-  \begin{scope}
-    \node (O) at (0,0) {};
-    \foreach[evaluate=\i as \j using int(\i*45)] \i in {0,...,8} {
-      \node[circle,draw,thick,blue!70!black] (A-\i) at (\j:1) {};
-      \node[circle,draw,thick,red!60!black] (B-\i) at (\j:2) {};
-    }
-    \foreach[evaluate=\i as \j using int(\i+1)] \i in {0,...,7} {
-      \draw (A-\i) -- (B-\i);
-    }
-    \node at (0,-2.7) {\footnotesize optimal coupling};
-  \end{scope}
-  \begin{scope}[shift={(8,0)}]
-    \node (O) at (0,0) {};
-    \foreach[evaluate=\i as \j using int(\i*45)] \i in {0,...,8} {
-      \node[circle,draw,thick,blue!70!black] (A-\i) at (\j:1) {};
-      \node[circle,draw,thick,red!60!black] (B-\i) at (\j:2) {};
-    }
-    \foreach[evaluate=\i as \j using int(\i+1)] \i in {0,...,7} {
-      \draw (A-\i) -- (B-\j);
-    }
-    \node at (0,-2.7) {\footnotesize straight, non-optimal coupling};
-  \end{scope}
-\end{tikzpicture}
-\]
-(For the quadratic cost)
-it is possible to remove the rotation by restricting the velocity to be a gradient,
-\begin{align*}
-  & \dot Z_t = \nabla f( Z_t , t ) \\
-  & f = \argmin_f \int_0^1 \E \n{ (x_1-x_0) - \nabla f(x_t,t) }^2 dt .
-\end{align*}
-The Helmoltz decomposition of vector fields
-\[ v_t = \nabla f_t + r_t \]
-can be generalized to other convex costs
-\[ v_t = \nabla c^*** ( \nabla f_t ) + r_t . \]
-If $X_0$ is Gaussian and ($X_0,X_1)$ is the independent coupling,
-then the score is (Tweedie's formula)
-\[ \nabla \log \rho_t (x) = \dfrac{ t v_t(x) - x }{ 1 - t } . \]
-
-Different prediction targets
-\begin{align*}
-  &\text{velocity} & v_t(x) &= \E[ X_1 - X_0 | X_t ] \\
-  &\text{noise} & \mu_{0,t}(x) &= \E[ X_0 | X_t ] \\
-  &\text{data} & \mu_{1,t}(x) &= \E[ X_1 | X_t ] \\
-  &\text{score} & \nabla \log \rho_t(x) &= - \dfrac1{1-t}  \E[ X_0 | X_t ]
-\end{align*}
-
-The \emph{Fokker-Plank equation} converts between ODEs and SDEs:
-it changes the dynamics but not the marginals.
-If
-\begin{align*}
-  d Z_t &= v_t( Z_t ) dt + \sigma_ dW_t, \\
-  \intertext{then}
-  \partial_t \rho_t(x) &= - \nabla \cdot \bigl( v_t^{\text{eff}} (x) \rho_t(x) \bigr)  \\
-  \intertext{where}
-  v_t^{\text{eff}} (x) &= v_t(x) - \dfrac12 \sigma_t^2 \nabla \log \rho_t(x). \\
-\end{align*}
-In particular,
-\begin{align*}
-  d Z_t &= v_t(Z_t) dt + \sigma_t dW_t && \text{DDPM} \\
-  \intertext{and}
-  d\tilde Z_t &= v_t^{\text{eff}}(Z_t) dt && \text{DDIM}
-\end{align*}
-have the same marginals.
-
-A \emph{diffusion} is an ODE with Langevin noise.
-\[ dZ_t = v_t(Z_t) dt + \sigma_f^2 \nabla \log \rho_t(Z_t) dt + \sqrt2 \sigma_t dW_t \]
-That noise is an error-correcting mechanism, moving outliers back towards the bulk of the distribution,
-and making $\rho_1$ more concentrated (mode-seeking).
-
-Instead of straight lines, you can interpolate with a Brownian bridge (or a jump bridge for discrete data).
-
-Once you have the ODE, use a numeric solver, or train a neural net to approximate the trajectories
-(forward loss, backward loss, triconsistency loss, velocity matching loss, KL, score, etc.).
-
-To add a constraint
-\[ P_\theta[ X_1 \in \Omega ] = 1 \]
-where $\Omega$ is a manifold or a finite set,
-use an $\Omega$-bridge, or just add (deterministic) singular forces
-\[ d Z_t = v_t^\Omega( Z_t ) dt + \underset{\text{trainable}}{v_t^\theta( Z_t )} dt + \sigma_t dW_t ; \]
-for instance, if $\Omega = \{\mu_1,\dots,\mu_k\}$ is a finite set, use
-\[ v_t^\Omega(z) = \sum_i w_i(z) \dfrac{ \mu_i - z }{ 1 - t }. \]
-
-*** Diffusion, ICML Tutorial (No? only the first third of the tutorial was interesting)
-
-\nextbook
-\begin{book}
-  \emph{Harnessing low dimensionality\\ in diffusion models}\\
-  (ICML 2025)
-\end{book}
-Older generative models (GAN, VAE) have been replaced with diffusion.
-From the forward SDE, which adds noise to the data
-\[ d X_t = f( X_t , t ) dt + g(t) dW_t \]
-we can compute the backward probability flow,
-a denoising ODE
-\[ dX = \Bigl[ f(X,t) - \dfrac12 g(t)^2 \nabla_{\!x} \log p_t(x) \Bigr] dt . \]
-We can use a neural net (U-net or transformer) to approximate the score
-\[ \operatorname*{Minimize}_\theta \E_{ t, x_0, x_t} \beta_t^2 \n{
-  \mathstrut
-  \nabla \log p_t(x_t) - s_\theta(x_t,t)
-}^2 .\]
-We do not know the marginal distribution $p_t$,
-but this is equivalent to predicting the noise
-\[ \n{ \epsilon - \beta_t s_\theta( x_t, t) } ^2 . \]
-
-The \emph{reproductibility score}
-between two diffusion models $M_1$, $M_2$ is the similarity of their outputs when given the same noise inputs,
-\[ \operatorname*{P}_{ \epsilon \sim N(0,I) } \bigl[
-  \text{SSCD}\bigl( M_1(\epsilon), M_2(\epsilon) \bigr) > 0.6
-  \bigr], \]
-where the self-supervised copy detection (SSCD)
-is the cosine similarity of some low-dimensional embedding.
-For diffusion, it is high ($>0.7$),
-while it was close to zero for GANs or VAEs.
-
-The \emph{generalization score} measures whether
-a model reproduces some of the training samples
-or generates new data.
-\[ 1 - \operatorname*{P}_{\epsilon \sim N(0,I) } \left[
-  \max_{ i \in \text{Train} \vphantom{(} } \text{SSCD} \bigl( M(\epsilon) , x_i \bigr ) > 0.6
-  \right]
-\]
-
-When there is little data, diffusion models memorize the training data:
-reproducibility is high, but generalization is low.
-As the volume of training data increases, reproducibility decreases but,
-if there is enough data, the model generalizes:
-the generalization score is high,
-and the reproducibility score is high again.
-
-We expect generalization to happen when
-$ p_{\text{empirical}} \approx p_{\text{data}} $,
-\ie, $N \geq (L/\epsilon)^d$,
-where $d$ is the \emph{intrinsic dimension} of the data
-(it can be as low as $d=45$ for ImageNet).
-The training data can be described as a mixture of low-rank Gaussians (MoLRG, subspace clustering).
-
-% Theoretical results
-% Application: diffusion inverse solvers (DIS)
-
-*** DONE Statistics: Calibration, ICML Tutorial
-
-\nextbook
-\begin{book}
-  \emph{Calibration and bias\\ in algorithms, data and models}\\
-  (ICML 2025)
-\end{book}
-To assess the miscalibration of probabilistic predictions,
-\begin{align*}
-  S_1,\dots,S_n&:\text{scores, predicted probabilities of success} \\
-  R_1,\dots,R_n&:\text{Bernoulli responses}
-\end{align*}
-assume, wlog, $S_1<\cdots<S_n$ and plot the cummulative differences
-\[ C_k = \dfrac1n \sum_{j=1}^k ( R_j - S_j ) , \qquad k=1,\dots,n \]
-versus $k/n$
-(you can put $k/n$ on one horizontal axis, with equal increments,
-and $S_k$ on another horizontal axis, with inequal increments).
-The slope (between any two points)
-measures the (average) miscalibration (between those two points).
-For statistical tests, use
-\begin{align*}
-  \text{KS} &= \max \va{ C_k } \\
-  \text{Kuiper} &= \max C_k - \min C_k;
-\end{align*}
-under $H_0$ (perfect calibration)
-\begin{align*}
-  \text{KS} / \sigma &\sim \max( \text{Brownian motion} ) \\
-  \text{Kuiper} / \sigma &\sim \text{Range}( \text{Brownian motion} )
-\end{align*}
-where
-\[ \sigma = \sum \dfrac{ S_k ( 1 - S_k ) }{ n^2 }. \]
-
-Do not bin data into $\tilde R_j$, $\tilde S_j$:
-the reliability diagram $\tilde R_j \sim \tilde S_j$ and the empirical calibration error
-(ECE, sometimes called ICE)
-$\operatorname{Mean} \va{ \tilde R_j - \tilde S_j}$ or
-$\operatorname{Mean} \bigl( \tilde R_j - \tilde S_j \bigr)^2$ or
-is not asymptotically consistent.
-
-Similarly, one can study the deviations of the responses of a subpopulation
-from those of the full population
-by matching the ``scores'' (age, income, predicted probability, etc. -- fairness)
-\[ C_k = \dfrac1n \sum_{ k=1 }^j \bigl( R_{ i_k } - \tilde R_{ i_k } ) \]
-where $i_1<\cdots<i_n$ are the subpopulation
-and $\tilde R_{ i_k}$  the average response of units matching $i_k$ (inclusing $i_k$).
-
-One can also compare two sub-populations, provided we can find matching units.
-We can also match on several covariates.
-
 * TODO ML
 ** Decision trees
 
@@ -7471,260 +6093,6 @@ TODO: There are variants of this idea
 
 If you want to stick to trees, you can distill your random forest into a tree,
 but use data augmentation, (x,f(x)+noise), to better explore the neighbourhood of the decision boundary.
-
-** DONE TO DELETE Trees
-
-*** DONE Decision trees (optimal)
-
-\nextbook
-\begin{book}
-  \emph{Optimal classification trees}\\
-  D. Bertsimas and J. Dunn (2015)
-\end{book}
-Decision trees are often built in a (suboptimal) greedy way,
-unconstrained (to detect strong splits hidden behind weak ones)
-and pruned (to account for the complexity penalty).
-
-The problem of finding the optimal tree of depth at most $D$ can be formulated as
-mixed integer program:
-\begin{compactitem}[--]
-\item Binary variables for each node, indicating if there is a split;
-\item Binary variables to select the variable used for the split;
-\item Binary variables indicating non-empty leaves;
-\item Binary variables indicating, for each observaation and each node,
-  whether it goes to the left or to the right;
-\item Binary variables indicating the majority class in each leaf
-\end{compactitem}
-(and many constraints).
-
-For the hyperparameters:
-\begin{compactitem}[--]
-\item Progressively increase the tree depth, using CART or a shallower tree as a warm start;
-\item The complexity penalty can be formulated as a hard constraint on the number of nodes:
-  progressively increase the number of nodes;
-\item Idem for the minimum number of observations in each leaf.
-\end{compactitem}
-
-This can be generalized to multivariate decision trees
-(hyperplane splits, instead of axis-aligned ones), with greedy (single-split-optimal-tree based)
-warm start (or greedy logistic regressions).
-
-\nextbook
-\begin{book}
-  \emph{Learning optimal and fair decision trees\\ for non-discriminative decision-making}\\
-  S. Aghaei et al.
-\end{book}
-Another MIP formulation of the optimal decision (or regression) tree;
-also allowing fairness penalties.
-
-Implementation in \texttt{ODTlearn}.
-
-\nextbook
-\begin{book}
-  \emph{Learning optimal classification trees\\ using a binary linear program formulation}\\
-  S. Verwer and Y. Zhang
-\end{book}
-Reformulation of the optimal decision tree MIP
-without constraints for each observation in the training set:
-just sum the constrains for the rows having the same feature values.
-
-\nextbook
-\begin{book}
-  \emph{Optimal constraint-based decision tree induction from itemset lattices}\\
-  S. Nijssen and E. Fromont
-\end{book}
-DL8 uses frequent itemset mining to build optimal decision trees on binary data
-(every path, o a decision tree, can be mapped to an itemset):
-the best decision tree on a subset of the data is obtained by considering all possible
-ways of paritioning it in two,
-and recursively determining the best tree for each partition.
-
-\nextbook
-\begin{book}
-  \emph{Learning optimal decision trees\\ using caching branch-and-bound search}\\
-  G. Aglin et al.
-\end{book}
-Implementation improvements for DL8, in \texttt{PyDL8.5}
-
-\nextbook
-\begin{book}
-  \emph{Optimal policy trees}\\
-  M. Amram et al.
-\end{book}
-The optimal decision tree MIP can be generalized to build an optimal \emph{policy} tree,
-\[ \operatorname*{Minimize}_{ \tau : \mathscr X \to \{0,1\} }
-\sum_i \Gamma_{ i , \tau(x_i) } \]
-after estimating the counterfactuals with a doubly robust (DR) estimator
-\[ \Gamma_{it} = \dfrac{ y_i - \hat y_{it} }{ \hat p_{it} } \mathbf 1_{ z_i = t } + \hat y_{it}. \]
-\[
-\begin{tikzpicture}[>=stealth,xscale=.5,yscale=.8,inner sep=2pt,outer sep=1pt,baseline=0]
-  \node (X) at (1,1) {$X$};
-  \node (T) at (0,0) {$T$};
-  \node (Y) at (2,0) {$Y$};
-  \draw[->] (X) -- (T);
-  \draw[->] (X) -- (Y);
-  \draw[->] (T) -- (Y);
-\end{tikzpicture}
-\]
-
-
-\nextbook
-\begin{book}
-  \emph{Optimal prescriptive trees}\\
-  D. Bertsimas et al.
-\end{book}
-Joint (MIP) tree model for counterfactual estimation
-(locally constant or piecewise linear)
-and optimal treatment assignment.
-
-*** No, Generalized random forests
-
-\nextbook
-\begin{book}
-  \emph{Generalized random forests}\\
-  S. Athey et al. (2016)
-\end{book}
-Generalized random forests fit a quantity $\theta(x)$
-identified as the solution of local moment equations
-\[ \E \bigl[ \psi_{ \theta(x) } (X) \,|\, X = x \bigr] = 0. \]
-
-The tree is built recursively, splitting a (parent) node $P$ into (children) $C_1$, $C_2$,
-maximizing
-\[ \Delta( C_1, C_2 ) =
-\dfrac{ \va{ C_1 } \cdot \va{ C_2 } }{ \va{ P }^2 }
-\n{ \hat\theta_{C_1} - \hat\theta_{C_2} }^2 , \]
-which can be approximated with a Taylor expansion
-\begin{align*}
-  A_p &= \operatorname*{Mean}_{ i \in P } \nabla \psi_{ \hat \theta_P } (x_i) \\
-  \rho_i &= - A_P^{-1} \psi_{ \hat\theta_P } (x_i) \\
-  \tilde \Delta(C_1,C_2) &= \sum_{ j \in \{1,2\} } \dfrac1{ \va{ C_j } }
-  \biggl(\, \sum_{ i \in C_j } \rho_i \biggr)^2.
-\end{align*}
-
-The final estimate is not obtained byaveraging estimates from each tree,
-but by
-using the ensemble to compute similarity weights $\alpha_i(x)$ between the new sample $x$ and training samples $i$
-and putting them in the empirical estimating equation
-\[ \hat\theta(x) = \argmin_\theta \n{ \sum_i \alpha_i(x) \psi_\theta(x_i) }_2. \]
-
-R implementation in \texttt{grf}.
-
-\nextbook
-\begin{book}
-  \emph{evtree: evolutionary learning of globally optimal classification and regression trees in R}\\
-  T. Grubinger et al. (2014)
-\end{book}
-Decision trees are usually built greedily: they are only locally optimal --
-genetic algorithms can search for a globally optimal tree.
-
-\nextbook
-\begin{book}
-  \emph{Parties, models, mobsters:\\ a new implementation\\ of model-based recursive partitioning in R}\\
-  A. Zeilleis and T. Hothorn
-\end{book}
-Model-based recursive partitioning (MOB)
-is a ``decision'' tree with models (e.g., linear models) in the leaves.
-They can use different variables for the models $y \sim x_1 + \cdots + x_m$
-and the splits $z_1,\dots,z_\ell$.
-The tree is built recursively:
-\begin{compactitem}[--]
-\item Fit the model to the current node;
-\item Test for parameter instability (SupLM fluctuation test)
-  to select the variable to split on;
-\item Use exhaustive search to select the split point;
-\item Split the node, and iterate until the desired depth;
-\item Prune the tree by looking at the AIC or BIC improvement.
-\end{compactitem}
-R implementation in \texttt{partykit}.
-
-\nextbook
-\begin{book}
-  \emph{Generalized M-fluctuation tests\\ for parameter instability}\\
-  A. Zeileis and K. Hornik (2007)
-\end{book}
-Given observations
-$Y_i \overset{\text{indep}}{\sim} F_{\theta_i}$,
-we can test
-\begin{align*}
-  H_0 &: \ \forall i \ \theta_i = \theta_0 \\
-  H_1 &: \ \theta_i \text{ varies over time}
-\end{align*}
-using a score function $\psi$, \ie, a function such that
-\[ \E_{ Y \sim F_\theta } \bigl[ \psi_\theta(Y) \bigr] = 0 , \]
-e.g.,
-\[ \psi_\theta(y) = \dfrac{ \partial \text{loss} ( y ; \theta ) }{ \partial \theta } \]
-where the loss is the log-likelihood or the residual sum of squares.
-
-Since
-$\hat B_n^{-1/2} W_n(\cdot, \hat\theta_n ) \overset{\text{d}}{\to} W^0(\cdot)$,
-where
-\begin{compactitem}[\ensuremath{\cdot}]
-\item $n$ is the number of observations;
-\item $\hat\theta_n$ is estimated using the whole sample:\\
-  \mbox{}\qquad\qquad\qquad$\displaystyle\sum_{i=1}^n \psi_{\hat\theta_n} ( Y_i ) = 0 ; $
-\item $\displaystyle W_n(t,\theta) = \dfrac{1}{\sqrt n} \sum_{ i=1 }^{ \lfloor nt \rfloor }\psi_\theta(Y_i );$
-\item $\displaystyle B(\theta) = \operatorname*{Var}_{ Y \sim F_\theta } \bigl[ \psi_\theta(Y) \bigr] ;$
-\item $\displaystyle\hat B_n = \dfrac1n \sum_{i=1}^n \psi_{\hat\theta_n}(Y_i) \psi_{\hat\theta_n}(Y_i) ^\top ;$
-\item $W^0(t) = W(t) - t W(1)$ Brownian bridge;
-\item $W$ is a standard Brownian motion,
-\end{compactitem}
-we can use
-\begin{align*}
-  &\text{SupLM} = \sup_{ t \in \Pi } \dfrac{ \n{ \text{efp}(t) }_2^2 }{ t(1-t) } \\
-  &\text{efp}(t) = \hat B_n^{-1/2} W_n(t,\hat\theta_n) \text{ (empirical fluctuation process)}\\
-  &\Pi \subset [0,1] \text{ interval with suspected break}
-\end{align*}
-as test statistic (and approximate $p$-values).
-For linear regression,
-\[ \psi_B( y_i, x_i ) = x_i ( y_i - x_i^\top \beta ). \]
-
-\nextbook
-\begin{book}
-  \emph{Approximate asymptotic p-values\\ for structural change tests}\\
-  B.E. Hansen (1997)
-\end{book}
-$P$-values for the limiting distribution
-\[ \sup_{ t \in \Pi } \dfrac{ \n{ W^0(t) }_2^2 }{ t(1-t) }. \]
-
-\nextbook
-\begin{book}
-  \emph{ctree: conditional inference trees}\\
-  T. Hothorn et al.
-\end{book}
-Decision tree using statistical tests (adjusted for multiple testing) to select the splits
-(instead of heuristic, overfitting-prone criteria).
-
-\nextbook
-\begin{book}
-  \emph{Fast optimal leaf ordering\\ for hierarchical clustering}\\
-  Z. Bar-Joseph et al. (2001)
-\end{book}
-
-*** DONE Random forests, interpretability
-
-\nextbook
-\begin{book}
-  \emph{Approximation trees:\\ statistical stability in model distillation}\\
-  Y. Zhou et al.
-\end{book}
-To explain a blackbox model (e.g., a random forest),
-distill it into a decision tree using pseudo observations
-(real observations plus Gaussian noise, for a user-chose bandwidth -- \ie,
-samples from a KDE of the data).
-Choose the number of pseudo observations so tha the trees be stable --
-use a statistical test on the Gini  index (which is used to select the splits).
-Choose the tree depth by comparing the variance of the observations in a leaf
-with the variance of the blackbox model.
-
-*** DONE Random forests
-
-\nextbook
-\begin{book}
-  \emph{Dynamic asset allocation using machine learning: seeing the forest for the trees}\\
-  C. Mueller-Glissmann and A. Ferrario
-\end{book}
-A \emph{student tree} is a complex model (e.g., a random forest)
-distilled into a tree (on real data + noise).
 
 ** TODO No? Change point detection
 *** ML, Clustering, Change point detection
@@ -8320,36 +6688,70 @@ H\bigl( \rho_{\not x}( y_{t+1} | y_t ) \bigr).
 
 * TODO Diffusion
 
-TODO: Explain the difference between DDPM (SDE) and DDIM (ODE).
+Diffusion models consider the progressive addition of noise to an image,
+and learn a model to do the opposite, i.e., to remove noise from an image or even,
+to turn noise into an image. Formally, the addition of noise
+can be described with a stochastic differential equation (SDE),
+and diffusion models such as DDPM learn the reverse-time SDE.
+(This can be generalized to non-text data: sound, time series, text, etc.)
 
-TODO: Consistency models
+Diffusion models also have an interpretation in terms of probability distributions:
+they learn a mapping between the noise distribution and the data distribution,
+and they do that progressively: they learn a path (in the space of distributions)
+between the noise distribution and the data distribution.
 
-  Consistency models}\\
-  Y. Song et al. (2023)
-  https://arxiv.org/abs/2303.01469
+But the stochastic differential equation is not the only process leading to that path:
+we can also obtain the same path with an ordinary differential equation (ODE) --
+this is what the DDIM diffusion model does.
 
-TODO: Relations between diffusion and normalizing flows?
-Rectified flow straightens the ODE solutions. TODO: ICML tutorial?
-
-TODO: Classifier-free guidance
+There have been a few variants or extensions of those models.
+For instance, classifier-free guidance (CFG) models train a single model
+which can be used for both conditional and unconditional generation
+(i.e., with or without a prompt); at inference time, we can use
+a linear combination of the conditional and unconditional models,
+with more weight given to the conditional part.
 
   Classifier-free diffusion guidance}\\
   J. Ho and T. Salimans (2021)
   https://arxiv.org/abs/2207.12598
 
+  
+While diffusion models have to move step by step to progressively transform the noise (t=0) into an image (t=1),
+consistency models try to do it all at once, by  training a model to transform an image
+with a given amount of noise to an image with another amount of noise (from t to s) in one step
+(it can then be used to go from t=0 to t=1).
+
+  Consistency models
+  Y. Song et al. (2023)
+  https://arxiv.org/abs/2303.01469
+
+Diffusions define a path in the space of probability distributions,
+from the noise distribution to the data distribution. We can use the path
+defined by the denoising SDE, but we could use any other path.
+In particular, we can use an ODE whose trajectories are straight lines:
+this is a rectified flow.
+
+  TODO: ICML tutorial
+
+This may sould a bit like optimal transport:
+diffusion defines a non-optimal transport between the noise distribution and the data distribution --
+we do not need it to be optimal.
+  
 TODO: Mention Schrödinger bridges?
 
   Trajectory inference\\ with smooth Schr\"odinger bridges}\\
   W. Hong et al. (2025)
   https://arxiv.org/abs/2503.00530
 
-* TODO Transformers, Transformers vs RNN
+* Transformers: position embedding
 
-TODO? Different types of position encoding
-Position encoding (PE) adds a sine (or learned) positional encoding to the first layer.
-\emph{RoPE} multiplies keys and queries with a sine encoding, at each layer; the values are left untouched.
-\emph{T5 bias} adds a learned, distance-dependent bias to the pre-softmax attention, at each layer (the values are left as is).
-\emph{ALiBi}
+The attention mechanism is permutation-invariant: it should be unsuitable
+for sequence data such as text -- it ignores the order of the words. 
+In spite of that, it is at the heart of the transformer architecture used in LLMs,
+thanks to the addition of a sine (or learned) positional embedding (PE) to the first layer.
+There are many variants:
+for instance, RoPE multiplies keys and queries with a sine embedding (which rotates them),
+whilte ALiBi adds position-based penalties to the attention scores. 
 
   Train short, test long: attention with linear biases enables input length extrapolation}\\
   O. Press et al. (2021)
@@ -8565,30 +6967,45 @@ This can be generalized to higher order recurrences
 applications include
 $x_i = a_i + b_i/x_{i-1}$, Fibonacci numbers, etc.
 
-* TODO Graphs, GNN
+* Graphs, GNN
 
-TODO Graph sparsification: union of random spanning trees
+When your graph is too large, you may want to shrink it,
+by reducing the number of nodes (coarsening -- merging nodes)
+or the number of edges (sparsification).
+For instance, taking the union of random spanning trees
+is a simple sparsification method.
 
   Spectral sparsification of graphs:\\ theory and algorithms}\\
   J. Baston et al. (2009)
   http://cs-www.cs.yale.edu/homes/spielman/PAPERS/CACMsparse.pdf
 
 * TODO Optimization
-** TODO Bayesian optimization and RL
 
-\nextbook
-\begin{book}
+** Bayesian optimization and reinforcement learning
+Bayesian optimization keeping an estimate of the quality of each possible point,
+evaluating the function to minimize at the most promising point,
+using its value to update the quality estimates, and iterates,
+until the model is confident it is close enough to a solution.
+Instead of looking at one-step-ahead decisions,
+you could use reinforcement learning for less myopic decisions.
+
   \emph{Earl-NO: reinforcement learning\\ for multi-step lookahead,\\ high-dimensional Bayesian optimization}\\
   M. Cheon et al.
-\end{book}
-Traditional Bayesian optimization looks for one-step optimal decisions.
-Instead, use reinforcement learning (PPO) for multi-step lookahead decisions.
-Encode the state (set of points examined so far, with their values)
-with attention and DeepSet,
-to have a constant-size state space.
+  
+** LiSSA
+
+Second-order optimization methods (Newton and variants, such as L-BFGS)
+are faster in number of iterations, but slower because of the Hessian inverse.
+LiSSA is a second-order optimization method (i.e., an approximation of Newton's method)
+as fast as first-order methods: it does not compute the inverse of the Hessian
+but uses a Taylor expansion of the inverse, without computing the whole Hessian
+(it only requires Hessian-vector products).
+
+  \emph{Second-order stochastic optimization\\ for machine learning in linear time}\\
+  N. Agarwal et al. (2017)
 
 ** TODO Optimization, Influence functions, data-centric ML, LiSSA, ICML
-
+*** Influence functions
 \nextbook
 \begin{book}
   \emph{Understanding black-box predictions\\ via influence functions}\\
@@ -8640,32 +7057,7 @@ Detrimental samples can be identified by the influence function
 Instead (inverting the Hessian is expensive),
 look for outliers in gradient space, e.g., with an isolation forest.
 
-\nextbook
-\begin{book}
-  \emph{Second-order stochastic optimization\\ for machine learning in linear time}\\
-  N. Agarwal et al. (2017)
-\end{book}
-Optimization problems in machine learning are often solved with
-\begin{compactitem}[--]
-\item First order methods, with variance reduction (SVRG, SAGA, SDCA),
-  and acceleration (AccSDCA, Catalyst, Katyushka);
-\item Quasi-Newton (approximation of Newton's method using only gradients, e.g. L-BFGS).
-\end{compactitem}
-To solve
-\[ \operatorname*{Minimize}_x f(x) = \dfrac1n \sum_i f_i(x)  \]
-LiSSA uses Newton's method
-\begin{align*}
-  x &\leftarrow x - H^{-1} g \\
-  g &= \nabla f \\
-  H &= \nabla^2 f
-\end{align*}
-without explicit matrix inversion
-\[ H_n = I + (I-H) H_{n-1}  \]
-and with a stochastic estimator for the Hessian
-\[ H_n = I + ( I - \nabla ^2 f_i ) H_{n-1}. \]
-Since the Newton step is a quadratic optimization,
-we can replace it with a first-order step to solve it
-(with a new, single $\nabla^2 f_i$ each time).
+*** Influence functions
 
 \nextbook
 \begin{book}
@@ -8703,6 +7095,8 @@ and approximate $f(x, \hat\theta_{-i})$
 with a higher-order expansion of the influence function.
 % It can be computes with "von Mises calculus": Taylor expansion for functionals.
 
+*** Beta Shapley
+
 \nextbook
 \begin{book}
   \emph{Beta Shapley: a unified and noise-reduced data valuation framework for machine learning}\\
@@ -8717,6 +7111,8 @@ allows for non-uniform weights in that average, for instance,
 beta-distributed weights:
 $B(\alpha,1)$ to focus on small cardinalities and remove the noise from the large cardinalities,
 or $B(1,\beta)$ to be closer to leave-out-one (LOO).
+
+*** Influence functions
 
 \nextbook
 \begin{book}
@@ -15367,3 +13763,1682 @@ train a random forest or boosted trees,
 explode them into a set of rules (each path from a root node to an internal or leaf node defines a rule),
 and combine them with the \emph{adaptive lasso}
 (which shrinks smaller weights even more).
+** DONE TO DELETE LiSSA 
+*** LiSSA
+
+\nextbook
+\begin{book}
+  \emph{Second-order stochastic optimization\\ for machine learning in linear time}\\
+  N. Agarwal et al. (2017)
+\end{book}
+Optimization problems in machine learning are often solved with
+\begin{compactitem}[--]
+\item First order methods, with variance reduction (SVRG, SAGA, SDCA),
+  and acceleration (AccSDCA, Catalyst, Katyushka);
+\item Quasi-Newton (approximation of Newton's method using only gradients, e.g. L-BFGS).
+\end{compactitem}
+To solve
+\[ \operatorname*{Minimize}_x f(x) = \dfrac1n \sum_i f_i(x)  \]
+LiSSA uses Newton's method
+\begin{align*}
+  x &\leftarrow x - H^{-1} g \\
+  g &= \nabla f \\
+  H &= \nabla^2 f
+\end{align*}
+without explicit matrix inversion
+\[ H_n = I + (I-H) H_{n-1}  \]
+and with a stochastic estimator for the Hessian
+\[ H_n = I + ( I - \nabla ^2 f_i ) H_{n-1}. \]
+Since the Newton step is a quadratic optimization,
+we can replace it with a first-order step to solve it
+(with a new, single $\nabla^2 f_i$ each time).
+
+** DONE TO DELETE Bayesian optimization and RL
+
+\nextbook
+\begin{book}
+  \emph{Earl-NO: reinforcement learning\\ for multi-step lookahead,\\ high-dimensional Bayesian optimization}\\
+  M. Cheon et al.
+\end{book}
+Traditional Bayesian optimization looks for one-step optimal decisions.
+Instead, use reinforcement learning (PPO) for multi-step lookahead decisions.
+Encode the state (set of points examined so far, with their values)
+with attention and DeepSet,
+to have a constant-size state space.
+
+** DONE TO DELETE Causal Discovery: Foundational models
+
+*** Foundational models
+
+\nextbook
+\begin{book}
+  \emph{Embracing the blackbox:\\ heading towards foundation models\\ for causal discovery from time series data}\\
+  G. Stein et al.
+\end{book}
+Supervised learning for causal discovery on time series
+(GRU, transformer, ConvMixer, MLP).
+Data from Kuramoto,
+or an ER graph with random nonlinear relations
+($e^x$, $x^2$, $\sigma(x)$, $\sin(x)$, $\cos(x)$, $\text{ReLU}(x)$, $\log \sigma(x)$, $1/x$, $\n x$, $\text{clamp}(x,-\tfrac12,\tfrac12)$).
+
+*** Foundation models
+
+\nextbook
+\begin{book}
+  \emph{Sample, estimate, aggregate: a recipe\\ for causal discovery foundation models}\\
+  M. Wu et al.
+\end{book}
+SEA is a supervised causal discovery model, combining
+global statistics (e.g., $\Sigma^{-1}$)
+with the output of causal discovery algorithms,
+observational (PC, FCI, GES, LiNGAM, CAM)
+or interventional (JCI, GIES, IGSP)
+on subsets of the data (random subsets of observations, random subsets of \emph{connected} variables),
+with a neural net: node embeddings,
+edge type embeddings (the PC algorithm does not return a DAG but a CPDAG; other algorithms have even more edge types),
+axial attention (attention along the rows, then along the columns, instead of 2-dimensional attention).
+
+** DONE TO DELETE Causal Discovery: topological ordering
+
+*** Causal discovery: topological order
+
+\nextbook
+\begin{book}
+  \emph{Score matching enables causal discovery\\ of nonlinear additive noise models}\\
+  P. Rolland et al.
+\end{book}
+The Hessian of the data log-likelihood can be used to identify the leaves of the DAG, and find a topological order.
+
+The nonlinear additive (Gaussian) noise model
+\[ X_i = f_i\bigl( \text{Pa}_i(X) \bigr) + \epsilon_i \]
+is identifiable: the DAG can be recovered from the joint distribution of $X$ or, equivalently, from the score function
+\[ s(x) = \nabla_{\!x} \log p(x) . \]
+
+From Stein's identity
+\[ \E_{ \mathbf x \sim p } \bigl[
+  \mathbf h(x) \nabla \log p(\mathbf x ) ^\top + \nabla \mathbf h( \mathbf x )
+  \bigr] = 0 \]
+we can estimate the score at the sample points
+\begin{align*}
+  G &= \bigl( s( x^1) , \dots, s(x^n) \bigr) \\
+  \hat G &= - ( K + \eta I )^{-1} \langle \nabla , K \rangle \\
+  K_{ij} &= \mathbf h ( \mathbf x_i )^\top \mathbf h ( \mathbf x_j ) = \kappa( \mathbf x_i, \mathbf x_j ) \quad \text{RBF kernel} \\
+  \langle \nabla K \rangle _{ij} &= \sum_{ k=1 }^n \nabla_{\!x_j^k} \kappa( \mathbf x_i , \mathbf x_k ).
+\end{align*}
+
+The leaves of the DAG are exactly the variables $j$ satisfying
+\[ \var \left[ \dfrac{ \partial s_j(\mathbf x ) }{ \partial x_j } \right] = 0 : \]
+to find a topological order,
+iteratively remove the nodes $j$ with the smallest $\var[ \partial x_j / \partial x_j ]$
+(you need to recompute the score after each removal).
+
+To compute the Jacobian of the score, use the second order Stein identity
+\[ \E[ h \nabla s ] = \E[ \nabla^2 h - h s s' ]. \]
+
+*** Causal discovery: topological order, diffusion
+
+\nextbook
+\begin{book}
+  \emph{Diffusion models for causal discovery\\ via topological ordering}\\
+  P. Sanchez et al.
+\end{book}
+The Hessian of the data log-likelihood can be used to identify the leaves of the DAG, and find a topological order.
+
+Instead of computing the Hessian with a second order Stein estimator
+over an RBF kernel
+(kernel methods scale poorly to a large number of observations),
+DiffAn trains a neural net (diffusion -- denoising
+uses score matching) to compute the score.
+The model can be updated after each iteration (leaf removal) without retraining:
+\[ \nabla \log p( \mathbf x_\ell) = \nabla \log p(x) - H_\ell \dfrac{ s_\ell }{ H_{\ell\ell} }. \]
+
+*** Causal discovery: topological ordering
+
+\nextbook
+\begin{book}
+  \emph{DAG learning on the permutahedron}\\
+  V. Zantedeschi et al.
+\end{book}
+% Not clear
+One can learn a DAG in two steps:
+\begin{compactitem}[--]
+\item First, find a topological ordering,
+\item Then, find a DAG consistent with that ordering -- an upper triangular matrix.
+\end{compactitem}
+The \emph{permutahedron} is
+\[ P_n = \text{Conv} \{ \rho^\sigma \ : \ \sigma \in \mathfrak S_n \} \]
+where Conv is the convex hull,
+\begin{align*}
+  \rho &= [1,2,\dots,n] \\
+  \rho^\sigma &= [ \sigma(1), \sigma(2), \dots, \sigma(n) ].
+\end{align*}
+The sorting operator
+\[ \sigma(\theta) \in \argmax_{ \sigma \in \mathfrak S_n } \theta' \rho ^\sigma \]
+can be relaxed to
+\[ \mu(\theta) = \argmax_{ \mu \in P_n } \theta' \mu - \lambda \n{ \mu }_2^2 . \]
+
+The combinatorial optimization problem
+\[ \argmax_{ \alpha \in \Delta } s' \alpha \]
+can be relaxed to the \emph{top-k sparsemax}
+\[ \argmax_{\substack{
+    \alpha \in \Delta \\ \n \alpha _0 \leq k
+}} s' \alpha - \n{ \alpha }_2^2 \]
+or the \emph{sparseMAP}, if $s$ has a low-dimensional parametrization $s = B' r$
+\[ \argmax_{ \alpha \in \Delta } r' B \alpha - \n{ B \alpha }_2^2. \]
+
+*** DONE Topological ordering
+
+\nextbook
+\begin{book}
+  \emph{Constraint-free structure learning\\ with smooth acyclic orientations}\\
+  R. Massidda et al.
+\end{book}
+\textsc{Cosmo} learns a DAG without an acyclicity constraint or penalty (like \textsc{Notears})
+by parametrizing the adjacency matrix as
+\[ A_{ij} = H_{ij} \sigma \left( \dfrac{ p_i - p_j }{ T } \right)  \]
+where $H$ is an adjacency matrix, $p$ a ``priority'' vector
+and the temperature $T$ decreases to 0.
+
+*** No, Topological order
+
+\nextbook
+\begin{book}
+  \emph{Differentiable DAG sampling}\\
+  B. Charpentier et al.
+\end{book}
+The \emph{Gumbel-Softmax} distribution is an approximation of the (one-hot-encoded) categorical distribution
+\begin{align*}
+  U &\sim \text{Cat}( p_1,\dots, p_k ) \\
+  G_1 &\sim \text{Gumbel}(0) \\
+  U_1 &\propto \exp \dfrac{ \log(p_i) + G_i }{ T } .
+\end{align*}
+The \emph{Gumbel-Sinkhorn} distribution, on the space of permutation matrices,
+can be sampled as
+\begin{align*}
+  G_{ij} &\overset{\text{iid}}{\sim} \text{Gumbel}(0) \\
+  \Pi &= \text{Sinkhorn}(\psi+G) \\
+  \widehat\Pi &= \text{Hungarian}( \Pi )
+\end{align*}
+where the Sinkhorn operator iteratively normalize rows and columns.
+
+The \emph{Gumbel-top-$n$} distribution can be sampled as
+\begin{align*}
+  G_i &\overset{\text{iid}}{\sim} \text{Gumbel}(0) \\
+  \pi &= \text{sort}( \psi + G ) \in \mathfrak S_k .
+\end{align*}
+
+
+The \emph{softsort} operator is
+\[
+\text{softsort}_T(s) = \text{softmax}
+- \dfrac{ \va{ \text{sort}(s) \mathbf 1' - \mathbf 1 s' } }{ T }
+\in [0,1] ^{k \times k } \]
+\[
+\text{softsort}_T(s) \underset{T \to 0}{\longrightarrow}
+\pi_{ \text{argsort}(s) } \in \mathfrak S _k
+\]
+
+To sample DAGs, first sample a topological order on the nodes
+(Gumbel-Sinkhorn, or Gumbel-top-$n$ + sortsort),
+then sample the edges (Gumbel softmax).
+
+You can learn a DAG, end-to-end,
+with variational inference (VI-SP-DAG).
+
+** DONE Causal Discovery: neural nets
+*** Causal discovery: notears and spectral radius
+
+\nextbook
+\begin{book}
+  \emph{Scaling structural learning with NoBears to\\ infer causal transcriptome networks}\\
+  H.C. Lee et al. (2019)
+\end{book}
+A square matrix with nonnegative entries is acyclic iff
+\[ \forall k \geq 1 \quad \tr A^k = 0 \]
+(this leads to the \textsc{Notears} condition),
+iff its only eigenvalue is zero, \ie, its spectral radius $\rho(A)$ is zero.
+The spectral radius can be approximated as
+\begin{align*}
+  \llap{\ensuremath{
+      5\times \left[
+      \vphantom{
+        \begin{aligned}
+          u &\leftarrow \dfrac{ A' u }{ \n{ A' u }_2 } \\
+          v &\leftarrow \dfrac{ Av }{ \n{ Av }_2 }
+        \end{aligned}
+      }
+      \right.
+  }}
+  &\begin{aligned}
+    u &\leftarrow \dfrac{ A' u }{ \n{ A' u }_2 } \\
+    v &\leftarrow \dfrac{ Av }{ \n{ Av }_2 }
+   \end{aligned}\\
+  &\rho(A) \approx \dfrac{ u' A v }{ u' v }
+\end{align*}
+If the elements of the weight matrix $W$ can have arbitrary signs, use $A = W \odot W$.
+To ensure differentiability, add $\epsilon = 10^{-6}$,
+\[ \dfrac{ \partial \rho( W \odot W + \epsilon ) }{ \partial W_{ij} } = 2 \dfrac{ W_{ij} v_i u_j }{ u' v }. \]
+To allow for nonlinear relations, use a polynomial loss
+\[ L(W) = \sum_t \sum_i \left(
+X_{it} - \sum_ { j \in \text{Pa}(i) } W_{ij} \sum_{ k = 0 }^3 \alpha_{jk} X_{jt}^k
+\right)^2 . \]
+To solve
+\[ \operatorname*{Minimize}_W L(w) \ \text{ st } \ \rho(W) = 0, \]
+the \emph{augmented Lagrangian} method iterates
+\begin{align*}
+  W &\leftarrow \argmin_W L(W) + \lambda \rho(W) + \dfrac\eta2 \rho(W)^2 \\
+  \lambda &\leftarrow \lambda + \eta \rho(W) \\
+  \eta &\leftarrow 1.1 \times \eta \text{ (optional)}.
+\end{align*}
+Implementation in \texttt{BNGPU}.
+
+** DONE TO DELETE Causal Discovery: LLMs
+*** Causal discovery, LLM to simulate the PC algorithm
+
+\nextbook
+\begin{book}
+  \emph{Can large language models\\ infer causation from correlation?}\\
+  Z. Jin et al.
+\end{book}
+Can an LLM learn the PC algorithm, \ie, infer causation from correlations
+(independence and conditional independence relations, expressed as text)?
+No. Fine-tuning does not help much.
+
+*** DONE Causal discovery: LLM, topological ordering
+
+\nextbook
+\begin{book}
+  \emph{Causal inference using LLM-guided discovery}\\
+  A. Vashishtha et al.
+\end{book}
+Do not ask the LLM to find the whole causal graph
+(it would truggle to distinguish direct from indirect relations)
+but only the partial order it induces (the \emph{transitive reduction},
+aka Hasse diagram it induces).
+
+You can compare DAGs with the $L^1$ distance betwen their transitive reductions.
+
+Use a triplet prompt to infer this order:
+provide 3 variables and ask for their causal graph.
+
+Applications include
+\begin{compactitem}[--]
+\item Post-processing the output of the PC algorithm, to orient the remaining unoriented edges;
+\item Constraints (transitive closure) for the PC or GES algorithms.
+\end{compactitem}
+
+*** DONE Causal discovery: LLM
+
+\nextbook
+\begin{book}
+  \emph{Causal order: the key to leveraging\\ imperfect experts in causal inference}\\
+  A. Vashishtha et al. (2024)
+\end{book}
+Building a causal graph by asking pairwise questions to an LLM creates spurious edges --
+with pairwise queries alone, the LLM cannot distinguish between direct and indirect effects.
+
+The not build a DAG, but just a \emph{partial order}: it can be used
+\begin{compactitem}[--]
+\item To obtain a valid adjustment set (the ancestors of a node in a topological order);
+\item As constraints or prior for classical causal discovery algorithms.
+\end{compactitem}
+
+Do not use pairwise queries, but triplet queries (either all triplets,
+or $k=10$ triplets for each pair if the graph is large),
+aggregated with a majority vote:
+this creates fewer cycles.
+
+The \emph{topological divergence} between a partial order $\preccurlyeq$
+and a DAG defined by its adjacency matrix
+is the number of edges incompatible with the order,
+\[ D( {\preccurlyeq} , A ) = \sum_{ i \not\preccurlyeq j } A_{ij}. \]
+
+*** Do LLMs know do-calculus?
+
+\nextbook
+\begin{book}
+  \emph{CLadder: assessing causal reasoning\\ in language models}\\
+  Z. Jin et al.
+\end{book}
+Dataset to check if LLMs already know do-calculus
+and can answer queries on the three rungs of teh causality ladder
+(association, intervention, counterfactuals),
+without resorting to commonsense.
+
+*** No, LLM
+\nextbook
+\begin{book}
+  \emph{Causal reasoning and large language models: opening a new frontier for causality}\\
+  E. K\i c \i man et al.
+\end{book}
+LLMs are good, but have unpredictable failures.
+
+** DONE TO DELETE Causal discovery: interventional data
+*** No, Causal discovery with interventions
+
+\nextbook
+\begin{book}
+  \emph{Identifying biological perturbation targets through causal differential networks}\\
+  M. Wu et al.
+\end{book}
+Given an observational dataset $D_{\text{obs}}$ and an interventional one $D_{\text{int}}$,
+predict which variables were intervened on:
+\[ I = \{ X \ :\ P(X|\text{Pa}\,X) \neq P_{\text{int}}(X | \text{Pa}\,X) \}. \]
+\[
+\begin{tikzpicture}[>=stealth,xscale=1.5,yscale=.8,inner sep=1pt,outer sep=1pt,baseline=0]
+  \node (Do) at (0,1) {$D_{\text{obs}}$};
+  \node (Di) at (0,0) {$D_{\text{int}}$};
+  \node (Go) at (1,1) {$G_{\text{obs}}$};
+  \node (Gi) at (1,0) {$G_{\text{int}}$};
+  \node (I) at (2.3,.5) {$I$};
+  \draw[|->] (Do) to node[anchor=south]{\footnotesize\textsc{sea}} (Go);
+  \draw[|->] (Di) to node[anchor=south]{\footnotesize\textsc{sea}} (Gi);
+  \draw[|->] (Go) -- (1.4,.5) to node[anchor=south]{\footnotesize\textsc{sea}-like} (I);
+  \draw[|->] (Gi) -- (1.4,.5) -- (I);
+\end{tikzpicture}
+\]
+
+*** Causal discovery with interventions
+
+\nextbook
+\begin{book}
+  \emph{Differentiable causal discovery\\ from interventional data}\\
+  P. Brouillard et al.
+\end{book}
+DCDI is a nonlinear NOTEARS for interventional data;
+the log-likelihood is
+\[ \prod_j p \bigl( x_j ; f_\theta( A_j \odot x ) \bigr) ^{1 - I_j}
+p \bigl( x_j ; g_\theta( A_j \odot x ) ) ^{ I_j }
+\]
+where $A \in \{0,1\}^{d\times d}$ is the adjacency matrix,
+$I \in \{0,1\}^d$ are the (unknown) interventions
+and $p$ is Gaussian or a normalizing flow.
+
+*** Causal discovery: intervention data
+
+\nextbook
+\begin{book}
+  \emph{Gene regulatory network inference\\ in the presence of selection bias\\ and latent confounders}\\
+  G. Luo et al.
+\end{book}
+With interventional data ($I_x \to X$ and/or $I_Y \to Y$), it is possible to distinguish between
+\[
+\begin{tikzpicture}[>=stealth,xscale=1,yscale=1,inner sep=2pt,outer sep=1pt,baseline=0]
+  \begin{scope}[shift={(0,0)}]
+    \node (IX) at (0,1) {$I_X$};
+    \node (IY) at (1,1) {$I_Y$};
+    \node (X)  at (0,0) {$X$};
+    \node (Y)  at (1,0) {$Y$};
+    \draw[->] (IX) -- (X);
+    \draw[->] (IY) -- (Y);
+    \draw[->] (X) -- (Y);
+    \node at (.5,-1.1) {\footnotesize causality};
+  \end{scope}
+  \begin{scope}[shift={(2.5,0)},xscale=1.2]
+    \node (IX) at (0,1) {$I_X$};
+    \node (IY) at (1,1) {$I_Y$};
+    \node (X)  at (0,0) {$X$};
+    \node (Y)  at (1,0) {$Y$};
+    \node[draw] (S) at (.5,-.7) {$S$};
+    \draw[->] (IX) -- (X);
+    \draw[->] (IY) -- (Y);
+    \draw[->] (X) -- (S);
+    \draw[->] (Y) -- (S);
+    \node at (.5,-1.1) {\footnotesize selection bias};
+  \end{scope}
+  \begin{scope}[shift={(5.2,0)}]
+    \node (IX) at (0,1) {$I_X$};
+    \node (IY) at (2,1) {$I_Y$};
+    \node (X)  at (0,0) {$X$};
+    \node (Y)  at (2,0) {$Y$};
+    \node[circle,draw,densely dotted,inner sep=0pt] (W) at (1,1) {$W$};
+    \draw[->] (IX) -- (X);
+    \draw[->] (IY) -- (Y);
+    \draw[->] (W) -- (X);
+    \draw[->] (W) -- (Y);
+    \node at (1,-1.1) {\footnotesize latent confounder};
+  \end{scope}
+\end{tikzpicture}
+\]
+with conditional independence tests.
+
+*** Causal discovery: Interventions
+
+\nextbook
+\begin{book}
+  \emph{Efficient neural causal discovery\\ without cyclicity constraints}\\
+  P. Lippe et al.
+\end{book}
+Conditional distributions $X | \text{Pa}\,X$
+from a causal graph are invariant under interventions
+(except for the nodes intervened on).
+The causal graph is the graph that generalizes best from observational to interventional data.
+
+\textsc{Enco} separately models the conditional distributions
+$ p_\phi( X_i | X_{-i} )$
+and the edge presence and orientation
+\begin{align*}
+  & p_{ij} = \sigma( \gamma_{ij} ) \sigma( \theta_{ij} ) && \text{edge probability} \\
+  & \gamma_{ij} && \text{edge presence} \\
+  & \theta_{ij} = - \theta_{ji} && \text{edge orientation}
+\end{align*}
+by alternating distribution fitting
+\[ \operatorname*{Maximize}_\phi \E_{ X \sim \text{data} }
+\E_{\substack{
+    M_{ij} \sim \text{Ber}(p_{ij}) \\
+    \text{(dropout)}
+}}
+\log p_\phi( X_i | M_{-i} \odot X_{-i} )
+\]
+and graph fitting
+\[ \operatorname*{Maximize}_{ \gamma, \theta}
+\E_{\substack{
+    I \sim \text{intervention} \\
+    X \sim \text{data}_I \\
+    M_{ij} \sim \text{Ber}\, p_{ij}
+}}
+\log p_\phi( X_i | M_{-i} \odot X_{-i} )
++ \lambda \sum_{ij} p_{ij} .
+\]
+Use \textsc{Reinforce} for the gradients (the adjacency matrix $M$ is discrete).
+
+*** Causal Interventions, No
+
+\nextbook
+\begin{book}
+  \emph{Shaking the foundations: delusions in sequence models for interaction and control}\\
+  P.A. Ortega et al.
+\end{book}
+In imitatation learning, the model takes its own actions as evidence about the wolrd:
+this leads to self-delusin.
+Actions are causal interventions:
+do not model $P[O|A]$, but $P\bigl[O |\text{do}(A) \bigr]$.
+\[
+\begin{tikzpicture}[>=stealth,xscale=1,yscale=1,inner sep=2pt,outer sep=1pt,baseline=0]
+  \node[circle,draw,densely dotted,inner sep=1pt] (T) at (1,1) {$\theta$};
+  \node[circle,draw,inner sep=1pt] (A) at (0,0) {$A$};
+  \node[circle,draw,inner sep=1pt] (O) at (2,0) {$O$};
+  \draw[->] (T) -- (A);
+  \draw[->] (T) -- (O);
+  \draw[->] (A) -- (O);
+  \node[below=-1mm of A,font=\footnotesize,align=center] {expert\\actions};
+  \node[below=-1mm of O,font=\footnotesize,align=center] {observations};
+  \node[right=0mm of T,font=\footnotesize,align=left] {expert\\knowledge};
+\end{tikzpicture}
+\]
+
+** DONE TO DELETE Causal discovery: time series
+*** No, Causal discovery, time series
+
+\nextbook
+\begin{book}
+  \emph{CUTS: neural causal discovery\\ from irregular time series data}\\
+  Y. CHeng et al.
+\end{book}
+Neural Granger causal discovery with missing values:
+jointly (alternatively) impute missing values and fit the DAG (no instantaneous effect)
+\begin{align*}
+  & s_{\tau i j } \sim \text{Ber} ( 1 - m_{\tau i j } ) &&\text{DAG} \\
+  & \hat x_t = f_\phi( X \odot S ) \\
+  &\tilde x_t \leftarrow (1-\alpha) \tilde x_t + \alpha \hat x_t && \text{imputed values} \\
+  & m_{\tau i j } = \sigma ( \theta_{\tau i j } ) \\
+  & \sigma: \text{ sigmoid} \\
+  & \theta, \phi \text{: parameters to estimate}
+\end{align*}
+
+*** DONE Causal discovery for time series
+
+\nextbook
+\begin{book}
+  \emph{Learning domain-specific\\ causal discovery from time series}\\
+  X. Wang and K. Kording
+\end{book}
+Supervised learning for causal discovery (for time series, with a transformer).
+
+** DONE TO DELETE LLM/NLP Models
+*** DONE GRPO, DeepSeek
+
+\nextbook
+\begin{book}
+  \emph{DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning}
+\end{book}
+DeepSeek-R1-Zero uses RL (GRPO) on DeepSeek-V3-Base to enhance its reasoning capabilities:
+\begin{compactitem}[--]
+\item Prompts: unspecified (math, leetcode, etc.);
+\item Reward: only accuracy (correct final answer) and format, as specified by the prompt:\\
+  \texttt{<think>...</think>} and \texttt{<answer>...</answer>}.
+\end{compactitem}
+During training, the model spends more and more time thinking,
+but the \texttt{<think>} section becomes less and less readable
+(it mixes Chinese and English).
+
+DeepSeek-R1 uses 4 steps:
+\begin{compactitem}[--]
+\item SUpervised fine-tuning (SFT)
+  with high-quality data, e.g., readable answers from DeepSeek-R1-Zero;
+\item RL, as above;
+\item SFT, with 600k reasoning samples (ask the model to generate several answers,
+  and have DeepSeek-V3 select the best)
+  and 200k non-reasoning samples from (DeepSeek-V3, unspecified prompts);
+\item RL, for alignment (unspecified prompts and rewards).
+\end{compactitem}
+
+\nextbook
+\begin{book}
+  \emph{DeepSeekMath: pushing the limits\\ of mathematical reasoning\\ in open language models}\\
+  Z. Shao et al.
+\end{book}
+Start with a code model, and fine-tune it on a large mathematical corpus:
+\begin{compactitem}[--]
+\item Train a FastText classifier on OpenWebMath;
+\item Apply it to CommonCrawl;
+\item Use the results to identify websites with math contents;
+\item Add the corresponding pages to the FastText training data
+  (adding arxiv papers does not bring any improvement);
+  re-train;
+\item To avoid benchmark contamination, exclude pages containing a 10-gram from one of the benchmarks;
+\item Apply the new model to CommonCrawl.
+\end{compactitem}
+
+Also evaluate on miniF2F (convert an informal proof into a formal one, checked with Isabelle)
+and on GSM8K (math with tool use: Python, SymPy).
+
+In PPO,
+\[ J = \E_{\substack{
+    q \sim \text{queries} \\ o \sim \pi_{\text{old}}( \bigcdot|q) }}
+\operatorname*{Mean}_{ 1 \leq t \leq \va o }
+\dfrac{
+  \pi_\theta ( o_t | q , o_{<t} )
+}{
+  \pi_{\text{old}} ( o_t | q , o_{<t} )
+} - \beta \text{KL}( \pi_\theta \| \pi_{\text{ref}} )
+\]
+GRPO (group relative policy optimization)
+replaces the advantage $A$ with the average reward from $\pi_{\text{old}}$,
+\[ A_i = \dfrac{ r_i - \text{mean}( \mathbf r ) }{ \text{std}( \mathbf r ) } \]
+and uses
+\[ \text{KL} ( \pi_\theta \| \pi_{\text{ref}} ) =
+\dfrac{ \pi_{\text{ref}}(\cdots) }{ \pi_\theta( \cdots ) } - \log
+\dfrac{ \pi_{\text{ref}}(\cdots) }{ \pi_\theta( \cdots ) } - 1. \]
+
+\nextbook
+\begin{book}
+  \emph{DeepSeek-V3 technical report}\\
+\end{book}
+DeepSeek-V3 combines:
+\begin{compactitem}[--]
+\item MoE (top-k and shared experts);
+\item No auxilliary loss to ensure load balancing between experts replaced by a bias term for each expert;
+\item Sequence-wise auxilliary loss;
+\item Multi-head laent attentio (MLA): joint low-rank compression of $K$ and $V$ to reduce the size of the KV cache;
+\item Multi-token predictin;
+\item FP8 mixed precision (FP8, BF16, FP32);
+\item Context length extension (first 32k, then 128k);
+\item Many parallelism and communication improvements).
+\end{compactitem}
+Training required 2 months on 2048 GPUs (\$5m).
+
+*** No, Models
+
+\nextbook
+\begin{book}
+  \emph{Nomic Embed: training a reproducible\\ long context text embedder}\\
+  Z. Nussbaum et al.
+\end{book}
+Open-source 8192-context-length embedding model,
+with \emph{task-specific prefixes},
+to break the symmetry of the encoder (we want a different model
+for questions and answers, such that the embeddings match).
+Tricks include: RoPE, SwiGLU, Flash Attention, AdamW, gradient accumulation, etc.
+
+*** DONE LLM, Bytes instead of tokens
+
+\nextbook
+\begin{book}
+  \emph{Byte latent transformer:\\ patches scale better than tokens}\\
+  A. Pagnoni et al.
+\end{book}
+Train a small transformer to forecast the next byte,
+from the current and previous bytes,
+with \emph{hash} n-gram embeddings, $3 \leq n \leq 8$.
+Use it to split the input into variable-length \emph{patches}
+(whenever the entropy of the next byte is above some threshold or increases too much).
+Feed those patches to a large transformer,
+to forecast the next patch.
+Decode the patches into bytes, with a small transformer, still using the entropy
+to decide when patches end.
+
+The model scales better than tokenizer-based transformers,
+and excells at character-level tasks.
+
+*** DONE LLM: BERT variants
+
+\nextbook
+\begin{book}
+  \emph{DeBERTa: decoding-enhanced BERT\\ with disentangled attention}\\
+  P. He et al.
+\end{book}
+BERT model with disentangled attention (content and position embeddings remain separate --
+content-content and content-position attention)
+and absolute word position embeddings just before the softmax layer.
+
+\nextbook
+\begin{book}
+  \emph{Electra: pre-training text encoders\\ as discriminators rather than generators}\\
+  K. Clark et al.
+\end{book}
+BERT model trained with a GAN-like task, replaced token detection (RTD) instead of masked language modeling (MLM).
+The replaced tokens come from a generator (e.g., a small MLM) trained with maximum likelihood (not adversarially).
+
+\nextbook
+\begin{book}
+  \emph{DeBERTav3: improving DeBERTa\\ using Electra-style pre-training\\ with gradient-disentangled embedding sharing}\\
+  P. He et al.
+\end{book}
+
+*** DONE LLM: NER
+
+\nextbook
+\begin{book}
+  \emph{GLiNER: generalist model for named entity recognition using bidirectional transformer}\\
+  U. Zaratiana et al. (2024)
+\end{book}
+Zero-shot NER with a BERT model:
+\begin{compactitem}[--]
+\item Compute embeddings $p_i$ of entity types and $h_i$ of sentence tokens;
+\item Apply FFNs to have embeddings $\text{FFN}(p_i)$ and $\text{FFN}(h_i,h_j)$,
+  ($i<j$, $\va{j-i}<12$) of entity types and spans;
+\item Compute the similarity (sigmoid of scalar product)
+  between entity types and spans;
+\item Return the highest scoring non-overlapping spans
+  (you may also allow fully nested spans).
+\end{compactitem}
+
+The model is trained on Pile-NER
+(50,000 texts from the Pile, annotated by ChatGPT, with open-ended entity types).
+Implementation available in \texttt{gliner}.
+
+\nextbook
+\begin{book}
+  \emph{UniversalNER: targeted distilation\\ from large language models\\ for open named entity recognition}\\
+  W. Zhou et al.
+\end{book}
+\emph{Targeted} distillation of ChatGPT onto Llama for Open NER.
+
+** DONE TO DELETE Capabilities
+*** DONE LLM, Causality (duplicate)
+
+\nextbook
+\begin{book}
+  \emph{Can large language models\\ infer causation from correlation}\\
+  Z. Jin et al.
+\end{book}
+Ask an LLM to discover and run the PC algorithm, \ie, discover and use
+\begin{compactitem}[--]
+\item $A \indep B \,|\, C \implies $ no $A$--$B$ edge;
+\item $A \indep B \text{ and } A \not\indep B \,|\, C \implies
+\begin{tikzpicture}[>=stealth,xscale=.8,yscale=.17,inner sep=0pt,outer sep=1pt,baseline={(0,.06)}]
+  \node (A) at (0,2) {$A$};
+  \node (B) at (0,0) {$B$};
+  \node (C) at (1,1) {$C$;};
+  \draw[->] (A) -- (C);
+  \draw[->] (B) -- (C);
+\end{tikzpicture}
+  $
+\item All colliders can be found in that way.
+\end{compactitem}
+(given all the relevant conditional independence statements, with no noise).
+The performance is bad.
+
+*** DONE LLM, Turing machine
+
+\nextbook
+\begin{book}
+  \emph{GPT is becoming a Turing machine:\\ here are some ways to program it}\\
+  A. Jojic et al.
+\end{book}
+Simulate iterative behaviour (loops)
+by providing a repetitive execution path as example.
+
+** DONE TO DELETE Attacks
+*** DONE Jailbreak
+
+\nextbook
+\begin{book}
+  \emph{FlipAttack: jailbreal LLMs via flipping}\\
+\end{book}
+Jailbreak an LLM by flipping words and/or characters in the prompt,
+and asking the LLM to ``finish the task'' by flipping words/characters
+(with few-shot examples).
+
+*** No, LLM, attacks
+
+\nextbook
+\begin{book}
+  \emph{Stealing part of a production language model}\\
+  N. Carlini et al.
+\end{book}
+With access to the logits of an LLM,
+one can recover the dimension of the last weight matrix.
+The final layer is a projection from the hidden latent dimension to a \emph{higher} dimensional logit vector:
+the dimension of the span of the logit vectors is the dimension of the last layer;
+estimate it by looking at the singular value of the matrix $Q$ of logits.
+The SVD, $Q = U \Sigma V^\top$
+also gives the weight matrix, $W = U \Sigma$ (up to symmetries).
+The attack still works without direct access to the logits, but is more expensive.
+
+*** DONE LLM, Attacks
+
+\nextbook
+\begin{book}
+  \emph{Removing RLHF protections in GPT-4\\ via fine-tuning}\\
+  Q. Zhan et al.
+\end{book}
+Fine-tune with prompts violating the OpenAI ToS and responses from an uncensored Llama2 70B.
+
+*** DONE LLMs, attacks
+
+\nextbook
+\begin{book}
+  \emph{Abusing images and sounds for indirect instruction injection in multi-modal LLMs}\\
+  E. Bagdasaryan et al.
+\end{book}
+With multimodal LLMs, prompt injection
+is no longer limited to text:
+you can alter images or sounds
+to modify the LLM's behaviour,
+as if you were altering the prompt.
+
+*** No, LLM, Jailbreak
+
+\nextbook
+\begin{book}
+  \emph{``Do anything now'': characterizing and\\ evaluating in-the-wild jailbreak prompts\\ on large language models}\\
+  X. Shen et al. et al. (2023)
+\end{book}
+Get your jailbreak prompts from Reddit and Discord.
+
+** DONE TO DELETE Graphs
+*** No, Graphs, GNN
+
+\nextbook
+\begin{book}
+  \emph{Industry classification based on supply chain network information using GNNs}\\
+  D. Wu et al.
+\end{book}
+Infer the industry of unlisted firms from the supply chain network.
+
+*** No, Finance, GNN
+
+\nextbook
+\begin{book}
+  \emph{Higher-order graph attention network\\ for stock selection with joint analysis}\\
+  Y. Qiao et al.
+\end{book}
+Stack
+LSTM (stock characteristics), motif-based GAT (from a graph built from sector, industry, Wiki data, etc.), MLP.
+
+*** DONE Text, graphs
+
+\nextbook
+\begin{book}
+  \emph{Text-based network industries\\ and endogenous product differentiation}\\
+  G. Hoberg and G. Phillips (2009)
+\end{book}
+Take the product description from the 10K filings,
+only keep nouns and proper nouns (they are capitalized 90\% of the time),
+discard geographic words, and words appearing in more than 25\% of the documents;
+compute pairwise cosine similarity
+to get each company's neighbours.
+
+Either use this weighted graph to compute a fixed industry classification
+(apply some clustering algorithm on data from 1997)
+or truncate the graph
+(to have the same number of connected pairs as in the SIC-3 classification).
+
+*** No, Finance, Graphs
+\nextbook
+\begin{book}
+  \emph{Modeling arterial and venous flows in Japanese supply chain: a network-based approach to the circular economy}\\
+  H. Goto
+\end{book}
+The supply chain has a bow-tie structure
+(the largest strongly connected component,
+its upstream, its downstream, the rest of the giant weakly connected component, and the rest).
+Take an industry classification, assume it is ordered (sic),
+and label flows as ``arterial'' or ``venous'',
+depending on their direction.
+[Instead, I would take the order maximizing arterial flow.]
+
+\nextbook
+\begin{book}
+  \emph{Analysis of cross-shareholding network Japanese listed companies}\\
+  S. Tanabe and T. Ohnishi
+\end{book}
+Evolution of the bow-tie structure.
+
+\nextbook
+\begin{book}
+  \emph{Dynamical analysis of financial stock network:
+  improving forecasting using network properties}\\
+  I. Achitouv
+\end{book}
+Forecast hourly or daily returns of S\&P 500 stocks from node or graph features:
+\begin{compactitem}[--]
+\item Centralities (degree, closeness, betweenness, eigenvalue);
+\item Clustering coefficient;
+\item Modularity;
+\item Largest component;
+\item Resilience (size of the largest component after removing a fraction of the nodes).
+\end{compactitem}
+Build the graph by thresholding the correlation matrix;
+choose the smallest threshold that makes the degree follow a power law distribution
+(increase the threshold until the degree istribution becomes conves: $\rho = 0.9$).
+
+** DONE TO DELETE Deep Learning in Finance
+*** DONE Asset embeddings
+
+\nextbook
+\begin{book}
+  \emph{Asset embeddings}\\
+  X. Gabaix et al. (2025)
+\end{book}
+Compute asset embeddings from holdings data:
+\begin{compactitem}[--]
+\item Recommender systems:
+  \begin{align*}
+    & \log w_{ui} \approx \langle \phi_u, \phi_i \rangle \\
+    & u \text{: user (investor)} \\
+    & i \text{: item (asset)} \\
+    & w \text{: weight in portfolio} \\
+    & \phi_u, \phi_i \text{: embeddings}
+  \end{align*}
+\item Word2vec, BERT, GPT, after transforming the holdings into a sequence of tokens, sorting the assets by decreasing weight.
+\end{compactitem}
+
+This is more informative (at forecasting relative valuation and comovement) than text-based embeddings (10-K, earnings calls, news).
+
+*** DONE Deep learning in finance
+
+\nextbook
+\begin{book}
+  \emph{NeuralFactors: a novel factor learning approach to generative modeling of equities}\\
+  A. Gopal
+\end{book}
+Train a VAE to forecast future stock returns from current stock characteristics
+\begin{align*}
+  \text{stock}_{it} & \longmapsto \alpha_{it} , \beta_{it} , \sigma_{it} , \nu_{it} \\
+  z_{t+1} &\sim T( \mu_z , \sigma_z , \nu_z ) \\
+  r_{i, t+1 } &\sim T( \alpha_{it} + \beta_{it}^\top z_{t+1} , \sigma_{it} , \nu_{it} )
+\end{align*}
+and use it for
+synthetic data,
+covariance estimation,
+risk analysis,
+portfolio construction.
+
+A T-SNE embedding of the $\beta_i$ reveals industrial sectors.
+
+\nextbook
+\begin{book}
+  \emph{Improving investment strategies with GNNs}\\
+  G. Farmanfarmaian
+\end{book}
+\emph{Gated GCNs} use GRU in the depth dimension.
+
+GraphGPS alternates MPNN layers with global attention layers.
+
+The \emph{turbulence index} (of the market, at a given data)
+is the Mahalanobis distance to the average return vector.
+
+The structure of the supply chain graph is not useful in forecasting future (monthly) returns,
+but global information (e.g., from a virtual node) is.
+
+\nextbook
+\begin{book}
+  \emph{A geometric approach\\ to asset allocation with investor views}\\
+  A.V. Antonov et al. (2024)
+\end{book}
+Given a prior on the distribution of asset returns
+\[ x \sim p_{\text{prior}} = N( \mu_0, V_0 ) \]
+and investor views
+$ x \sim p_{\text{views}} = N(\mu_1,V_1)$,
+compute a posterior distribution
+\[ \operatorname*{Argmin}_{ p = N(\mu,V) } d( p, p_{\text{prior}} ) \text{\ \ such that\ \ } d( p, p_{\text{view}} ) \leq d_0 \]
+or
+\[ \operatorname*{Argmin}_{ p = N(\mu,V) } d( p, p_{\text{prior}} ) + \lambda  d( p, p_{\text{view}} ) \leq d_0. \]
+This readily generalizes to degenerate views.
+
+*** DONE Finance, synthetic data, neural factors
+
+\nextbook
+\begin{book}
+  \emph{Neural factors: a novel factor learning approach to generative modeling of equities}\\
+  A. Gopal
+\end{book}
+An autoencoder-based factor model can generate synthetic data:
+\begin{compactitem}[--]
+\item A neural network converts stock characteristics (financial statements, a few reference indices)
+  into factor exposures $\beta_{ijt}$ and the parameters of a Student distribution
+  $\alpha_{it}$, $\sigma_{it}$, $\nu_{it}$;
+\item The factors follow a Gaussian distribution
+  $z_{t+1} \sim N(0,I)$;
+\item The stock returns are then
+  \[ r_{i, t+1} \sim T_{ \nu_{it} } ( \alpha_{it} + \beta_{i\bigcdot t} ^\top z_{t+1} , \sigma_{it} ). \]
+\end{compactitem}
+
+** DONE TO DELETE Books, Tutorials
+*** No, Book: Conformal prediction
+
+\nextbook
+\begin{book}
+  \emph{Introduction\\ to conformal prediction with Python}\\
+  C. Molnar (2023)
+\end{book}
+
+\textbf{6.}
+Conformal prediction (CP) works as follows:
+\begin{compactitem}[--]
+\item Split the data into training and calibration
+  (and test, and validation) sets;
+\item Train the model on the training set
+\item Compute a \emph{non-conformity score} for all observations in the calibration set
+  (any measure of how unusual $y$ is, given $x$), e.g.,
+  $ 1 - \hat p(y|x)$, for a classification model;
+\item Compute its $1-\alpha$ quantile $\hat q$
+  (with a finite-sample adjustment);
+\item Given new data, $x$, return all the $y$'s whose non-conformity score is below $\hat q$ as \emph{prediction set}.
+\end{compactitem}
+(This is inductive CP;
+transductive CP uses the whole dataset, but needs to refit the model many times).
+For the splits, you can use a single split, cross-validation (CV) or leave-out-one (LOO).
+
+\textbf{7.}
+For classification:
+\begin{compactitem}[--]
+\item The \emph{score method} uses the probabilities of the true classes to compute the conformity scores:
+  $s_i = 1 - \hat p(x_i)_{ y_i }$
+  (where $\hat p(x_i)$ is the vector of predicted probabilities);
+  it is not \emph{adaptive}:
+  it only guarantees \emph{marginal coverage},
+  not \emph{class-conditional coverage} -- the coverage is $1-\alpha$ only on average,
+  but it can be much higher/lower for easier/harder classes.
+\item \emph{Adaptive prediction sets} (APS)
+  use cummulated probabilities, from the largest down to the true class;
+  at test time, compute the cummulated sorted probabilities, and return the classes until the threshold
+  (you can include the label just above the threshold, or not (but this can lead to empty prediction sets),
+  or (better) decide at random);
+\item Top-$k$ uses the rank of the true class;
+  the prediction sets all have the same size;
+\item Regularized APS (RAPS)
+  penalizes the inclusion of too many classes;
+\item Group-balanced conformal prediction applies conformal prediction separately for each group;
+\item Class-conditional APS uses group-balanced CP
+  for the classes to predict:
+  since they are not known at test time, it computes the CP for all classes, and returns the union of the forecasts.
+\end{compactitem}
+
+\textbf{8.}
+For regression:
+\begin{compactitem}[--]
+\item $s(y,x) = \bigl| y - \hat f(x) \bigr|$
+  gives prediction intervals all of the same size
+  (this is fine if the data is homoskedastic);
+\item Locally adaptive CP
+  \[s(y,x) = \dfrac{ \bigl| y - \hat f(x) \bigr| }{ \hat \sigma(x) } \]
+  accounts for heteroskedasticity
+  (but can output excessively large intervals if the data is homoskedastic).
+\end{compactitem}
+Instead of conformalizing (mean) regression, we can conformalize quantile regression
+\[ s(y,x) = \max \bigl\{
+\hat f _{\text{low}} (x) - y , y - \hat f_{\text{up}}(x)
+\bigr\} \]
+(the distance to the nearest interval boundary, with a negative sign if inside).
+
+\textbf{9.} Conformal prediction can be generalized to time series
+(EnbPI, in spite of non-exchangeability),
+multilabel classification,
+outlier detection (CP provides accurate control of the false positive rate).
+
+Implementation: \texttt{mapie}; also check \texttt{crepes}, \texttt{nixtla}.
+
+*** DONE Rectified flow, Generative models, ICML tutorial
+
+\nextbook
+\begin{book}
+  \emph{Continuous time generative models}\\
+  (Q. Liu, ICML 2025)
+\end{book}
+Generative models sample from a distribution defined by samples
+\[
+\begin{tikzpicture}[>=stealth,scale=1.8,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
+  \node (A) at (0,0) {noise\strut};
+  \node (B) at (1,0) {data.\strut};
+  \draw[->] (A) to node[anchor=south,outer sep=0pt] {$T_\theta$} (B) ;
+\end{tikzpicture}
+\]
+They can be:
+\begin{compactitem}[--]
+\item One-step: GAN, VAE, invertible models;
+\item Iterative: diffusion (SDE), flows (ODE), GPT (AR).
+\end{compactitem}
+They can be seen as ``lazy EM'':
+\[
+\begin{tikzpicture}[>=stealth,scale=1.8,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
+  \node (A) at (0,0) {latent};
+  \node (B) at (1,0) {model};
+  \draw[->] (A) to[out=30,in=150] node[anchor=south,outer sep=0pt]{\footnotesize M step} (B);
+  \draw[->] (B) to[out=-150,in=-30] node[anchor=north,outer sep=0pt]{\footnotesize E step} (A);
+  \node (C) at (2.5,0) {latent};
+  \node (D) at (3.5,0) {model.};
+  \draw[->] (C) -- (D);
+  \node (a) at (1.55,0) {\vphantom{l}};
+  \node (b) at (1.95,0) {\vphantom{l}};
+  \draw[->,decorate,
+    decoration={zigzag,amplitude=0.7pt,segment length=1.2mm,pre=lineto,pre length=2pt,post length=3pt}
+  ] (a) -- (b);
+\end{tikzpicture}
+\]
+Given two distributions, $p_0$, $p_1$,
+the \emph{flow transport problem} learns a velocity field $v(z,t)$ such that if
+\[ Z_0 \sim p_0 \qquad \dfrac{ d Z_t }{ dt } = v( Z_t, t ), \]
+then $Z_1 \sim p_1$.
+The \emph{transport process} is $(Z_t)_{t \in [0,1]}$.
+The \emph{transport plan}, or \emph{coupling},
+is the joint distribution of $(Z_0,Z_1)$.
+The \emph{transport map} is $T: Z_0 \mapsto Z_1$.
+The solution is not unique.
+Optimal transport
+\[ \min_{\substack{
+    (Z_0,Z_1)\\
+    Z_0 \sim p_0 \\
+    Z_1 \sim p_1
+}} \E \bigl[ c(Z_1-Z_0) \bigr]
+\quad \text{ or } \quad
+\min_{\substack{
+    (Z_t)_{ t \in [0,1] } \\
+    Z_0 \sim p_0 \\
+    Z_1 \sim p_1
+}} \E \left[
+  \int_0^1 c( \dot Z_t ) dt
+  \right]
+\]
+is difficult and unnecessary.
+
+The Euler discretization of the ODE depends on the curvature of the trajectory:
+with straight trajectories, one step suffices. We want straight transport maps.
+
+\d{Rectified flow} provides a solution:
+\begin{compactitem}[--]
+\item Sample a noise-data pair $(X_0,X_1)$ (independent coupling);
+\item Interpolate $X_t = t X_1 + (1-t) X_0$
+  (the trajectories intersect: this does not come from an ODE);
+\item Convert to an ODE
+  $ \dot Z_t = v_t(Z_t), $
+  \[ \operatorname*{Minimize}_v \int_0^1 \E_{ X_0,X_1} \n{ \dot X_t - v_t(X_t) }^2 dt, \]
+  where $\dot X_t$ are the line directions;
+\item Iterate (sample from the new coupling).
+\end{compactitem}
+\[
+<<RectifiedFlow2D,engine='python',results='hide',echo=FALSE,out.width='\\hsize',fig.show='hold'>>=
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import scipy
+M = 6
+np.random.seed(1)
+def sample_from_p0(size=1):
+    p = np.random.uniform(size=size)
+    m = np.where( p > .5, 1, -1 ) *** 3
+    return np.random.normal( m, 1, size=size )
+def sample_from_p1(size = 1):
+    return sample_from_p0(size)
+N = 10_000
+z0 = sample_from_p0(N)
+z1 = sample_from_p1(N)
+coupling = np.vstack([z0,z1]).T
+slope = z1 - z0
+def v(x,y, sigma=.1):
+    yhat = slope *** x + z0
+    weights = np.exp( - (y-yhat)**2 / 2 / sigma**2 )
+    weights = weights / np.sum(weights)
+    return np.sum( weights*slope )
+K = 10
+xs = np.linspace(0,1,K)
+ys = np.linspace(-M,M,K)
+Vs = np.array( [
+    [v(x,y) for x in xs]
+    for y in ys
+] )
+Xs = np.tile( xs, (len(ys),1) )
+Ys = np.tile( ys, (len(xs),1) ).T
+Us = np.cos( np.atan(Vs) )
+Vs = np.sin( np.atan(Vs) )
+fig, axs = plt.subplots( 1, 3, figsize = (12,3) )
+for i in range(50):
+    axs[0].plot( [0,1], [z0[i],z1[i]], color = 'tab:orange', linewidth = 1 )
+#axs[1].streamplot(Xs,Ys,Us,Vs)
+for i in range(50):
+    r = scipy.integrate.solve_ivp(v, (0,1), z0[[i]], t_eval=np.linspace(0,1,100), dense_output=True)
+    axs[1].plot( r.t, r.y[0,:], color = 'tab:orange', linewidth=1 )
+    z = r.y[0,-1]
+    axs[2].plot( [0,1], [z0[i],z], color = 'tab:orange', linewidth=1 )
+dz0 = scipy.stats.gaussian_kde(z0)
+dz0 = scipy.stats.gaussian_kde(z1)
+zs = np.linspace(-M,M,200)
+for ax in axs:
+    ax.axvline( 0, color = 'black', linewidth = 1 )
+    ax.axvline( 1, color = 'black', linewidth = 1 )
+    s = 2
+    ax.plot( -s*dz0(zs), zs, color = 'tab:blue' )
+    ax.plot(1+s*dz0(zs), zs, color = 'tab:blue' )
+    ax.axis('off')
+fig.subplots_adjust( left = 0, right = 1, top = .95, bottom = 0 )
+plt.show()
+@
+\]
+For a single data point
+\begin{align*}
+  x_t &= t x^{\text{data}} + (1-t) x_0 \\
+  \dot x_t &= x^{\text{data}} - x_0 = \dfrac{ x^{\text{data}} - x_t }{ 1 - t }
+  \intertext{(there is a singularity, but it is numerically stable)}
+  v^*(x,t) &= \E[ \dot X_t | X_t = x ].
+\end{align*}
+More generally, the \emph{rectified flow} of a stochastic process $X_t$ is the ODE
+\[ \dot Z_t = v_t( Z_t ) \ \text{ where }\  v_t(x) = \E[ \dot X_t | X_t = x ] . \]
+The density $\rho_t$ of $X_t$ satisfies the \emph{continuity equation}
+\[ \underset{
+  \text{rate of change}
+}{\partial _t \rho_t (x)\vphantom{\bigl(}} = -
+\underset{
+  \text{divergence of the flux}
+}{\nabla \cdot \bigl( v_t(x) \rho_t(x) \bigr)}
+\]
+where the divergence is
+\[ \nabla \cdot v(x) = \text{Trace}\, \nabla v(x). \]
+\[
+\begin{tikzpicture}[>=stealth,scale=1,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
+  \begin{scope}
+    \begin{scope}[yscale=.15]
+      \foreach \i in {-2,...,2} {
+        \draw[->] (0,\i) -- (.3,\i);
+        \draw[->] (.35,\i) -- (1,\i);
+      }
+    \end{scope}
+    \begin{scope}[shift={(1.8,0)},scale=.3]
+      \node (O) at (0,0) {};
+      \foreach \i in {0,45,...,315}
+        \draw[->] (O) -- (\i:1.3);
+    \end{scope}
+    \node at (1,-.8) {$\text{div}>0$};
+    \node at (.5,.5) {\footnotesize accelerate};
+    \node at (1.8,.5) {\footnotesize diverge};
+  \end{scope}
+  \begin{scope}[shift={(3.5,0)}]
+    \begin{scope}[yscale=.15]
+      \foreach \i in {-2,...,2} {
+        \draw[->] (0,\i) -- (.65,\i);
+        \draw[->] (.7,\i) -- (1,\i);
+      }
+    \end{scope}
+    \begin{scope}[shift={(1.8,0)},scale=.3]
+      \node (O) at (0,0) {};
+      \foreach \i in {0,45,...,315}
+        \draw[->] (\i:1.3) -- (O);
+    \end{scope}
+    \node at (1,-.8) {$\text{div}<0$};
+    \node at (.5,.5) {\footnotesize decelerate};
+    \node at (1.8,.5) {\footnotesize converge};
+  \end{scope}
+\end{tikzpicture}
+\]
+The rectified flow reduces the curvature (straightens trajectories --
+% TODO: PLOT?
+in practice, one reflow is good enough).
+The rectified flow reduces the transport cost for all convex costs (Jensen),
+but we need not get the optimal transport.
+\[
+\qquad
+\begin{tikzpicture}[>=stealth,scale=.5,inner sep=1pt,outer sep=1pt,every node/.style={anchor=base}]
+  \begin{scope}
+    \node (O) at (0,0) {};
+    \foreach[evaluate=\i as \j using int(\i*45)] \i in {0,...,8} {
+      \node[circle,draw,thick,blue!70!black] (A-\i) at (\j:1) {};
+      \node[circle,draw,thick,red!60!black] (B-\i) at (\j:2) {};
+    }
+    \foreach[evaluate=\i as \j using int(\i+1)] \i in {0,...,7} {
+      \draw (A-\i) -- (B-\i);
+    }
+    \node at (0,-2.7) {\footnotesize optimal coupling};
+  \end{scope}
+  \begin{scope}[shift={(8,0)}]
+    \node (O) at (0,0) {};
+    \foreach[evaluate=\i as \j using int(\i*45)] \i in {0,...,8} {
+      \node[circle,draw,thick,blue!70!black] (A-\i) at (\j:1) {};
+      \node[circle,draw,thick,red!60!black] (B-\i) at (\j:2) {};
+    }
+    \foreach[evaluate=\i as \j using int(\i+1)] \i in {0,...,7} {
+      \draw (A-\i) -- (B-\j);
+    }
+    \node at (0,-2.7) {\footnotesize straight, non-optimal coupling};
+  \end{scope}
+\end{tikzpicture}
+\]
+(For the quadratic cost)
+it is possible to remove the rotation by restricting the velocity to be a gradient,
+\begin{align*}
+  & \dot Z_t = \nabla f( Z_t , t ) \\
+  & f = \argmin_f \int_0^1 \E \n{ (x_1-x_0) - \nabla f(x_t,t) }^2 dt .
+\end{align*}
+The Helmoltz decomposition of vector fields
+\[ v_t = \nabla f_t + r_t \]
+can be generalized to other convex costs
+\[ v_t = \nabla c^*** ( \nabla f_t ) + r_t . \]
+If $X_0$ is Gaussian and ($X_0,X_1)$ is the independent coupling,
+then the score is (Tweedie's formula)
+\[ \nabla \log \rho_t (x) = \dfrac{ t v_t(x) - x }{ 1 - t } . \]
+
+Different prediction targets
+\begin{align*}
+  &\text{velocity} & v_t(x) &= \E[ X_1 - X_0 | X_t ] \\
+  &\text{noise} & \mu_{0,t}(x) &= \E[ X_0 | X_t ] \\
+  &\text{data} & \mu_{1,t}(x) &= \E[ X_1 | X_t ] \\
+  &\text{score} & \nabla \log \rho_t(x) &= - \dfrac1{1-t}  \E[ X_0 | X_t ]
+\end{align*}
+
+The \emph{Fokker-Plank equation} converts between ODEs and SDEs:
+it changes the dynamics but not the marginals.
+If
+\begin{align*}
+  d Z_t &= v_t( Z_t ) dt + \sigma_ dW_t, \\
+  \intertext{then}
+  \partial_t \rho_t(x) &= - \nabla \cdot \bigl( v_t^{\text{eff}} (x) \rho_t(x) \bigr)  \\
+  \intertext{where}
+  v_t^{\text{eff}} (x) &= v_t(x) - \dfrac12 \sigma_t^2 \nabla \log \rho_t(x). \\
+\end{align*}
+In particular,
+\begin{align*}
+  d Z_t &= v_t(Z_t) dt + \sigma_t dW_t && \text{DDPM} \\
+  \intertext{and}
+  d\tilde Z_t &= v_t^{\text{eff}}(Z_t) dt && \text{DDIM}
+\end{align*}
+have the same marginals.
+
+A \emph{diffusion} is an ODE with Langevin noise.
+\[ dZ_t = v_t(Z_t) dt + \sigma_f^2 \nabla \log \rho_t(Z_t) dt + \sqrt2 \sigma_t dW_t \]
+That noise is an error-correcting mechanism, moving outliers back towards the bulk of the distribution,
+and making $\rho_1$ more concentrated (mode-seeking).
+
+Instead of straight lines, you can interpolate with a Brownian bridge (or a jump bridge for discrete data).
+
+Once you have the ODE, use a numeric solver, or train a neural net to approximate the trajectories
+(forward loss, backward loss, triconsistency loss, velocity matching loss, KL, score, etc.).
+
+To add a constraint
+\[ P_\theta[ X_1 \in \Omega ] = 1 \]
+where $\Omega$ is a manifold or a finite set,
+use an $\Omega$-bridge, or just add (deterministic) singular forces
+\[ d Z_t = v_t^\Omega( Z_t ) dt + \underset{\text{trainable}}{v_t^\theta( Z_t )} dt + \sigma_t dW_t ; \]
+for instance, if $\Omega = \{\mu_1,\dots,\mu_k\}$ is a finite set, use
+\[ v_t^\Omega(z) = \sum_i w_i(z) \dfrac{ \mu_i - z }{ 1 - t }. \]
+
+*** Diffusion, ICML Tutorial (No? only the first third of the tutorial was interesting)
+
+\nextbook
+\begin{book}
+  \emph{Harnessing low dimensionality\\ in diffusion models}\\
+  (ICML 2025)
+\end{book}
+Older generative models (GAN, VAE) have been replaced with diffusion.
+From the forward SDE, which adds noise to the data
+\[ d X_t = f( X_t , t ) dt + g(t) dW_t \]
+we can compute the backward probability flow,
+a denoising ODE
+\[ dX = \Bigl[ f(X,t) - \dfrac12 g(t)^2 \nabla_{\!x} \log p_t(x) \Bigr] dt . \]
+We can use a neural net (U-net or transformer) to approximate the score
+\[ \operatorname*{Minimize}_\theta \E_{ t, x_0, x_t} \beta_t^2 \n{
+  \mathstrut
+  \nabla \log p_t(x_t) - s_\theta(x_t,t)
+}^2 .\]
+We do not know the marginal distribution $p_t$,
+but this is equivalent to predicting the noise
+\[ \n{ \epsilon - \beta_t s_\theta( x_t, t) } ^2 . \]
+
+The \emph{reproductibility score}
+between two diffusion models $M_1$, $M_2$ is the similarity of their outputs when given the same noise inputs,
+\[ \operatorname*{P}_{ \epsilon \sim N(0,I) } \bigl[
+  \text{SSCD}\bigl( M_1(\epsilon), M_2(\epsilon) \bigr) > 0.6
+  \bigr], \]
+where the self-supervised copy detection (SSCD)
+is the cosine similarity of some low-dimensional embedding.
+For diffusion, it is high ($>0.7$),
+while it was close to zero for GANs or VAEs.
+
+The \emph{generalization score} measures whether
+a model reproduces some of the training samples
+or generates new data.
+\[ 1 - \operatorname*{P}_{\epsilon \sim N(0,I) } \left[
+  \max_{ i \in \text{Train} \vphantom{(} } \text{SSCD} \bigl( M(\epsilon) , x_i \bigr ) > 0.6
+  \right]
+\]
+
+When there is little data, diffusion models memorize the training data:
+reproducibility is high, but generalization is low.
+As the volume of training data increases, reproducibility decreases but,
+if there is enough data, the model generalizes:
+the generalization score is high,
+and the reproducibility score is high again.
+
+We expect generalization to happen when
+$ p_{\text{empirical}} \approx p_{\text{data}} $,
+\ie, $N \geq (L/\epsilon)^d$,
+where $d$ is the \emph{intrinsic dimension} of the data
+(it can be as low as $d=45$ for ImageNet).
+The training data can be described as a mixture of low-rank Gaussians (MoLRG, subspace clustering).
+
+% Theoretical results
+% Application: diffusion inverse solvers (DIS)
+
+*** DONE Statistics: Calibration, ICML Tutorial
+
+\nextbook
+\begin{book}
+  \emph{Calibration and bias\\ in algorithms, data and models}\\
+  (ICML 2025)
+\end{book}
+To assess the miscalibration of probabilistic predictions,
+\begin{align*}
+  S_1,\dots,S_n&:\text{scores, predicted probabilities of success} \\
+  R_1,\dots,R_n&:\text{Bernoulli responses}
+\end{align*}
+assume, wlog, $S_1<\cdots<S_n$ and plot the cummulative differences
+\[ C_k = \dfrac1n \sum_{j=1}^k ( R_j - S_j ) , \qquad k=1,\dots,n \]
+versus $k/n$
+(you can put $k/n$ on one horizontal axis, with equal increments,
+and $S_k$ on another horizontal axis, with inequal increments).
+The slope (between any two points)
+measures the (average) miscalibration (between those two points).
+For statistical tests, use
+\begin{align*}
+  \text{KS} &= \max \va{ C_k } \\
+  \text{Kuiper} &= \max C_k - \min C_k;
+\end{align*}
+under $H_0$ (perfect calibration)
+\begin{align*}
+  \text{KS} / \sigma &\sim \max( \text{Brownian motion} ) \\
+  \text{Kuiper} / \sigma &\sim \text{Range}( \text{Brownian motion} )
+\end{align*}
+where
+\[ \sigma = \sum \dfrac{ S_k ( 1 - S_k ) }{ n^2 }. \]
+
+Do not bin data into $\tilde R_j$, $\tilde S_j$:
+the reliability diagram $\tilde R_j \sim \tilde S_j$ and the empirical calibration error
+(ECE, sometimes called ICE)
+$\operatorname{Mean} \va{ \tilde R_j - \tilde S_j}$ or
+$\operatorname{Mean} \bigl( \tilde R_j - \tilde S_j \bigr)^2$ or
+is not asymptotically consistent.
+
+Similarly, one can study the deviations of the responses of a subpopulation
+from those of the full population
+by matching the ``scores'' (age, income, predicted probability, etc. -- fairness)
+\[ C_k = \dfrac1n \sum_{ k=1 }^j \bigl( R_{ i_k } - \tilde R_{ i_k } ) \]
+where $i_1<\cdots<i_n$ are the subpopulation
+and $\tilde R_{ i_k}$  the average response of units matching $i_k$ (inclusing $i_k$).
+
+One can also compare two sub-populations, provided we can find matching units.
+We can also match on several covariates.
+
+** DONE TO DELETE Trees
+
+*** DONE Decision trees (optimal)
+
+\nextbook
+\begin{book}
+  \emph{Optimal classification trees}\\
+  D. Bertsimas and J. Dunn (2015)
+\end{book}
+Decision trees are often built in a (suboptimal) greedy way,
+unconstrained (to detect strong splits hidden behind weak ones)
+and pruned (to account for the complexity penalty).
+
+The problem of finding the optimal tree of depth at most $D$ can be formulated as
+mixed integer program:
+\begin{compactitem}[--]
+\item Binary variables for each node, indicating if there is a split;
+\item Binary variables to select the variable used for the split;
+\item Binary variables indicating non-empty leaves;
+\item Binary variables indicating, for each observaation and each node,
+  whether it goes to the left or to the right;
+\item Binary variables indicating the majority class in each leaf
+\end{compactitem}
+(and many constraints).
+
+For the hyperparameters:
+\begin{compactitem}[--]
+\item Progressively increase the tree depth, using CART or a shallower tree as a warm start;
+\item The complexity penalty can be formulated as a hard constraint on the number of nodes:
+  progressively increase the number of nodes;
+\item Idem for the minimum number of observations in each leaf.
+\end{compactitem}
+
+This can be generalized to multivariate decision trees
+(hyperplane splits, instead of axis-aligned ones), with greedy (single-split-optimal-tree based)
+warm start (or greedy logistic regressions).
+
+\nextbook
+\begin{book}
+  \emph{Learning optimal and fair decision trees\\ for non-discriminative decision-making}\\
+  S. Aghaei et al.
+\end{book}
+Another MIP formulation of the optimal decision (or regression) tree;
+also allowing fairness penalties.
+
+Implementation in \texttt{ODTlearn}.
+
+\nextbook
+\begin{book}
+  \emph{Learning optimal classification trees\\ using a binary linear program formulation}\\
+  S. Verwer and Y. Zhang
+\end{book}
+Reformulation of the optimal decision tree MIP
+without constraints for each observation in the training set:
+just sum the constrains for the rows having the same feature values.
+
+\nextbook
+\begin{book}
+  \emph{Optimal constraint-based decision tree induction from itemset lattices}\\
+  S. Nijssen and E. Fromont
+\end{book}
+DL8 uses frequent itemset mining to build optimal decision trees on binary data
+(every path, o a decision tree, can be mapped to an itemset):
+the best decision tree on a subset of the data is obtained by considering all possible
+ways of paritioning it in two,
+and recursively determining the best tree for each partition.
+
+\nextbook
+\begin{book}
+  \emph{Learning optimal decision trees\\ using caching branch-and-bound search}\\
+  G. Aglin et al.
+\end{book}
+Implementation improvements for DL8, in \texttt{PyDL8.5}
+
+\nextbook
+\begin{book}
+  \emph{Optimal policy trees}\\
+  M. Amram et al.
+\end{book}
+The optimal decision tree MIP can be generalized to build an optimal \emph{policy} tree,
+\[ \operatorname*{Minimize}_{ \tau : \mathscr X \to \{0,1\} }
+\sum_i \Gamma_{ i , \tau(x_i) } \]
+after estimating the counterfactuals with a doubly robust (DR) estimator
+\[ \Gamma_{it} = \dfrac{ y_i - \hat y_{it} }{ \hat p_{it} } \mathbf 1_{ z_i = t } + \hat y_{it}. \]
+\[
+\begin{tikzpicture}[>=stealth,xscale=.5,yscale=.8,inner sep=2pt,outer sep=1pt,baseline=0]
+  \node (X) at (1,1) {$X$};
+  \node (T) at (0,0) {$T$};
+  \node (Y) at (2,0) {$Y$};
+  \draw[->] (X) -- (T);
+  \draw[->] (X) -- (Y);
+  \draw[->] (T) -- (Y);
+\end{tikzpicture}
+\]
+
+
+\nextbook
+\begin{book}
+  \emph{Optimal prescriptive trees}\\
+  D. Bertsimas et al.
+\end{book}
+Joint (MIP) tree model for counterfactual estimation
+(locally constant or piecewise linear)
+and optimal treatment assignment.
+
+*** No, Generalized random forests
+
+\nextbook
+\begin{book}
+  \emph{Generalized random forests}\\
+  S. Athey et al. (2016)
+\end{book}
+Generalized random forests fit a quantity $\theta(x)$
+identified as the solution of local moment equations
+\[ \E \bigl[ \psi_{ \theta(x) } (X) \,|\, X = x \bigr] = 0. \]
+
+The tree is built recursively, splitting a (parent) node $P$ into (children) $C_1$, $C_2$,
+maximizing
+\[ \Delta( C_1, C_2 ) =
+\dfrac{ \va{ C_1 } \cdot \va{ C_2 } }{ \va{ P }^2 }
+\n{ \hat\theta_{C_1} - \hat\theta_{C_2} }^2 , \]
+which can be approximated with a Taylor expansion
+\begin{align*}
+  A_p &= \operatorname*{Mean}_{ i \in P } \nabla \psi_{ \hat \theta_P } (x_i) \\
+  \rho_i &= - A_P^{-1} \psi_{ \hat\theta_P } (x_i) \\
+  \tilde \Delta(C_1,C_2) &= \sum_{ j \in \{1,2\} } \dfrac1{ \va{ C_j } }
+  \biggl(\, \sum_{ i \in C_j } \rho_i \biggr)^2.
+\end{align*}
+
+The final estimate is not obtained byaveraging estimates from each tree,
+but by
+using the ensemble to compute similarity weights $\alpha_i(x)$ between the new sample $x$ and training samples $i$
+and putting them in the empirical estimating equation
+\[ \hat\theta(x) = \argmin_\theta \n{ \sum_i \alpha_i(x) \psi_\theta(x_i) }_2. \]
+
+R implementation in \texttt{grf}.
+
+\nextbook
+\begin{book}
+  \emph{evtree: evolutionary learning of globally optimal classification and regression trees in R}\\
+  T. Grubinger et al. (2014)
+\end{book}
+Decision trees are usually built greedily: they are only locally optimal --
+genetic algorithms can search for a globally optimal tree.
+
+\nextbook
+\begin{book}
+  \emph{Parties, models, mobsters:\\ a new implementation\\ of model-based recursive partitioning in R}\\
+  A. Zeilleis and T. Hothorn
+\end{book}
+Model-based recursive partitioning (MOB)
+is a ``decision'' tree with models (e.g., linear models) in the leaves.
+They can use different variables for the models $y \sim x_1 + \cdots + x_m$
+and the splits $z_1,\dots,z_\ell$.
+The tree is built recursively:
+\begin{compactitem}[--]
+\item Fit the model to the current node;
+\item Test for parameter instability (SupLM fluctuation test)
+  to select the variable to split on;
+\item Use exhaustive search to select the split point;
+\item Split the node, and iterate until the desired depth;
+\item Prune the tree by looking at the AIC or BIC improvement.
+\end{compactitem}
+R implementation in \texttt{partykit}.
+
+\nextbook
+\begin{book}
+  \emph{Generalized M-fluctuation tests\\ for parameter instability}\\
+  A. Zeileis and K. Hornik (2007)
+\end{book}
+Given observations
+$Y_i \overset{\text{indep}}{\sim} F_{\theta_i}$,
+we can test
+\begin{align*}
+  H_0 &: \ \forall i \ \theta_i = \theta_0 \\
+  H_1 &: \ \theta_i \text{ varies over time}
+\end{align*}
+using a score function $\psi$, \ie, a function such that
+\[ \E_{ Y \sim F_\theta } \bigl[ \psi_\theta(Y) \bigr] = 0 , \]
+e.g.,
+\[ \psi_\theta(y) = \dfrac{ \partial \text{loss} ( y ; \theta ) }{ \partial \theta } \]
+where the loss is the log-likelihood or the residual sum of squares.
+
+Since
+$\hat B_n^{-1/2} W_n(\cdot, \hat\theta_n ) \overset{\text{d}}{\to} W^0(\cdot)$,
+where
+\begin{compactitem}[\ensuremath{\cdot}]
+\item $n$ is the number of observations;
+\item $\hat\theta_n$ is estimated using the whole sample:\\
+  \mbox{}\qquad\qquad\qquad$\displaystyle\sum_{i=1}^n \psi_{\hat\theta_n} ( Y_i ) = 0 ; $
+\item $\displaystyle W_n(t,\theta) = \dfrac{1}{\sqrt n} \sum_{ i=1 }^{ \lfloor nt \rfloor }\psi_\theta(Y_i );$
+\item $\displaystyle B(\theta) = \operatorname*{Var}_{ Y \sim F_\theta } \bigl[ \psi_\theta(Y) \bigr] ;$
+\item $\displaystyle\hat B_n = \dfrac1n \sum_{i=1}^n \psi_{\hat\theta_n}(Y_i) \psi_{\hat\theta_n}(Y_i) ^\top ;$
+\item $W^0(t) = W(t) - t W(1)$ Brownian bridge;
+\item $W$ is a standard Brownian motion,
+\end{compactitem}
+we can use
+\begin{align*}
+  &\text{SupLM} = \sup_{ t \in \Pi } \dfrac{ \n{ \text{efp}(t) }_2^2 }{ t(1-t) } \\
+  &\text{efp}(t) = \hat B_n^{-1/2} W_n(t,\hat\theta_n) \text{ (empirical fluctuation process)}\\
+  &\Pi \subset [0,1] \text{ interval with suspected break}
+\end{align*}
+as test statistic (and approximate $p$-values).
+For linear regression,
+\[ \psi_B( y_i, x_i ) = x_i ( y_i - x_i^\top \beta ). \]
+
+\nextbook
+\begin{book}
+  \emph{Approximate asymptotic p-values\\ for structural change tests}\\
+  B.E. Hansen (1997)
+\end{book}
+$P$-values for the limiting distribution
+\[ \sup_{ t \in \Pi } \dfrac{ \n{ W^0(t) }_2^2 }{ t(1-t) }. \]
+
+\nextbook
+\begin{book}
+  \emph{ctree: conditional inference trees}\\
+  T. Hothorn et al.
+\end{book}
+Decision tree using statistical tests (adjusted for multiple testing) to select the splits
+(instead of heuristic, overfitting-prone criteria).
+
+\nextbook
+\begin{book}
+  \emph{Fast optimal leaf ordering\\ for hierarchical clustering}\\
+  Z. Bar-Joseph et al. (2001)
+\end{book}
+
+*** DONE Random forests, interpretability
+
+\nextbook
+\begin{book}
+  \emph{Approximation trees:\\ statistical stability in model distillation}\\
+  Y. Zhou et al.
+\end{book}
+To explain a blackbox model (e.g., a random forest),
+distill it into a decision tree using pseudo observations
+(real observations plus Gaussian noise, for a user-chose bandwidth -- \ie,
+samples from a KDE of the data).
+Choose the number of pseudo observations so tha the trees be stable --
+use a statistical test on the Gini  index (which is used to select the splits).
+Choose the tree depth by comparing the variance of the observations in a leaf
+with the variance of the blackbox model.
+
+*** DONE Random forests
+
+\nextbook
+\begin{book}
+  \emph{Dynamic asset allocation using machine learning: seeing the forest for the trees}\\
+  C. Mueller-Glissmann and A. Ferrario
+\end{book}
+A \emph{student tree} is a complex model (e.g., a random forest)
+distilled into a tree (on real data + noise).
+
