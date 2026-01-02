@@ -4,7 +4,7 @@ Here is, as every year, a summary of some of the papers and book I read over the
 covering topics such as
 TODO: LIST THE TOPICS
 
-* TODO Multiple Testing
+* Multiple Testing
 
 I will first review the traditional approach to statistical testing,
 including p-values, multiple testing, and sequential testing,
@@ -130,9 +130,49 @@ and uses critical values cₜ such that
   J.S. Koopmeiners (2012)
   https://www.biostat.umn.edu/~josephk/courses/pubh8482_fall2012/index.php?page=lectures
 
-** TODO E-values
-** TODO White, Romano-Wolf
+** E-values
 
+When data arrives progressively over time, one observation at a time,
+we are tempted to perform the statistical tests continuously and monitor the p-value:
+this is p-value peeking -- the p-values are incorrect.
+But they need not be.
+
+Instead of a sequence of p-values, you could build an E-process:
+a stochastic process (Eₜ)ₜ, such that
+E≥0,
+E[E_τ|H₀]≤1 for all stopping times τ,
+and P[∃t:Eₜ≤1/α]≤α.
+They are not too difficult to build, using likelihood ratios
+and a generalization of Kelly's principle,
+even for composite null hypotheses
+They also provide (valid) sequences of p-values, and valid sequences of confidence intervals.
+
+There are a few drawbacks, though:
+first, you need more data to reach the same conclusions (but not as much as you could fear);
+second, the tests focus on the log-power, rather than the power.
+
+  \emph{Game theoretic statistics and\\ sequential anytime valid inference (SAVI):\\ a martingale theory of evidence}\\
+  (ICML 2025)
+
+  \emph{Hypothesis testing with e-values}\\
+  A. Ramdas and R. Wang (2025)
+
+
+
+** FWER: White, Romano-Wolf
+
+If you have raw data (e.g., model residuals) instead of just p-values,
+you can also use resampling to control the FWER: this will automatically account for dependencies between the tests.
+
+  A reality check for data snooping
+  H.L. White (2000)
+  https://users.ssc.wisc.edu/~behansen/718/White2000.pdf
+
+  Stepwise Multiple Testing as Formalized Data Snooping
+  J.P Romano and M.W. Wolf (2003)
+  http://www-stat.wharton.upenn.edu/~steele/Courses/956/Resource/MultipleComparision/RomanoWolf05.pdf
+
+** DONE TO DELETE White, Romano-Wolf
 
 \nextbook
 \begin{book}
@@ -187,7 +227,7 @@ applies White's reality check iteratively:
 These approaches to FWER control are more powerful than Bonferroni,
 because they account for the dependence between the tests.
 
-** TODO E-values
+** DONE TO DELETE  E-values
 *** Multiple testing: SAVI
 
 \nextbook
@@ -1266,7 +1306,7 @@ For instance, given a prior $H$ on $\theta$, the
   S_n &= \dfrac1n \sum_{ i=1 }^n X_i.
 \end{align*}
 
-* TODO Tabular data
+* Tabular data
 ** Deep Learning
 
 Deep learning models are still often seen as inferior to tree-based models
@@ -1310,6 +1350,35 @@ and more agressive ensembling
   O. Laurent et al. (2023)
   https://arxiv.org/abs/2210.09184
 
+Those deep learning models can be improved by putting machine learning algorithms inside them,
+for instance, a k-NN layer.
+
+  \emph{TabR: Tabular deep learning\\ meets nearest neighbours in 2023}\\
+  Y. Gorishniy et al. (2024)
+
+Foundational tabular data models have started to appear, in particular TabPFN
+(but there are still scalability issues).
+
+  \emph{Zero-shot meta-learning\\ for tabular prediction tasks\\ with adversarially pre-trained transformer}\\
+  Y. Wu and D.L. Bergman
+
+  \emph{TabPFN unleashed: a scalable and effective solution to tabular classification problems}\\
+  S.Y. Liu and H.J. Ye
+
+Comparing those modles can be problematic: each paper tends to use different benchmarks,
+the largest models may have seen some of the test data,
+and sythnetic data may present artefacts or (when based on resampling)
+may be general enough.
+
+  \emph{TabArena}: a living benchmark for machine learning on tabular data\\
+  N. Erickson et al.
+
+  \emph{TabSDS: a lightweight, fully\\ non-parametric, and model free approach\\ for generating synthetic tabular data}\\
+  E.C. Neto (2025)
+
+  \emph{Synthcity: facilitating innovative use cases\\ of synthetic data in different data modalities}\\
+  Z. Qian et al.
+
 ** Kernel methods
 
 Kernel methods with axis-aware kernels (ℓᵖ) also have that axis-aligned prior.
@@ -1351,8 +1420,8 @@ where I is a random subset of columns (rows).
   Y. Chen et al. (2022)
   https://arxiv.org/abs/2207.06503
 
-** TODO TabPFN, k-NN
-*** TabPFN, transformer
+** DONE TO DELETE TabPFN, k-NN
+*** DONE TO DELETE TabPFN, transformer
 
 \nextbook
 \begin{book}
@@ -1490,7 +1559,7 @@ where
 and training uses random subsets of neighbours
 instead of the whole dataset.
 
-** TODO TO SORT
+** DONE TO DELETE Tabular Data, unsorted
 *** Benchmark
 \nextbook
 \begin{book}
@@ -1546,7 +1615,7 @@ Iterative imputation
 with automated hyperparameter selection,
 for MAR (not necessarily MCAR) data.
 
-* TODO Time series
+* Time series
 
 All too often, I see plots of time series forecasts
 that just plot the time series (value against time)
@@ -1612,7 +1681,7 @@ it is the quantile (pinball) loss
 integrated from 0 to 1.
 
   Regions of reliability in the evaluation\\ of multivariate probabilistic forecasts}\\
-  \'E. Marcotte et al. (2023)
+  É. Marcotte et al. (2023)
   https://arxiv.org/abs/2304.09836
 
 ** Non-stationarity
@@ -1636,7 +1705,7 @@ and then work with standardized data.
   Z. Liu et al. (2023)
   https://openreview.net/forum?id=5BqDSw8r5j
 
-** TODO TO SORT
+** TODO TO DELETE No, time series, unsorted
 *** Koopman, ODE
 
 \nextbook
@@ -1655,7 +1724,7 @@ with its dynamics described by
 \end{align*}
 (the dynamics of $\theta$ are non-linear, but they become linear when lifted to a higher-dimension space).
 
-* TODO Interpretability
+* Interpretability
 ** Introduction / Mechanistic interpretability
 
 Interpreting large (language) models is tricky:
@@ -1818,7 +1887,7 @@ and Taylor expansions.
   G. Montavon et al. (2015)
   https://arxiv.org/abs/1512.02479
 
-** TODO TO SORT
+** TODO TO DELETE Sarsity, discrete variables
 *** Sparsity, Discrete variables
 
 \nextbook
@@ -1864,8 +1933,37 @@ The \emph{sparseMAP} generalizes this to other polytopes
   \text{sparseMAP}(s) &= \argmin_{ \xi \in \Delta } \n{ A \xi - s } _2^2
 \end{align*}
 
-* TODO Causality
-** TODO Causal Discovery: dataset, benchmarks
+* Causality
+** Causal Discovery benchmarks
+
+It is difficult to compare causal discovery algorithms because,
+for most datasets, we do not have a ground truth causal graph:
+at best, we have a suspected causal graph from domain knwoledge.
+
+  \emph{OCDB: revisiting causal discovery\\ with a comprehensive benchmark\\ and evaluation framework}\\
+  W. Zhou et al.
+
+Synthetic data also has problems: it tends to present artefacts, absent from real data,
+that can be leveraged by of some of the algorithms.
+
+  \emph{CausalTime: realistically generated time series for benchmarking of causal discovery}\\
+  Y. Cheng et al.
+
+A few real-world datasets with ground truth causal graphs have started to appear,
+but there are still too few of them:
+actual physical devices (light tunnel, wind tunnel,
+cooling system of a particle accelerator), river flow, etc.
+
+  \emph{The causal chambers: real physical systems\\ as a testbed for AI methodology}\\
+  J.L. Gamella et al.
+
+  \emph{Causal discovery in a complex industrial system: a time series benchmark}\\
+  S.W. Mogensen et al.
+
+  \emph{CausalRivers: scaling up benchmarking of causal discovery for real-world time series}\\
+  G. Stein et al.
+
+** DONE TO DELETE Causal Discovery: dataset, benchmarks
 *** Benchmark
 
 \nextbook
@@ -2019,7 +2117,7 @@ they can be viewed as natural experiments
   \emph{Causal discovery in heavy-tailed models}\\
   N. Gnecco et al. (2020)
 
-** TODO Causal discovery: time series
+** TODO MOVE THIS ELSEWHERE? Causal discovery: time series, KAN (stacked GAMs)
 *** Causal discovery for time series
 
 \nextbook
@@ -2194,7 +2292,6 @@ for instance, with rank conditions.
 
   \emph{Causal structure learning in Hawkes processes with complex latent confounder networks}\\
   S. Jin and B. Huang
-
 
 
 ** DONE TO DELETE Causal discovery: other algorithms
@@ -4917,7 +5014,7 @@ observations close to the threshold are comparable.
   &= \lim_{ x \to c^+ } \E[ Y | X = x ] - \lim_{ x \to c^- } \E[ Y | X = x ]
 \end{align*}
 
-** TODO TO SORT
+** DONE TO DELETE, no, Causal Discovery, unsorted
 *** Bayesian
 
 \nextbook
@@ -4927,7 +5024,7 @@ observations close to the threshold are comparable.
 \end{book}
 Bayesian estimation (rather than point estimation) of a DAG.
 
-*** Causal discovery (?), RKHS
+*** No, Causal discovery (?), RKHS
 
 \nextbook
 \begin{book}
@@ -4975,7 +5072,7 @@ with \texttt{dowhy-gcm}, it can answer causal queries:
 counterfactuals, direct and indirect effects,
 causal strength, root cause analysis, etc.
 
-* TODO LLM
+* LLM
 ** LLMs as optimizers
 
 CMA-ES is a simple, population-based optimization algorithm:
@@ -5188,14 +5285,20 @@ and mode collapse (too much RL).
   J. Chen et al. (2025)
   https://arxiv.org/abs/2505.13026
 
-** TODO TO TIDY Models
+** Models
 
-TODO Instead of SFT+RL, DeepSeek uses SFT+RL+SFT+RL, with GRPO (i.e., it replaces the critic, which had to be trained, with a simple average)
+Large language models are trained in three steps:
+they first learn to continue a text (next word prediction),
+then they learn to behave as an assistant, i.e., to answer user's queries, with supervised fine-tuning (SFT),
+and they are finally aligned to human preferences (do no harm) with reinforcement learning (RL).
+
+Instead of SFT+RL, DeepSeek uses SFT+RL+SFT+RL;
+for the reinforcement learning part, it uses GRPO, i.e.,
+it replaces the critic, which had to be trained, with a simple average.
 
   \emph{DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning}
 
-
-
+** TODO MOVE? Transformers
 
 TODO: Move this to the "Transformers" section, if there is one?
 You can actually train an LLM with bytes instead of tokens,
@@ -5204,9 +5307,7 @@ if you use hashed n-gram embeddings (for n≤8).
   \emph{Byte latent transformer:\\ patches scale better than tokens}\\
   A. Pagnoni et al.
 
-
-
-
+** TODO MOVE? Smaller models
 
 TODO: Move this to an "Older models" or "smaller models" section?
 The BERT model is not dead. It is an encoder-only model (e.g., for classification -- LLMs are generative models).
@@ -5229,6 +5330,15 @@ On some tasks, e.g., open-ended NER (named entity recognition), they can compete
 
   \emph{UniversalNER: targeted distilation\\ from large language models\\ for open named entity recognition}\\
   W. Zhou et al.
+
+** LLMs for non-text data
+
+LLM-like models can also be used for non-text data:
+images (after cutting them into patches), sounds,
+or even items (in a recommendation system).
+
+  \emph{Recommendation with generative models}\\
+  Y. Deldjoo et al. (2024)
 
 ** Attacks
 
@@ -5422,7 +5532,7 @@ Coordinates corresponding to negative (resp. positive) eigenvalues
 have a negative (positive)
 contribution to distances.
 
-* TODO Finance
+* Finance
 ** Portfolio optimization
 
 If you are unfamiliar with portfolio optimization, the following paper covers the basics,
@@ -5556,7 +5666,7 @@ we could directly forecast portfolio weights.
   G. Chevalier et al. (2022)
   https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4230955
 
-** TODO ? Causality for time series
+** DONE TO DELETE Causality for time series, No
 *** Finance, Causality, time series forecasting
 
 \nextbook
@@ -5591,7 +5701,7 @@ VAR model, with pinball loss, to forecast the 10\%, 50\%, 90\% quantiles,
 using piecewise linear transformations of the predictors,
 with knots at the 10\% and 90\% quantiles to detect tail interactions.
 
-** TODO ? Technical
+** DONE TO DELETE No,  Finance, Technical
 *** Small mean-reverting portfolios
 
 \nextbook
@@ -5689,6 +5799,7 @@ It can be solved:
   \[ \lambda = - \dfrac{ w' A \Gamma w }{ w' \Gamma w } \]
   (it is another generalized eigendecomposition problem, but $A \Gamma$ is not psd).]
 
+** DONE TO DELETE No, FInance, Technical
 *** pairs
 
 \nextbook
@@ -5713,7 +5824,7 @@ $ \E[ r | x \geq 0 ]$
 and decompose them into the contributions of $(\mu,\epsilon)$,
 $\text{diag}(B)$ and the off-diagonal of $B$.
 
-** No, Investment strategies
+** DONE TO DELETE No, Investment strategies
 *** Credit strategies
 
 \nextbook
@@ -5746,7 +5857,7 @@ You can also obtain such latent representations from text (news, 10K, etc.) or h
   \emph{Asset embeddings}\\
   X. Gabaix et al. (2025)
 
-** TODO No
+** DONE TO DELETE No
 *** No
 
 \nextbook
@@ -6038,7 +6149,7 @@ the slope (between any two points) is the average calibration error for that reg
   \emph{Calibration and bias\\ in algorithms, data and models}\\
   (ICML 2025)
 
-* TODO ML
+* ML
 ** Decision trees
 
 Decision (and regression) trees) are traditionally built greedily:
@@ -6094,7 +6205,7 @@ TODO: There are variants of this idea
 If you want to stick to trees, you can distill your random forest into a tree,
 but use data augmentation, (x,f(x)+noise), to better explore the neighbourhood of the decision boundary.
 
-** TODO No? Change point detection
+** DONE TO DELETE Change point detection, No
 *** ML, Clustering, Change point detection
 
 \nextbook
@@ -6265,8 +6376,16 @@ use the $\chi^2$ kernel
 \[ k(x,y) = \exp - \dfrac1{h \cdot d} \sum_{i=1}^d \dfrac{ (x_i-x_j)^2 }{ x_i + x_j } \]
 (for some bandwidth $h>0$).
 
-** TODO TO SORT
-*** Risk-seeking RL, Symbolic regression
+** Risk-seeking RL, Symbolic regression
+
+Symbolic regression is often performed with genetic algorithms
+or, more recently, with LLMs. Alternatively, we could use reinforcement learning (RL)
+but, to allow for more exploration, it should be risk-seeking reinforcement learning.
+
+  \emph{Deep symbolic regression:\\ recovering mathematical expressions from data\\ via risk-seeking policy gradients}\\
+  B.K. Petersen et al.
+
+** DONE TO DELETE Risk-seeking RL, Symbolic regression
 
 \nextbook
 \begin{book}
@@ -6286,7 +6405,7 @@ instead, we want to maximize the maximum reward:
 this can be achieved by maximizing the conditional expected reward
 \[ \E_{ \tau \sim p_\theta } \bigl[ R(\tau) \,|\, R_\tau \geq R_\epsilon(\theta) \bigr]. \]
 
-*** ML and PDEs, Koopman operator theory
+** DONE ML and PDEs, Koopman operator theory, No (next year?)
 
 \nextbook
 \begin{book}
@@ -6352,7 +6471,7 @@ If a solution $u$ can be represented as a sum of eigenfunctions
 \[ u = \sum \dfrac{ \langle \phi_n , f \rangle }{ \lambda_n }\phi_n. \]
 Neural operators generalize that to nonlinear PDEs.
 
-*** ANN (Approximate nearest neighbour): optimized product quantization
+** DONE TO DELETE ANN (Approximate nearest neighbour): optimized product quantization, no
 
 \nextbook
 \begin{book}
@@ -6374,7 +6493,7 @@ after a learned orthogonal transormation:
 \end{compactitem}
 this gives $k^M$ codewords.
 
-*** LLMs with non-text sequences: REcSys
+** DONE TO DELETE LLMs with non-text sequences: REcSys
 
 \nextbook
 \begin{book}
@@ -6420,7 +6539,7 @@ Conversational RecSys provide textual explanations (personalized reviews),
 and allow for interactive query refinement --
 but also personalized content and advertising.
 
-** No
+** DONE TO DELETE ML, No
 *** No, ML, Model selection, BIC alternatives
 
 \nextbook
@@ -6458,7 +6577,7 @@ ML pipelines pay attention to feature ($X$) transformation, but tend to ignore \
 \item Logarithm, quantile uniform, quantile normal or Yeo-Johnson transform.
 \end{compactitem}
 
-* Model Merging
+* TODO MOVE TO THE TRAINING SECTION Model Merging
 
 LoRAs are often just added, with weights summing to 1.
 Instead, select which columns to keep from which LoRA by looking at the sparsity of those columns.
@@ -6475,8 +6594,22 @@ Instead, average highly correlated features and concatenate the others.
   G. Stoica et al. (2023)
   https://arxiv.org/abs/2305.03053
 
-* TODO Statistics
-** TODO Score
+* Statistics
+** Score
+
+The score function (the gradient of the logarithm of a probability density),
+which appears in diffusion models,
+looks a bit mysterious.
+One big advantage over the probability density itself,
+is that it does not require a normalized density
+(the normalization constant disappears when you differentiate the logarithm):
+you can use it to fit unnormalized densities.
+
+  \emph{Estimation of non-normalized\\ statistical models by score matching}\\
+  A. Hyvärinen
+
+** DONE TO DELETE Score
+
 *** Statistics, Score function
 
 \nextbook
@@ -6506,7 +6639,16 @@ and minimize
 + \dfrac12 \psi_\theta(x_t)_i^2.
 \]
 
-** TODO KAN (in the "models" section, above?)
+** TODO KAN (in the "models" section, above?) (just after the k-NN layers?)
+
+For a reason I did not really understand,
+the Kolmogorov-Arnold networks (KAN) were all over the news.
+These are just stacked GAM (generalized additive models) layers.
+
+  \emph{KAN: Kolmogorov-Arnold networks}\\
+  Z. Liu et al.
+
+** DONE TO DELETE KAN
 *** Statistics, Kolmogorov-Arnold networks (stacked GAMs)
 
 \nextbook
@@ -6523,7 +6665,21 @@ Stacked GAMs.
 \end{book}
 A KAN is a neural net with GAM layers: the weights are replaced by learnable nonlinearities (splines of order 3 on $G$ intervals).
 
-** TODO TO SORT? TO DELETE?
+** Sparse PCA and CCA
+
+It is relatively easy to add constraints or penalties on
+PCA (principal component analysis) or CCA (canonical correlation analysis):
+they can be computed using a sequence of regressions,
+for which we can require non-negative and/or sparse coefficients.
+(As presented in the paper, the algorithm does not work well:
+check the authors' code instead.)
+
+  \emph{Nonnegative CCA\\ for audiovisual source separation}\\
+  C. Sigg et al.
+
+  TODO: LINK TO THE CODE
+
+** DONE TO DELETE Statistics, unsorted
 *** Statistics/ML: Intrinsic dimension
 
 \nextbook
@@ -6686,7 +6842,7 @@ H\bigl( \rho( y_{t+1} | y_t ) \bigr) -
 H\bigl( \rho_{\not x}( y_{t+1} | y_t ) \bigr).
 \]
 
-* TODO Diffusion
+* Diffusion
 
 Diffusion models consider the progressive addition of noise to an image,
 and learn a model to do the opposite, i.e., to remove noise from an image or even,
@@ -6709,13 +6865,13 @@ For instance, classifier-free guidance (CFG) models train a single model
 which can be used for both conditional and unconditional generation
 (i.e., with or without a prompt); at inference time, we can use
 a linear combination of the conditional and unconditional models,
-with more weight given to the conditional part.
+with more weight given to the conditional part (more than 100%).
 
   Classifier-free diffusion guidance}\\
   J. Ho and T. Salimans (2021)
   https://arxiv.org/abs/2207.12598
 
-  
+
 While diffusion models have to move step by step to progressively transform the noise (t=0) into an image (t=1),
 consistency models try to do it all at once, by  training a model to transform an image
 with a given amount of noise to an image with another amount of noise (from t to s) in one step
@@ -6731,12 +6887,14 @@ defined by the denoising SDE, but we could use any other path.
 In particular, we can use an ODE whose trajectories are straight lines:
 this is a rectified flow.
 
-  TODO: ICML tutorial
+  \emph{Continuous time generative models}\\
+  (Q. Liu, ICML 2025)
 
 This may sould a bit like optimal transport:
 diffusion defines a non-optimal transport between the noise distribution and the data distribution --
 we do not need it to be optimal.
-  
+
+** DONE TO DELETE Schrödinger bridges, No
 TODO: Mention Schrödinger bridges?
 
   Trajectory inference\\ with smooth Schr\"odinger bridges}\\
@@ -6746,12 +6904,12 @@ TODO: Mention Schrödinger bridges?
 * Transformers: position embedding
 
 The attention mechanism is permutation-invariant: it should be unsuitable
-for sequence data such as text -- it ignores the order of the words. 
+for sequence data such as text -- it ignores the order of the words.
 In spite of that, it is at the heart of the transformer architecture used in LLMs,
 thanks to the addition of a sine (or learned) positional embedding (PE) to the first layer.
 There are many variants:
 for instance, RoPE multiplies keys and queries with a sine embedding (which rotates them),
-whilte ALiBi adds position-based penalties to the attention scores. 
+whilte ALiBi adds position-based penalties to the attention scores.
 
   Train short, test long: attention with linear biases enables input length extrapolation}\\
   O. Press et al. (2021)
@@ -6979,9 +7137,9 @@ is a simple sparsification method.
   J. Baston et al. (2009)
   http://cs-www.cs.yale.edu/homes/spielman/PAPERS/CACMsparse.pdf
 
-* TODO Optimization
-
+* Optimization
 ** Bayesian optimization and reinforcement learning
+
 Bayesian optimization keeping an estimate of the quality of each possible point,
 evaluating the function to minimize at the most promising point,
 using its value to update the quality estimates, and iterates,
@@ -6991,7 +7149,7 @@ you could use reinforcement learning for less myopic decisions.
 
   \emph{Earl-NO: reinforcement learning\\ for multi-step lookahead,\\ high-dimensional Bayesian optimization}\\
   M. Cheon et al.
-  
+
 ** LiSSA
 
 Second-order optimization methods (Newton and variants, such as L-BFGS)
@@ -7004,7 +7162,48 @@ but uses a Taylor expansion of the inverse, without computing the whole Hessian
   \emph{Second-order stochastic optimization\\ for machine learning in linear time}\\
   N. Agarwal et al. (2017)
 
-** TODO Optimization, Influence functions, data-centric ML, LiSSA, ICML
+** TODO MOVE TO THE INTERPRETABILITY SECTION Shapley values
+
+The Shapley value assesses the importance of on an input feature for a model
+by fitting that model on all possible subsets of features,
+computing some goodness-of-fit (gof) for each of them,
+computing the difference of gof of models with and without the input feature of interest,
+and averaging those differences.
+It is a weighted average, with the same weight for each subset size.
+
+If you have some prior on the number of relevant features,
+you may want to use another weighting, e.g.,
+to focus more on models with a small number of features (and remove the noise from irrelevant features)
+or a large number of features (which gives a result close to the leave-out-one (LOO) approach).
+
+  \emph{Beta Shapley: a unified and noise-reduced data valuation framework for machine learning}\\
+  Y. Kwon and J. Zou
+
+** Influence functions
+
+Influence functions (the effect, on the loss,
+of upweighting one of the training samples)
+can be used to identify detrimental samples.
+They can be computed efficiently (with LiSSA),
+and they can be generalized to groups of observations.
+
+  \emph{Understanding black-box predictions\\ via influence functions}\\
+  P.W. Koh and P. Liang (2017)
+
+  \emph{DataInf: efficiently estimating data influence in LoRA-tuned LLMs and diffusion models}\\
+  Y. Kwon et al.
+
+  \emph{On second-order group influence functions\\ for black-box predictions}\\
+  S. Basu et al. (2020)
+
+Outlier detection algorithms can provide the same information,
+more efficiently.
+
+  \emph{Outlier gradient analysis:\\ efficiently identifying detrimental\\ training samples for deep learning}\\
+  A. Chhabra e al. (2025)
+
+
+** DONE TO DELETE Optimization, Influence functions, data-centric ML, LiSSA, ICML
 *** Influence functions
 \nextbook
 \begin{book}
@@ -7095,7 +7294,7 @@ and approximate $f(x, \hat\theta_{-i})$
 with a higher-order expansion of the influence function.
 % It can be computes with "von Mises calculus": Taylor expansion for functionals.
 
-*** Beta Shapley
+*** DONE TO DELETE Beta Shapley
 
 \nextbook
 \begin{book}
@@ -13763,7 +13962,7 @@ train a random forest or boosted trees,
 explode them into a set of rules (each path from a root node to an internal or leaf node defines a rule),
 and combine them with the \emph{adaptive lasso}
 (which shrinks smaller weights even more).
-** DONE TO DELETE LiSSA 
+** DONE TO DELETE LiSSA
 *** LiSSA
 
 \nextbook
@@ -15441,4 +15640,3 @@ with the variance of the blackbox model.
 \end{book}
 A \emph{student tree} is a complex model (e.g., a random forest)
 distilled into a tree (on real data + noise).
-
