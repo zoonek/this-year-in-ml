@@ -8,7 +8,7 @@ TODO: LIST THE TOPICS
 
 I will first review the traditional approach to statistical testing,
 including p-values, multiple testing, and sequential testing,
-before presenting the notion of e-values.
+before presenting the notion of e-value, which was new to me.
 
 ** Statistical tests
 
@@ -93,6 +93,19 @@ or the distribution of the p-values under H₀ and H₁ (local FDR).
 
   TODO: Local FDR
 
+** FWER: White, Romano-Wolf
+
+If you have raw data (e.g., model residuals) instead of just p-values,
+you can also use resampling to control the FWER: this will automatically account for dependencies between the tests.
+
+  A reality check for data snooping
+  H.L. White (2000)
+  https://users.ssc.wisc.edu/~behansen/718/White2000.pdf
+
+  Stepwise Multiple Testing as Formalized Data Snooping
+  J.P Romano and M.W. Wolf (2003)
+  http://www-stat.wharton.upenn.edu/~steele/Courses/956/Resource/MultipleComparision/RomanoWolf05.pdf
+
 ** Sequential testing
 
 So far, we assumed we had access to all the data but,
@@ -158,19 +171,6 @@ second, the tests focus on the log-power, rather than the power.
   A. Ramdas and R. Wang (2025)
 
 
-
-** FWER: White, Romano-Wolf
-
-If you have raw data (e.g., model residuals) instead of just p-values,
-you can also use resampling to control the FWER: this will automatically account for dependencies between the tests.
-
-  A reality check for data snooping
-  H.L. White (2000)
-  https://users.ssc.wisc.edu/~behansen/718/White2000.pdf
-
-  Stepwise Multiple Testing as Formalized Data Snooping
-  J.P Romano and M.W. Wolf (2003)
-  http://www-stat.wharton.upenn.edu/~steele/Courses/956/Resource/MultipleComparision/RomanoWolf05.pdf
 
 * Tabular data
 ** Deep Learning
@@ -286,7 +286,10 @@ where I is a random subset of columns (rows).
   Y. Chen et al. (2022)
   https://arxiv.org/abs/2207.06503
 
+
 * Time series
+
+** Time series forecasts
 
 All too often, I see plots of time series forecasts
 that just plot the time series (value against time)
@@ -341,20 +344,6 @@ stylized facts of real data.
   H. Huang et al. (ICLR 2024)
   https://openreview.net/forum?id=CdjnzWsQax
 
-** TODO Probabilistic forecasts -- MOVE THIS ELSEWHERE (it is not specific to time series)
-
-Instead of a point forecast, we may prefer a probabilistic forecast:
-not a single value, but a probability distribution (the model can provide it as a parametric distribution,
-e.g., the parameters of a Gaussian distribution, or as samples from that distribution).
-To assess the quality of a probabilistic forecast,
-one can use the continuous ranked probability score (CRPS):
-it is the quantile (pinball) loss
-integrated from 0 to 1.
-
-  Regions of reliability in the evaluation\\ of multivariate probabilistic forecasts}\\
-  É. Marcotte et al. (2023)
-  https://arxiv.org/abs/2304.09836
-
 ** Non-stationarity
 
 Most time series models assume that the data is stationary or, at least,
@@ -375,6 +364,7 @@ and then work with standardized data.
   Adaptive normalization\\ for non-stationary time series forecasting:\\ a temporal slice perspective}\\
   Z. Liu et al. (2023)
   https://openreview.net/forum?id=5BqDSw8r5j
+
 
 * Interpretability
 ** Introduction / Mechanistic interpretability
@@ -488,21 +478,25 @@ and end up with a more reliable model.
   \emph{Approximation trees:\\ statistical stability in model distillation}\\
   Y. Zhou et al.
 
-** No, Adaptive lasso
-*** ML, interpretability: Adaptive lasso
+** Rule extraction TODO MERGE
 
-\nextbook
-\begin{book}
-  \emph{The adaptive lasso and its oracle properties}\\
-  H. Zou (2006)
-\end{book}
-The adaptive lasso (AdaLasso)
-first fits a lasso (or an OLS)
-\[ \hat\beta_{\text{lasso}} = \argmin_\beta \n{ y - X \beta }_2^2 + \lambda \n \beta _1 \]
-and then a weighted lasso
-\[ \hat\beta_{\text{AdaLasso}} = \argmin_\beta \n{ y - X \beta }_2^2 + \lambda \sum_i \va{ \hat\beta_{\text{lasso}, i} }^{-1} \cdot \va{ \beta_i } \]
-\ie, it penalizes even further small coefficients.
-It has better asymptotic properties.
+Trees are somewhat interpretable but rarely fit the data.
+Conversely, random forests provide a better fit,
+but are trickier to interpret.
+
+It is actually possible to simplify random forests and make them more interpretable than trees.
+After training your random forest, look at all the paths in its trees (from the root to a node or leaf):
+each can be seen as a rule, and some of those rules are repeated across many trees.
+Keep the mopst frequent rules (this is, again, frequent itemset mining) and combine them with the lasso.
+
+TODO: ALREADY MENTIONED ABOVE
+
+TODO: Papers
+
+TODO: There are variants of this idea
+
+If you want to stick to trees, you can distill your random forest into a tree,
+but use data augmentation, (x,f(x)+noise), to better explore the neighbourhood of the decision boundary.
 
 ** Relevance
 
@@ -518,6 +512,23 @@ For linear models, this was popularized as "relevance" forecasting.
   Relevance-based prediction: a transparent and adaptive alternative to machine learning}\\
   M. Czasonis et al. (2023)
   https://globalmarkets.statestreet.com/research/service/public/v1/article/insights/pdf/v2/d0cdca66-3c68-4fd5-9608-f8953dc0ac78/jfds_relevance_based_prediction.pdf
+
+** Shapley values
+
+The Shapley value assesses the importance of on an input feature for a model
+by fitting that model on all possible subsets of features,
+computing some goodness-of-fit (gof) for each of them,
+computing the difference of gof of models with and without the input feature of interest,
+and averaging those differences.
+It is a weighted average, with the same weight for each subset size.
+
+If you have some prior on the number of relevant features,
+you may want to use another weighting, e.g.,
+to focus more on models with a small number of features (and remove the noise from irrelevant features)
+or a large number of features (which gives a result close to the leave-out-one (LOO) approach).
+
+  \emph{Beta Shapley: a unified and noise-reduced data valuation framework for machine learning}\\
+  Y. Kwon and J. Zou
 
 ** LIME, LRP, Taylor, etc.
 
@@ -539,7 +550,453 @@ and Taylor expansions.
   G. Montavon et al. (2015)
   https://arxiv.org/abs/1512.02479
 
-* Causality
+** LLM Interpretability
+
+When word embeddings appeared, we noticed we could do arithmetic with them,
+for instance, the famous "king - man + woman = queen".
+This remains true for large language models, for activations and/or weights,
+and the directions can be used to steer
+the answers of the model in a given direction: for instance,
+we can identify directions corresponding to timestamps
+(we can tweak the LLM to behave as if it only had access to information available at a given point in time)
+or truthfulness (we can tweak the LLM to limit hallucinations).
+
+  Time is encoded in the weights\\ of finetuned language models}\\
+  K. Nylund et al. (2023)
+  https://arxiv.org/abs/2312.13401
+
+  Inference-time intervention: eliciting\\ truthful answers from a language model}\\
+  K. Li et al. (2023)
+  https://arxiv.org/abs/2306.03341
+
+
+* LLM
+** LLMs as optimizers
+
+CMA-ES is a simple, population-based optimization algorithm:
+Start with random candidates, sampled from a Gaussian distribution;
+Keep the best ones;
+Fir a Gaussian distribution to them;
+Iterate, with that new Gaussian distribution.
+
+The same idea can be applied to LLMs, for instance, for symbolic regression:
+Ask the LLM to give a few functions (as Python code) to approximate the data
+(it does not even need to see the data, but some summary statistics may help);
+Compute the error on the data;
+Give the error to the LLM and ask it to improve the functions it gave;
+Iterate until the solutions are satisfactory.
+
+  Data-driven discovery of dynamical systems\\ in pharmacology using large language models}\\
+  S. Holt et al. (2023)
+  https://arxiv.org/abs/2312.04350
+
+  Language model cross-over:\\ variation through few-shot prompting}\\
+  E. Leyerson et al. (2023)
+  https://arxiv.org/abs/2302.12170
+
+The same idea can be used to optimize the prompts for an LLM, if you have an objective way of assessing the quality of the answer.
+
+  Optimizing instructions and demonstrations form multi-stage language model programs}\\
+  K. Opsahl-Ong et al. (2024)
+  https://arxiv.org/abs/2406.11695
+
+  DSPy: compiling declarative language model calls into self-improving pipelines}\\
+  O. Khattab et al. (2023)
+  https://arxiv.org/abs/2310.03714
+
+To solve combinatorial problems or find numeric bounds for some mathematical problems,
+you can ask, not for a solution, but for a Python program to search for a solution.
+
+  AlphaEvolve: a coding agent\\ for scientific and algorithmic discovery}\\
+  A. Novikov et al. (2025)
+  https://arxiv.org/abs/2506.13131
+
+  OpenEvolve:\\ an opensource evolutionary coding agent
+  A. Sharma (2025)
+  https://huggingface.co/blog/codelion/openevolve
+
+  ShinkaEvolve: towards open-ended\\ and sample-efficient program evolution}\\
+  R.T. Lange et al. (2025)
+  https://arxiv.org/abs/2509.19349
+
+  Mathematical exploration\\ and discovery at scale}\\
+  B. Georgiev et al. (2025)
+  https://arxiv.org/abs/2511.02864
+
+** Formal proofs
+
+To ensure that the LLM reasons correctly,
+you can ask it to provide answers in a formal language,
+which can then be checked (Isabelle, Python, Datalog, etc.)
+
+  Baldur: whole-proof generation and repair with large language models}\\
+  E. First et al. (2023)
+  https://arxiv.org/abs/2303.04910
+
+  Faithful chain-of-thought reasoning
+  Q. Lyu et al. (2023)
+  https://arxiv.org/abs/2301.13379
+
+** RAG
+
+To augment your LLM with proprietary and/or up-to-date information,
+you can use RAG (retrieval-augmented generation): put all your documents
+in a database (often, a vector store), retrieve the documents relevant for a query,
+and give the to the LLM, as part of its context.
+The documents may need pre-processing (e.g., with docling,
+to extract text and tables from PDF files, even when their layout is not straightforward),
+and chunking (for large documents, try hierarchical chunking,
+replacing nodes with an LLM-generated summary of their children).
+
+  Docling technical report}\\
+  C. Auer et al.
+  https://arxiv.org/abs/2408.09869
+  https://github.com/docling-project/docling
+
+  Raptor: recursive abstractive processing\\ for tree-organized retrieval }\\
+  P. Sarthi et al. (2024)
+  https://arxiv.org/abs/2401.18059
+
+  Retrieval augmented generation\\ for large language models: a survey}\\
+  Y. Gao et al. (2023)
+  https://arxiv.org/abs/2312.10997
+
+** CoT
+
+Chain-of-Thought (spliting a problem into a linear sequence of steps)
+has been generalized to tree-of-thought (examining several alternatives),
+forest-of-thought (idem, several times in parallel, with voting at the end)
+and graph-of-thought (tree branches can be merged).
+
+  Tree of thoughts: deliberate problem solving with large language models}\\
+  S. Yao et al. (2023)
+  https://arxiv.org/abs/2305.10601
+
+  Forest-of-Thought: scaling test-time compute for enhancing LLM reasoning}\\
+  Z. Bi et al. (2024)
+  https://arxiv.org/abs/2412.09078
+
+  TODO: Graph-of-thought?
+
+** Tools
+
+The array of tools available to LLMs can include generic tools, such as
+a Python interpreter,
+other deep learning models (e.g., all those on HuggingFace),
+a database (for the LLM to store and retrieve the information it may need),
+
+  Executable code actions\\ elicit better LLM agents}\\
+  X. Wang et al. (2024)
+  https://arxiv.org/abs/2402.01030
+
+  HuggingGPT: solving AI tasks with ChatGPT and its friends in Hugging Face}\\
+  Y. Shen et al. (2023)
+  https://arxiv.org/abs/2303.17580
+
+  ChatDB: augmenting LLMs\\ with databases as their symbolic memory}\\
+  C. Hu et al. (2023)
+  https://arxiv.org/abs/2306.03901
+
+** Transformers: position embedding
+
+The attention mechanism is permutation-invariant: it should be unsuitable
+for sequence data such as text -- it ignores the order of the words.
+In spite of that, it is at the heart of the transformer architecture used in LLMs,
+thanks to the addition of a sine (or learned) positional embedding (PE) to the first layer.
+There are many variants:
+for instance, RoPE multiplies keys and queries with a sine embedding (which rotates them),
+whilte ALiBi adds position-based penalties to the attention scores.
+
+  Train short, test long: attention with linear biases enables input length extrapolation}\\
+  O. Press et al. (2021)
+  https://arxiv.org/abs/2108.12409
+
+** Transformers
+
+You can actually train an LLM with bytes instead of tokens,
+if you use hashed n-gram embeddings (for n≤8).
+
+  \emph{Byte latent transformer:\\ patches scale better than tokens}\\
+  A. Pagnoni et al.
+
+** LLMs for non-text data
+
+LLM-like models can also be used for non-text data:
+images (after cutting them into patches), sounds,
+or even items (in a recommendation system).
+
+  \emph{Recommendation with generative models}\\
+  Y. Deldjoo et al. (2024)
+
+** Attacks
+
+Here are some of the ways people have tried to attack an LLM:
+obfuscate the query by reversing the words or characters;
+fine-tune with prompts violating the terms-of-service of the target LLM and queries from an uncensored (but weak) model;
+target the non-text parts of a multi-modal model;
+
+  \emph{FlipAttack: jailbreal LLMs via flipping}\\
+
+  \emph{Removing RLHF protections in GPT-4\\ via fine-tuning}\\
+  Q. Zhan et al.
+
+  \emph{Abusing images and sounds for indirect instruction injection in multi-modal LLMs}\\
+  E. Bagdasaryan et al.
+
+The most successful current attacks are decomposition attacks:
+ask a weaker but uncensored model to decompose the problematic query into several innocuous queries,
+ask the stronger but censored model to answer those queries,
+ask the weaker but uncensored model to combine them into the final answer.
+
+** Older models
+
+The BERT model is not dead. It is an encoder-only model (e.g., for classification -- LLMs are generative models).
+Improvements include disentangled attention (contents and position embeddings remain separate),
+or different pretext tasts (e.g., replaced token detection instead of masked language modeling),
+
+  \emph{DeBERTa: decoding-enhanced BERT\\ with disentangled attention}\\
+  P. He et al.
+
+  \emph{Electra: pre-training text encoders\\ as discriminators rather than generators}\\
+  K. Clark et al.
+
+  \emph{DeBERTav3: improving DeBERTa\\ using Electra-style pre-training\\ with gradient-disentangled embedding sharing}\\
+  P. He et al.
+
+On some tasks, e.g., open-ended NER (named entity recognition), they can compete with LLMs.
+
+  \emph{GLiNER: generalist model for named entity recognition using bidirectional transformer}\\
+  U. Zaratiana et al. (2024)
+
+  \emph{UniversalNER: targeted distilation\\ from large language models\\ for open named entity recognition}\\
+  W. Zhou et al.
+
+** Old-school NLP
+
+Classical (pre-LLM) NLP is not dead: n-grams can be improved
+by considering words as bags of character n-grams,
+and made scalable by using
+Vowpal Wabbit's hashing trick to store the coefficients of the linear model you train with them
+
+  Bag of tricks for efficient text classification}\\
+  A. Joulin et al. (2016)
+  https://arxiv.org/abs/1607.01759
+
+  FastText.zip:\\ compressing text classification models}\\
+  A. Joulin et al. (2016)
+  https://arxiv.org/abs/1612.03651
+
+  Enriching word vectors\\ with subword information
+  P. Bojanowski et al. (2016)
+  https://arxiv.org/abs/1607.04606
+
+
+* Training
+** LLM Training
+
+LLMs are fine-tuned with a mix of SFT (supervised fine-tuning,
+to have them behave as assistants, i.e., to answer the user's questions)
+and RL (reinforcement learning, to align the models with the desired ethical values:
+do no harm, etc.).
+Traditionally, we first use SFT and then RL,
+but we could do it several times (SFT, RL, SFT, RL, SFT, RL, as with DeepSeek),
+or blend the two, choosing the weights
+to avoid overfitting (too much SFT)
+and mode collapse (too much RL).
+
+  Stepwise adaptive integration of supervised\\ fine-tuning and reinforcement learning\\ for task-specific LLMs}\\
+  J. Chen et al. (2025)
+  https://arxiv.org/abs/2505.13026
+
+** LLM Training TO MERGE
+
+Large language models are trained in three steps:
+they first learn to continue a text (next word prediction),
+then they learn to behave as an assistant, i.e., to answer user's queries, with supervised fine-tuning (SFT),
+and they are finally aligned to human preferences (do no harm) with reinforcement learning (RL).
+
+Instead of SFT+RL, DeepSeek uses SFT+RL+SFT+RL;
+for the reinforcement learning part, it uses GRPO, i.e.,
+it replaces the critic, which had to be trained, with a simple average.
+
+  \emph{DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning}
+
+** PEFT
+
+LoRA (low-rank adaptation) is one of the main
+PEFT (parameter-efficient fine-tuning) methods:
+instead of fine-tuning all the weights, you only train a low-rank offset to the current (frozen) weights,
+W+A'B. There are many variants:
+QLoRA uses quantized weights;
+ReLoRA periodically merges the LoRA weights into the base model and resets them;
+DoRA extends LoRA to continual learning by encouraging updates orthogonal to those of the previous task;
+GaLore reduces the memory requirement of gradient based optimization by replacing the gradients with low-rank approximations.
+One can also use W⊙A'B instead (for a rank-1 adjustment, this amounts to multiplying
+the inputs of the layer with a scalar,
+different for each coordinate, and multiplying the outputs with a scalar, different for each coordinate)
+
+Other PEFT methods include
+adapters (small feed-forward layers inserted between layers),
+soft prompts,
+BitFit (only re-train the biases),
+etc.
+
+  FRUGAL: Memory-efficient optimization by reducing state overhead for scalable training}\\
+  P. Zmushko et al. (2025)
+  https://arxiv.org/abs/2411.07837
+
+** PEFT, Soft Prompts TO MERGE
+
+The most common way of fine-tuning a model is to add a low-rank matrix to some of the weight matrices
+(LoRA, low-rank adaptation).
+
+Another way, for LLMs, is to learn a prompt prefix: a string that would be prepended to the user query.
+Instead of an actual prompt (a sequence of tokens), it could be a soft prompt: a sequence of embeddings --
+since this is no longer discrete, it is easier to train, and it can be injected at different levels
+in the network, not just in the input.
+
+  LLaMA-adapter: efficient fine-tuning of language models with zero-init attention}\\
+  R. Zhang et al. (2023)
+  https://arxiv.org/abs/2303.16199
+
+  Scaling down to scale up:\\ a guide to parameter-efficient fine-tuning}\\
+  V. Lialin et al. (2023)
+  https://arxiv.org/abs/2303.15647
+
+** Data mixing
+
+Large language and vision models require more and more data,
+but data quality matters.
+The training curriculum also matters: easier samples are more useful at the begining (pre-training),
+harder samples at the end (fine-tuning). They can be identified, for instance, by clustering the data
+(using some embedding) and identifying dense clusters (easier) and more diffuse ones (harder).
+
+  Chameleon: a flexible data-mixing framework for language model pretraining and finetuning}\\
+  W. Xie et al. (2025)
+  https://arxiv.org/abs/2505.24844
+
+  Domain2Vec: vectorizing datasets to find\\ the optimal data mixture without training}\\
+  M. Zhang et al. (2025)
+  https://arxiv.org/abs/2506.10952
+
+When training with data from different sources,
+train a (cheap) proxy model for each source,
+then learn the best convex combination of their outputs,
+and use this weighting to remix the data.
+
+  MixMin: finding data mixtures\\ via convex minimization}\\
+  A. Thudi et al. (2025)
+  https://arxiv.org/abs/2502.10510
+
+Beware of generated data: training on it will eventually lead to model collapse.
+There are two effects. First, generated data will omit some details present, but rarely, in real data --
+distribution tails will progressively disappear.
+Second, generated data will be slightly off, and progressively drift away from real data.
+
+  The curse of recursion: training on\\ generated data makes models forget}\\
+  O. Shumailov et al. (2023)
+  https://arxiv.org/abs/2305.17493
+
+** Influence functions
+
+Influence functions (the effect, on the loss,
+of upweighting one of the training samples)
+can be used to identify detrimental samples.
+They can be computed efficiently (with LiSSA),
+and they can be generalized to groups of observations.
+
+  \emph{Understanding black-box predictions\\ via influence functions}\\
+  P.W. Koh and P. Liang (2017)
+
+  \emph{DataInf: efficiently estimating data influence in LoRA-tuned LLMs and diffusion models}\\
+  Y. Kwon et al.
+
+  \emph{On second-order group influence functions\\ for black-box predictions}\\
+  S. Basu et al. (2020)
+
+Outlier detection algorithms can provide the same information,
+more efficiently.
+
+  \emph{Outlier gradient analysis:\\ efficiently identifying detrimental\\ training samples for deep learning}\\
+  A. Chhabra e al. (2025)
+
+** Model Merging
+
+LoRAs are often just added, with weights summing to 1.
+Instead, select which columns to keep from which LoRA by looking at the sparsity of those columns.
+
+  ZipLoRA: any subject in any style\\ by effectively merging LoRAs}\\
+  V. Shah et al. (2023)
+  https://arxiv.org/abs/2311.13600
+
+Meging models (same architecture but different training data and/or tasks) is trickier.
+You could assume that the features are the same, up to a permutation, adn try to learn that permutation.
+Instead, average highly correlated features and concatenate the others.
+
+  ZipIt! Merging models\\ from different tasks without training}\\
+  G. Stoica et al. (2023)
+  https://arxiv.org/abs/2305.03053
+
+** Spectral properties
+
+The spectral properties of a neural network (e.g., the distribution of the singular values
+of the weight matrices, the eigenvalues of the Hessian -- more generally
+any matrix you can get from the network) change as the network is trained:
+this can be used to check how well-trained a network is.
+
+  Traditional and heavy-tailed regularization in neural network models
+  C.H. Martin and M.W. Mahoney (2019)
+  https://arxiv.org/abs/1901.08276
+  https://github.com/CalculatedContent/WeightWatcher
+
+  Investigating the overlooked Hessian structure: from CNNs to LLMs}\\
+  Q.Y. Tang et al. (2025)
+  https://openreview.net/forum?id=o62ZzfCEwZ&noteId=j6GImKzqjc
+
+** Gradient descent variants
+
+The number of optimization algorithms, variants of stochastic gradient descent,
+is exploding, and they become difficult to track. AdamW seems to be the most popular for the moment,
+
+  Decoupled Weight Decay Regularization
+  I. Loshchilov and F. Hutter (2017)
+  https://arxiv.org/abs/1711.05101
+
+but here are a few others.
+For instance, the convergence speed of gradient descent itself
+can be improved by adding periodic long steps.
+
+  Provably faster gradient descent via long steps}\\
+  B. Grimmer (2023)
+  https://arxiv.org/abs/2307.06324
+
+Since Adam is stateful, it is more memory-intensive than plain stochastic gradient descent.
+There are many low-memory Adam variants ("Adammini"),
+using blockwise second moments (MicroAdam, BAdam),
+chunking (Adamem, only one second moment per block);
+factorization of the second moments (Fira (rank-1), LDAdam, or AdaFactor for matrix-shaped weights).
+
+At the other extreme, SignSGD only uses the sign of the gradient.
+
+Tools from convex optimization can also be combined with gradient descent.
+
+  Training deep learning models\\ with norm-constrained LMOs}\\
+  T. Pethick et al. (2025)
+  https://arxiv.org/abs/2502.07529
+
+Second-order optimization (i.e., Newton's method and its approximations:
+LBFGS, K-FAC, Shampoo, etc.) take the curvature of the loss function into account
+to speed up convergence.
+Muon is a first-order method (for models whose weights are matrices and not just vectors),
+which tweaks the gradient matrix to make it orthogonal: this implicitly accounts for
+some of the geometry of the loss function.
+
+  Practical efficiency of Muon for pretraining}\\
+  Essential AI (2025)
+  https://arxiv.org/abs/2505.02222
+
+
+* Causal Discovery
 ** Causal Discovery benchmarks
 
 It is difficult to compare causal discovery algorithms because,
@@ -656,18 +1113,6 @@ they can be viewed as natural experiments
 
   \emph{Causal discovery in heavy-tailed models}\\
   N. Gnecco et al. (2020)
-
-** TODO MOVE THIS ELSEWHERE? Causal discovery: time series, KAN (stacked GAMs)
-*** Causal discovery for time series
-
-\nextbook
-\begin{book}
-  \emph{Granger causality detection with Kolmogorov-Arnold networks}\\
-  H. Lin et al.
-\end{book}
-Granger causality testing with KAN (stacked GAMs),
-with a sparsity penalty for the first layer,
-fitted with proximal gradient descent to ensure sparsity.
 
 ** Causal discovery: other algorithms
 
@@ -833,7 +1278,6 @@ for instance, with rank conditions.
   \emph{Causal structure learning in Hawkes processes with complex latent confounder networks}\\
   S. Jin and B. Huang
 
-
 ** Missing confounders
 
 Another assumption of many causal discovery algorithms
@@ -889,396 +1333,6 @@ If you are using R, you can also check
   TODO: Is that link legit?
   https://www.researchgate.net/profile/Teklehaimanot-Kiros/post/Any_one_who_knows_latest_R_package_for_causal_inference/attachment/62753eb01d03190b320b34cf/AS%3A1152760498143232%401651850928181/download/Fundamentals+of+Causal+Inference+with+R+%28Babette+A.+Brumback%29+%28z-lib.org%29.pdf
 
-* LLM
-** LLMs as optimizers
-
-CMA-ES is a simple, population-based optimization algorithm:
-Start with random candidates, sampled from a Gaussian distribution;
-Keep the best ones;
-Fir a Gaussian distribution to them;
-Iterate, with that new Gaussian distribution.
-
-The same idea can be applied to LLMs, for instance, for symbolic regression:
-Ask the LLM to give a few functions (as Python code) to approximate the data
-(it does not even need to see the data, but some summary statistics may help);
-Compute the error on the data;
-Give the error to the LLM and ask it to improve the functions it gave;
-Iterate until the solutions are satisfactory.
-
-  Data-driven discovery of dynamical systems\\ in pharmacology using large language models}\\
-  S. Holt et al. (2023)
-  https://arxiv.org/abs/2312.04350
-
-  Language model cross-over:\\ variation through few-shot prompting}\\
-  E. Leyerson et al. (2023)
-  https://arxiv.org/abs/2302.12170
-
-The same idea can be used to optimize the prompts for an LLM, if you have an objective way of assessing the quality of the answer.
-
-  Optimizing instructions and demonstrations form multi-stage language model programs}\\
-  K. Opsahl-Ong et al. (2024)
-  https://arxiv.org/abs/2406.11695
-
-  DSPy: compiling declarative language model calls into self-improving pipelines}\\
-  O. Khattab et al. (2023)
-  https://arxiv.org/abs/2310.03714
-
-To solve combinatorial problems or find numeric bounds for some mathematical problems,
-you can ask, not for a solution, but for a Python program to search for a solution.
-
-  AlphaEvolve: a coding agent\\ for scientific and algorithmic discovery}\\
-  A. Novikov et al. (2025)
-  https://arxiv.org/abs/2506.13131
-
-  OpenEvolve:\\ an opensource evolutionary coding agent
-  A. Sharma (2025)
-  https://huggingface.co/blog/codelion/openevolve
-
-  ShinkaEvolve: towards open-ended\\ and sample-efficient program evolution}\\
-  R.T. Lange et al. (2025)
-  https://arxiv.org/abs/2509.19349
-
-  Mathematical exploration\\ and discovery at scale}\\
-  B. Georgiev et al. (2025)
-  https://arxiv.org/abs/2511.02864
-
-** Formal proofs
-
-To ensure that the LLM reasons correctly,
-you can ask it to provide answers in a formal language,
-which can then be checked (Isabelle, Python, Datalog, etc.)
-
-  Baldur: whole-proof generation and repair with large language models}\\
-  E. First et al. (2023)
-  https://arxiv.org/abs/2303.04910
-
-  Faithful chain-of-thought reasoning
-  Q. Lyu et al. (2023)
-  https://arxiv.org/abs/2301.13379
-
-** RAG
-
-To augment your LLM with proprietary and/or up-to-date information,
-you can use RAG (retrieval-augmented generation): put all your documents
-in a database (often, a vector store), retrieve the documents relevant for a query,
-and give the to the LLM, as part of its context.
-The documents may need pre-processing (e.g., with docling,
-to extract text and tables from PDF files, even when their layout is not straightforward),
-and chunking (for large documents, try hierarchical chunking,
-replacing nodes with an LLM-generated summary of their children).
-
-  Docling technical report}\\
-  C. Auer et al.
-  https://arxiv.org/abs/2408.09869
-  https://github.com/docling-project/docling
-
-  Raptor: recursive abstractive processing\\ for tree-organized retrieval }\\
-  P. Sarthi et al. (2024)
-  https://arxiv.org/abs/2401.18059
-
-  Retrieval augmented generation\\ for large language models: a survey}\\
-  Y. Gao et al. (2023)
-  https://arxiv.org/abs/2312.10997
-
-** CoT
-
-Chain-of-Thought (spliting a problem into a linear sequence of steps)
-has been generalized to tree-of-thought (examining several alternatives),
-forest-of-thought (idem, several times in parallel, with voting at the end)
-and graph-of-thought (tree branches can be merged).
-
-  Tree of thoughts: deliberate problem solving with large language models}\\
-  S. Yao et al. (2023)
-  https://arxiv.org/abs/2305.10601
-
-  Forest-of-Thought: scaling test-time compute for enhancing LLM reasoning}\\
-  Z. Bi et al. (2024)
-  https://arxiv.org/abs/2412.09078
-
-  TODO: Graph-of-thought?
-
-** PEFT, Soft Prompts
-
-The most common way of fine-tuning a model is to add a low-rank matrix to some of the weight matrices
-(LoRA, low-rank adaptation).
-
-Another way, for LLMs, is to learn a prompt prefix: a string that would be prepended to the user query.
-Instead of an actual prompt (a sequence of tokens), it could be a soft prompt: a sequence of embeddings --
-since this is no longer discrete, it is easier to train, and it can be injected at different levels
-in the network, not just in the input.
-
-  LLaMA-adapter: efficient fine-tuning of language models with zero-init attention}\\
-  R. Zhang et al. (2023)
-  https://arxiv.org/abs/2303.16199
-
-  Scaling down to scale up:\\ a guide to parameter-efficient fine-tuning}\\
-  V. Lialin et al. (2023)
-  https://arxiv.org/abs/2303.15647
-
-** Interpretability MERGE WITH THE INTERPRETABILITY CHAPTER ABOVE?
-
-When word embeddings appeared, we noticed we could do arithmetic with them,
-for instance, the famous "king - man + woman = queen".
-This remains true for large language models, for activations and/or weights,
-and the directions can be used to steer
-the answers of the model in a given direction: for instance,
-we can identify directions corresponding to timestamps
-(we can tweak the LLM to behave as if it only had access to information available at a given point in time)
-or truthfulness (we can tweak the LLM to limit hallucinations).
-
-  Time is encoded in the weights\\ of finetuned language models}\\
-  K. Nylund et al. (2023)
-  https://arxiv.org/abs/2312.13401
-
-  Inference-time intervention: eliciting\\ truthful answers from a language model}\\
-  K. Li et al. (2023)
-  https://arxiv.org/abs/2306.03341
-
-** Tools
-
-The array of tools available to LLMs can include generic tools, such as
-a Python interpreter,
-other deep learning models (e.g., all those on HuggingFace),
-a database (for the LLM to store and retrieve the information it may need),
-
-  Executable code actions\\ elicit better LLM agents}\\
-  X. Wang et al. (2024)
-  https://arxiv.org/abs/2402.01030
-
-  HuggingGPT: solving AI tasks with ChatGPT and its friends in Hugging Face}\\
-  Y. Shen et al. (2023)
-  https://arxiv.org/abs/2303.17580
-
-  ChatDB: augmenting LLMs\\ with databases as their symbolic memory}\\
-  C. Hu et al. (2023)
-  https://arxiv.org/abs/2306.03901
-
-** Data mixing
-
-Large language and vision models require more and more data,
-but data quality matters.
-The training curriculum also matters: easier samples are more useful at the begining (pre-training),
-harder samples at the end (fine-tuning). They can be identified, for instance, by clustering the data
-(using some embedding) and identifying dense clusters (easier) and more diffuse ones (harder).
-
-  Chameleon: a flexible data-mixing framework for language model pretraining and finetuning}\\
-  W. Xie et al. (2025)
-  https://arxiv.org/abs/2505.24844
-
-  Domain2Vec: vectorizing datasets to find\\ the optimal data mixture without training}\\
-  M. Zhang et al. (2025)
-  https://arxiv.org/abs/2506.10952
-
-When training with data from different sources,
-train a (cheap) proxy model for each source,
-then learn the best convex combination of their outputs,
-and use this weighting to remix the data.
-
-  MixMin: finding data mixtures\\ via convex minimization}\\
-  A. Thudi et al. (2025)
-  https://arxiv.org/abs/2502.10510
-
-Beware of generated data: training on it will eventually lead to model collapse.
-There are two effects. First, generated data will omit some details present, but rarely, in real data --
-distribution tails will progressively disappear.
-Second, generated data will be slightly off, and progressively drift away from real data.
-
-  The curse of recursion: training on\\ generated data makes models forget}\\
-  O. Shumailov et al. (2023)
-  https://arxiv.org/abs/2305.17493
-
-** Training
-
-LLMs are fine-tuned with a mix of SFT (supervised fine-tuning,
-to have them behave as assistants, i.e., to answer the user's questions)
-and RL (reinforcement learning, to align the models with the desired ethical values:
-do no harm, etc.).
-Traditionally, we first use SFT and then RL,
-but we could do it several times (SFT, RL, SFT, RL, SFT, RL, as with DeepSeek),
-or blend the two, choosing the weights
-to avoid overfitting (too much SFT)
-and mode collapse (too much RL).
-
-  Stepwise adaptive integration of supervised\\ fine-tuning and reinforcement learning\\ for task-specific LLMs}\\
-  J. Chen et al. (2025)
-  https://arxiv.org/abs/2505.13026
-
-** Models
-
-Large language models are trained in three steps:
-they first learn to continue a text (next word prediction),
-then they learn to behave as an assistant, i.e., to answer user's queries, with supervised fine-tuning (SFT),
-and they are finally aligned to human preferences (do no harm) with reinforcement learning (RL).
-
-Instead of SFT+RL, DeepSeek uses SFT+RL+SFT+RL;
-for the reinforcement learning part, it uses GRPO, i.e.,
-it replaces the critic, which had to be trained, with a simple average.
-
-  \emph{DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning}
-
-** TODO MOVE? Transformers
-
-TODO: Move this to the "Transformers" section, if there is one?
-You can actually train an LLM with bytes instead of tokens,
-if you use hashed n-gram embeddings (for n≤8).
-
-  \emph{Byte latent transformer:\\ patches scale better than tokens}\\
-  A. Pagnoni et al.
-
-** TODO MOVE? Smaller models
-
-TODO: Move this to an "Older models" or "smaller models" section?
-The BERT model is not dead. It is an encoder-only model (e.g., for classification -- LLMs are generative models).
-Improvements include disentangled attention (contents and position embeddings remain separate),
-or different pretext tasts (e.g., replaced token detection instead of masked language modeling),
-
-  \emph{DeBERTa: decoding-enhanced BERT\\ with disentangled attention}\\
-  P. He et al.
-
-  \emph{Electra: pre-training text encoders\\ as discriminators rather than generators}\\
-  K. Clark et al.
-
-  \emph{DeBERTav3: improving DeBERTa\\ using Electra-style pre-training\\ with gradient-disentangled embedding sharing}\\
-  P. He et al.
-
-On some tasks, e.g., open-ended NER (named entity recognition), they can compete with LLMs.
-
-  \emph{GLiNER: generalist model for named entity recognition using bidirectional transformer}\\
-  U. Zaratiana et al. (2024)
-
-  \emph{UniversalNER: targeted distilation\\ from large language models\\ for open named entity recognition}\\
-  W. Zhou et al.
-
-** LLMs for non-text data
-
-LLM-like models can also be used for non-text data:
-images (after cutting them into patches), sounds,
-or even items (in a recommendation system).
-
-  \emph{Recommendation with generative models}\\
-  Y. Deldjoo et al. (2024)
-
-** Attacks
-
-Here are some of the ways people have tried to attack an LLM:
-obfuscate the query by reversing the words or characters;
-fine-tune with prompts violating the terms-of-service of the target LLM and queries from an uncensored (but weak) model;
-target the non-text parts of a multi-modal model;
-
-  \emph{FlipAttack: jailbreal LLMs via flipping}\\
-
-  \emph{Removing RLHF protections in GPT-4\\ via fine-tuning}\\
-  Q. Zhan et al.
-
-  \emph{Abusing images and sounds for indirect instruction injection in multi-modal LLMs}\\
-  E. Bagdasaryan et al.
-
-The most successful current attacks are decomposition attacks:
-ask a weaker but uncensored model to decompose the problematic query into several innocuous queries,
-ask the stronger but censored model to answer those queries,
-ask the weaker but uncensored model to combine them into the final answer.
-
-** Old-school NLP
-
-Classical (pre-LLM) NLP is not dead: n-grams can be improved
-by considering words as bags of character n-grams,
-and made scalable by using
-Vowpal Wabbit's hashing trick to store the coefficients of the linear model you train with them
-
-  Bag of tricks for efficient text classification}\\
-  A. Joulin et al. (2016)
-  https://arxiv.org/abs/1607.01759
-
-  FastText.zip:\\ compressing text classification models}\\
-  A. Joulin et al. (2016)
-  https://arxiv.org/abs/1612.03651
-
-  Enriching word vectors\\ with subword information
-  P. Bojanowski et al. (2016)
-  https://arxiv.org/abs/1607.04606
-
-* Training
-** Spectral properties
-
-The spectral properties of a neural network (e.g., the distribution of the singular values
-of the weight matrices, the eigenvalues of the Hessian -- more generally
-any matrix you can get from the network) change as the network is trained:
-this can be used to check how well-trained a network is.
-
-  Traditional and heavy-tailed regularization in neural network models
-  C.H. Martin and M.W. Mahoney (2019)
-  https://arxiv.org/abs/1901.08276
-  https://github.com/CalculatedContent/WeightWatcher
-
-  Investigating the overlooked Hessian structure: from CNNs to LLMs}\\
-  Q.Y. Tang et al. (2025)
-  https://openreview.net/forum?id=o62ZzfCEwZ&noteId=j6GImKzqjc
-
-** PEFT
-
-LoRA (low-rank adaptation) is one of the main
-PEFT (parameter-efficient fine-tuning) methods:
-instead of fine-tuning all the weights, you only train a low-rank offset to the current (frozen) weights,
-W+A'B. There are many variants:
-QLoRA uses quantized weights;
-ReLoRA periodically merges the LoRA weights into the base model and resets them;
-DoRA extends LoRA to continual learning by encouraging updates orthogonal to those of the previous task;
-GaLore reduces the memory requirement of gradient based optimization by replacing the gradients with low-rank approximations.
-One can also use W⊙A'B instead (for a rank-1 adjustment, this amounts to multiplying
-the inputs of the layer with a scalar,
-different for each coordinate, and multiplying the outputs with a scalar, different for each coordinate)
-
-Other PEFT methods include
-adapters (small feed-forward layers inserted between layers),
-soft prompts,
-BitFit (only re-train the biases),
-etc.
-
-  FRUGAL: Memory-efficient optimization by reducing state overhead for scalable training}\\
-  P. Zmushko et al. (2025)
-  https://arxiv.org/abs/2411.07837
-
-** Gradient descent variants
-
-The number of optimization algorithms, variants of stochastic gradient descent,
-is exploding, and they become difficult to track. AdamW seems to be the most popular for the moment,
-
-  Decoupled Weight Decay Regularization
-  I. Loshchilov and F. Hutter (2017)
-  https://arxiv.org/abs/1711.05101
-
-but here are a few others.
-For instance, the convergence speed of gradient descent itself
-can be improved by adding periodic long steps.
-
-  Provably faster gradient descent via long steps}\\
-  B. Grimmer (2023)
-  https://arxiv.org/abs/2307.06324
-
-Since Adam is stateful, it is more memory-intensive than plain stochastic gradient descent.
-There are many low-memory Adam variants ("Adammini"),
-using blockwise second moments (MicroAdam, BAdam),
-chunking (Adamem, only one second moment per block);
-factorization of the second moments (Fira (rank-1), LDAdam, or AdaFactor for matrix-shaped weights).
-
-At the other extreme, SignSGD only uses the sign of the gradient.
-
-Tools from convex optimization can also be combined with gradient descent.
-
-  Training deep learning models\\ with norm-constrained LMOs}\\
-  T. Pethick et al. (2025)
-  https://arxiv.org/abs/2502.07529
-
-Second-order optimization (i.e., Newton's method and its approximations:
-LBFGS, K-FAC, Shampoo, etc.) take the curvature of the loss function into account
-to speed up convergence.
-Muon is a first-order method (for models whose weights are matrices and not just vectors),
-which tweaks the gradient matrix to make it orthogonal: this implicitly accounts for
-some of the geometry of the loss function.
-
-  Practical efficiency of Muon for pretraining}\\
-  Essential AI (2025)
-  https://arxiv.org/abs/2505.02222
 
 * Finance
 ** Portfolio optimization
@@ -1432,160 +1486,6 @@ You can also obtain such latent representations from text (news, 10K, etc.) or h
   \emph{Asset embeddings}\\
   X. Gabaix et al. (2025)
 
-* Books, Tutorials
-
-The main machine learning conferences often provide one or two days of tutorials,
-some of which turn out to be more interesting than the rest of the conference.
-
-One-step generative models (GAN, VAE) have been supplanted by iterative ones,
-in particular diffusion, flows and auto-regressive models (GPT).
-Diffusion models take a simple stochastic differential equation (SDE),
-which adds noise to data until only the noise remains,
-and inverts the SDE, i.e., learns how to remove noise to have more real-looking data.
-Flows uses a similar idea, but with ordinary differential equations (ODEs):
-moving from noise to data then requires to solve an ODE.
-The flow between the data distribution and the noise distribution is not unique:
-in particular, you can try to have a recified flow, i.e., straight lines --
-going from noise to data can then be done in a single Euler step.
-
-  \emph{Continuous time generative models}\\
-  (Q. Liu, ICML 2025)
-
-Probabilistic models do not output a single prediction,
-but a probability distribution of predictions.
-However, badly trained models can be miscalibrated
-(even when they give good point forecasts).
-Some of the traditional methods to assess calibration
-(reliability diagram, empirical calibration error) are not
-asymptotically consistent: they should be avoided.
-Instead, plot the cummulative differences between (Bernoulli) responses and (sorted) scores:
-the slope (between any two points) is the average calibration error for that region.
-
-  \emph{Calibration and bias\\ in algorithms, data and models}\\
-  (ICML 2025)
-
-* ML
-** Decision trees
-
-Decision (and regression) trees) are traditionally built greedily:
-find the best way (according to some creterion)
-to split the data in two,
-and continue recursively until some termination criterion (e.g., tree depth, leaf size, leaf homogeneity).
-But, as most greedy approaches, this is suboptimal:
-for instance, a decision tree cannot learn XOR in this way.
-
-Instead, it is actually possible to look for an optimal decision tree:
-optimality can be formulated as a mixed integer program.
-
-  \emph{Optimal classification trees}\\
-  D. Bertsimas and J. Dunn (2015)
-
-  \emph{Learning optimal classification trees\\ using a binary linear program formulation}\\
-  S. Verwer and Y. Zhang
-
-Other methods to build (nearly) optimal decision trees include frequent itemset mining
-
-  \emph{Optimal constraint-based decision tree induction from itemset lattices}\\
-  S. Nijssen and E. Fromont
-
-  \emph{Learning optimal decision trees\\ using caching branch-and-bound search}\\
-  G. Aglin et al.
-
-and genetic algorithms.
-
-  \emph{evtree: evolutionary learning of globally optimal classification and regression trees in R}\\
-  T. Grubinger et al. (2014)
-
-  Decision tree induction through LLMs\\ via semantically-aware evolution}\\
-  T. Liu et al. (2025)
-  https://arxiv.org/abs/2503.14217
-
-** Rule extraction TODO MERGE WITH SIMILAR SECTION ABOVE
-
-Trees are somewhat interpretable but rarely fit the data.
-Conversely, random forests provide a better fit,
-but are trickier to interpret.
-
-It is actually possible to simplify random forests and make them more interpretable than trees.
-After training your random forest, look at all the paths in its trees (from the root to a node or leaf):
-each can be seen as a rule, and some of those rules are repeated across many trees.
-Keep the mopst frequent rules (this is, again, frequent itemset mining) and combine them with the lasso.
-
-TODO: ALREADY MENTIONED ABOVE
-
-TODO: Papers
-
-TODO: There are variants of this idea
-
-If you want to stick to trees, you can distill your random forest into a tree,
-but use data augmentation, (x,f(x)+noise), to better explore the neighbourhood of the decision boundary.
-
-** Risk-seeking RL, Symbolic regression
-
-Symbolic regression is often performed with genetic algorithms
-or, more recently, with LLMs. Alternatively, we could use reinforcement learning (RL)
-but, to allow for more exploration, it should be risk-seeking reinforcement learning.
-
-  \emph{Deep symbolic regression:\\ recovering mathematical expressions from data\\ via risk-seeking policy gradients}\\
-  B.K. Petersen et al.
-
-  \emph{Deep symbolic regression for physics\\ guided by unit constraints:
-  towards\\ the automated discovery of physical laws}\\
-  W. Tenach et al. (2023)
-
-* TODO MOVE TO THE TRAINING SECTION Model Merging
-
-LoRAs are often just added, with weights summing to 1.
-Instead, select which columns to keep from which LoRA by looking at the sparsity of those columns.
-
-  ZipLoRA: any subject in any style\\ by effectively merging LoRAs}\\
-  V. Shah et al. (2023)
-  https://arxiv.org/abs/2311.13600
-
-Meging models (same architecture but different training data and/or tasks) is trickier.
-You could assume that the features are the same, up to a permutation, adn try to learn that permutation.
-Instead, average highly correlated features and concatenate the others.
-
-  ZipIt! Merging models\\ from different tasks without training}\\
-  G. Stoica et al. (2023)
-  https://arxiv.org/abs/2305.03053
-
-* Statistics
-** Score
-
-The score function (the gradient of the logarithm of a probability density),
-which appears in diffusion models,
-looks a bit mysterious.
-One big advantage over the probability density itself,
-is that it does not require a normalized density
-(the normalization constant disappears when you differentiate the logarithm):
-you can use it to fit unnormalized densities.
-
-  \emph{Estimation of non-normalized\\ statistical models by score matching}\\
-  A. Hyvärinen
-
-** TODO KAN (in the "models" section, above?) (just after the k-NN layers?)
-
-For a reason I did not really understand,
-the Kolmogorov-Arnold networks (KAN) were all over the news.
-These are just stacked GAM (generalized additive models) layers.
-
-  \emph{KAN: Kolmogorov-Arnold networks}\\
-  Z. Liu et al.
-
-** Sparse PCA and CCA
-
-It is relatively easy to add constraints or penalties on
-PCA (principal component analysis) or CCA (canonical correlation analysis):
-they can be computed using a sequence of regressions,
-for which we can require non-negative and/or sparse coefficients.
-(As presented in the paper, the algorithm does not work well:
-check the authors' code instead.)
-
-  \emph{Nonnegative CCA\\ for audiovisual source separation}\\
-  C. Sigg et al.
-
-  TODO: LINK TO THE CODE
 
 * Diffusion
 
@@ -1639,31 +1539,6 @@ This may sould a bit like optimal transport:
 diffusion defines a non-optimal transport between the noise distribution and the data distribution --
 we do not need it to be optimal.
 
-* Transformers: position embedding
-
-The attention mechanism is permutation-invariant: it should be unsuitable
-for sequence data such as text -- it ignores the order of the words.
-In spite of that, it is at the heart of the transformer architecture used in LLMs,
-thanks to the addition of a sine (or learned) positional embedding (PE) to the first layer.
-There are many variants:
-for instance, RoPE multiplies keys and queries with a sine embedding (which rotates them),
-whilte ALiBi adds position-based penalties to the attention scores.
-
-  Train short, test long: attention with linear biases enables input length extrapolation}\\
-  O. Press et al. (2021)
-  https://arxiv.org/abs/2108.12409
-
-* Graphs, GNN
-
-When your graph is too large, you may want to shrink it,
-by reducing the number of nodes (coarsening -- merging nodes)
-or the number of edges (sparsification).
-For instance, taking the union of random spanning trees
-is a simple sparsification method.
-
-  Spectral sparsification of graphs:\\ theory and algorithms}\\
-  J. Baston et al. (2009)
-  http://cs-www.cs.yale.edu/homes/spielman/PAPERS/CACMsparse.pdf
 
 * Optimization
 ** Bayesian optimization and reinforcement learning
@@ -1690,48 +1565,166 @@ but uses a Taylor expansion of the inverse, without computing the whole Hessian
   \emph{Second-order stochastic optimization\\ for machine learning in linear time}\\
   N. Agarwal et al. (2017)
 
-** TODO MOVE TO THE INTERPRETABILITY SECTION Shapley values
 
-The Shapley value assesses the importance of on an input feature for a model
-by fitting that model on all possible subsets of features,
-computing some goodness-of-fit (gof) for each of them,
-computing the difference of gof of models with and without the input feature of interest,
-and averaging those differences.
-It is a weighted average, with the same weight for each subset size.
+* Other topics
+** Decision trees
 
-If you have some prior on the number of relevant features,
-you may want to use another weighting, e.g.,
-to focus more on models with a small number of features (and remove the noise from irrelevant features)
-or a large number of features (which gives a result close to the leave-out-one (LOO) approach).
+Decision (and regression) trees) are traditionally built greedily:
+find the best way (according to some creterion)
+to split the data in two,
+and continue recursively until some termination criterion (e.g., tree depth, leaf size, leaf homogeneity).
+But, as most greedy approaches, this is suboptimal:
+for instance, a decision tree cannot learn XOR in this way.
 
-  \emph{Beta Shapley: a unified and noise-reduced data valuation framework for machine learning}\\
-  Y. Kwon and J. Zou
+Instead, it is actually possible to look for an optimal decision tree:
+optimality can be formulated as a mixed integer program.
 
-** Influence functions
+  \emph{Optimal classification trees}\\
+  D. Bertsimas and J. Dunn (2015)
 
-Influence functions (the effect, on the loss,
-of upweighting one of the training samples)
-can be used to identify detrimental samples.
-They can be computed efficiently (with LiSSA),
-and they can be generalized to groups of observations.
+  \emph{Learning optimal classification trees\\ using a binary linear program formulation}\\
+  S. Verwer and Y. Zhang
 
-  \emph{Understanding black-box predictions\\ via influence functions}\\
-  P.W. Koh and P. Liang (2017)
+Other methods to build (nearly) optimal decision trees include frequent itemset mining
 
-  \emph{DataInf: efficiently estimating data influence in LoRA-tuned LLMs and diffusion models}\\
-  Y. Kwon et al.
+  \emph{Optimal constraint-based decision tree induction from itemset lattices}\\
+  S. Nijssen and E. Fromont
 
-  \emph{On second-order group influence functions\\ for black-box predictions}\\
-  S. Basu et al. (2020)
+  \emph{Learning optimal decision trees\\ using caching branch-and-bound search}\\
+  G. Aglin et al.
 
-Outlier detection algorithms can provide the same information,
-more efficiently.
+and genetic algorithms.
 
-  \emph{Outlier gradient analysis:\\ efficiently identifying detrimental\\ training samples for deep learning}\\
-  A. Chhabra e al. (2025)
+  \emph{evtree: evolutionary learning of globally optimal classification and regression trees in R}\\
+  T. Grubinger et al. (2014)
+
+  Decision tree induction through LLMs\\ via semantically-aware evolution}\\
+  T. Liu et al. (2025)
+  https://arxiv.org/abs/2503.14217
+
+** Risk-seeking RL, Symbolic regression
+
+Symbolic regression is often performed with genetic algorithms
+or, more recently, with LLMs. Alternatively, we could use reinforcement learning (RL)
+but, to allow for more exploration, it should be risk-seeking reinforcement learning.
+
+  \emph{Deep symbolic regression:\\ recovering mathematical expressions from data\\ via risk-seeking policy gradients}\\
+  B.K. Petersen et al.
+
+  \emph{Deep symbolic regression for physics\\ guided by unit constraints:
+  towards\\ the automated discovery of physical laws}\\
+  W. Tenach et al. (2023)
+
+** Probabilistic forecasts
+
+Instead of a point forecast, we may prefer a probabilistic forecast:
+not a single value, but a probability distribution (the model can provide it as a parametric distribution,
+e.g., the parameters of a Gaussian distribution, or as samples from that distribution).
+To assess the quality of a probabilistic forecast,
+one can use the continuous ranked probability score (CRPS):
+it is the quantile (pinball) loss
+integrated from 0 to 1.
+
+  Regions of reliability in the evaluation\\ of multivariate probabilistic forecasts}\\
+  É. Marcotte et al. (2023)
+  https://arxiv.org/abs/2304.09836
+
+** Score
+
+The score function (the gradient of the logarithm of a probability density),
+which appears in diffusion models,
+looks a bit mysterious.
+One big advantage over the probability density itself,
+is that it does not require a normalized density
+(the normalization constant disappears when you differentiate the logarithm):
+you can use it to fit unnormalized densities.
+
+  \emph{Estimation of non-normalized\\ statistical models by score matching}\\
+  A. Hyvärinen
+
+** TODO KAN (in the "models" section, above?) (just after the k-NN layers?)
+
+For a reason I did not really understand,
+the Kolmogorov-Arnold networks (KAN) were all over the news.
+These are just stacked GAM (generalized additive models) layers.
+
+  \emph{KAN: Kolmogorov-Arnold networks}\\
+  Z. Liu et al.
+
+** TODO MOVE THIS ELSEWHERE? Causal discovery: time series, KAN (stacked GAMs)
+*** Causal discovery for time series
+
+\nextbook
+\begin{book}
+  \emph{Granger causality detection with Kolmogorov-Arnold networks}\\
+  H. Lin et al.
+\end{book}
+Granger causality testing with KAN (stacked GAMs),
+with a sparsity penalty for the first layer,
+fitted with proximal gradient descent to ensure sparsity.
+
+** Sparse PCA and CCA
+
+It is relatively easy to add constraints or penalties on
+PCA (principal component analysis) or CCA (canonical correlation analysis):
+they can be computed using a sequence of regressions,
+for which we can require non-negative and/or sparse coefficients.
+(As presented in the paper, the algorithm does not work well:
+check the authors' code instead.)
+
+  \emph{Nonnegative CCA\\ for audiovisual source separation}\\
+  C. Sigg et al.
+
+  TODO: LINK TO THE CODE
+
+** Graphs
+
+When your graph is too large, you may want to shrink it,
+by reducing the number of nodes (coarsening -- merging nodes)
+or the number of edges (sparsification).
+For instance, taking the union of random spanning trees
+is a simple sparsification method.
+
+  Spectral sparsification of graphs:\\ theory and algorithms}\\
+  J. Baston et al. (2009)
+  http://cs-www.cs.yale.edu/homes/spielman/PAPERS/CACMsparse.pdf
 
 
-* DONE TO DELETE No
+* Books, Tutorials
+
+The main machine learning conferences often provide one or two days of tutorials,
+some of which turn out to be more interesting than the rest of the conference.
+
+One-step generative models (GAN, VAE) have been supplanted by iterative ones,
+in particular diffusion, flows and auto-regressive models (GPT).
+Diffusion models take a simple stochastic differential equation (SDE),
+which adds noise to data until only the noise remains,
+and inverts the SDE, i.e., learns how to remove noise to have more real-looking data.
+Flows uses a similar idea, but with ordinary differential equations (ODEs):
+moving from noise to data then requires to solve an ODE.
+The flow between the data distribution and the noise distribution is not unique:
+in particular, you can try to have a recified flow, i.e., straight lines --
+going from noise to data can then be done in a single Euler step.
+
+  \emph{Continuous time generative models}\\
+  (Q. Liu, ICML 2025)
+
+Probabilistic models do not output a single prediction,
+but a probability distribution of predictions.
+However, badly trained models can be miscalibrated
+(even when they give good point forecasts).
+Some of the traditional methods to assess calibration
+(reliability diagram, empirical calibration error) are not
+asymptotically consistent: they should be avoided.
+Instead, plot the cummulative differences between (Bernoulli) responses and (sorted) scores:
+the slope (between any two points) is the average calibration error for that region.
+
+  \emph{Calibration and bias\\ in algorithms, data and models}\\
+  (ICML 2025)
+
+
+* DONE TO DELETE
+** DONE TO DELETE No
 *** No
 
 \nextbook
@@ -2394,7 +2387,8 @@ It can be written as a sum of step functions
   } (h) . \]
 To make it differentiable, replace the step functions with sigmoids.
 
-* DONE TO DELETE No, Bootstrap
+** DONE TO DELETE No, Bootstrap
+
 *** Block bootstrap
 
 \nextbook
@@ -2443,7 +2437,7 @@ Applications include worst-case (uncertainty-aware) portfolio optimization
 \end{book}
 Resample blocks of random lengths, from a geometric distribution.
 
-* DONE TO DELETE No, Relevance (already covered last year)
+** DONE TO DELETE No, Relevance (already covered last year)
 *** Relevance
 
 \nextbook
@@ -2550,7 +2544,7 @@ and $r_i < r^*$ (so that $w^+ = w$).
 Relevance grid numeric example:
 predicting volatility from 14 variables (do not use all the subsets of predictors, just 100 random ones).
 
-* DONE TO DELETE MAB: No (already covered last year)
+** DONE TO DELETE MAB: No (already covered last year)
 *** MAB, ICML
 
 \nextbook
@@ -2792,7 +2786,7 @@ There are many variants of \emph{UCB}:
     }
 \end{align*}
 
-* DONE TO DELETE No, Unsorted
+** DONE TO DELETE No, Unsorted
 *** Low rank approximations
 
 \nextbook
@@ -3053,7 +3047,6 @@ for low-noise data
 (0.1\% to 10\%):
 dimensional analysis drastically reduces the search space.
 
-* DONE TO DELETE
 ** No, RL
 *** Multi-objective RL
 
@@ -15643,3 +15636,18 @@ or swap the average and the inverse:
 \operatorname*{Mean}_i \bigl(   ( \nabla_\theta \ell_i  ) ( \nabla_\theta \ell_i )^\top + \lambda I \bigr)^{-1}
 \end{align*}
 and use the Sherman-Morrison formula to compute the inverse (identity plus rank-one) in closed form.
+** No, Adaptive lasso
+*** ML, interpretability: Adaptive lasso
+
+\nextbook
+\begin{book}
+  \emph{The adaptive lasso and its oracle properties}\\
+  H. Zou (2006)
+\end{book}
+The adaptive lasso (AdaLasso)
+first fits a lasso (or an OLS)
+\[ \hat\beta_{\text{lasso}} = \argmin_\beta \n{ y - X \beta }_2^2 + \lambda \n \beta _1 \]
+and then a weighted lasso
+\[ \hat\beta_{\text{AdaLasso}} = \argmin_\beta \n{ y - X \beta }_2^2 + \lambda \sum_i \va{ \hat\beta_{\text{lasso}, i} }^{-1} \cdot \va{ \beta_i } \]
+\ie, it penalizes even further small coefficients.
+It has better asymptotic properties.
