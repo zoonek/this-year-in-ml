@@ -123,7 +123,7 @@ Here are the detailed summaries from this year:\\
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\texttt{@output.tex} This file was converted from a markdown file, \texttt{@output.md}, 
+\texttt{@output.tex} This file was converted from a markdown file, \texttt{@output.md},
 which used a mixture of \LaTeX{} and unicode for the equations.
 The conversion not only kept the Unicode, but also mangled some of the \LaTeX{}.
 Can you fix the \LaTeX{} file to use proper \LaTeX{} for all the math, without any unicode?
@@ -131,33 +131,34 @@ Can you fix the \LaTeX{} file to use proper \LaTeX{} for all the math, without a
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 That is good: the unicode problems are fixed.
-But there are still a few \LaTeX{} issues: 
+But there are still a few \LaTeX{} issues:
 
 -- Math code (in particular subscripts) outside any math environment;
 
--- Completely mangled equations: pandoc seems to have replaced some substripts by \verb|\emph|. 
+-- Completely mangled equations: pandoc seems to have replaced some substripts by \verb|\emph|.
 (You can see the original code in \texttt{@tmp/output.md}: it should be more readable.)
 
 Can you fix those remaining issues?
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-That looks better, but quite often the math is between brackets, e.g., 
-\verb|(\alpha)|, instead of 
-\verb|\(\alpha\)| or 
-\verb|$\alpha$|. 
+That looks better, but quite often the math is between brackets, e.g.,
+\verb|(\alpha)|, instead of
+\verb|\(\alpha\)| or
+\verb|$\alpha$|.
 Can you fix those?
 
 \section{Problems}
 
 \begin{itemize}
 \tightlist
-\item ChatGPT did not reproduce my style: there were too many equations, and the sections did not have the same structure. 
-  Next year, ask him to analyze my style, and produce a prompt to reproduce it. 
+\item ChatGPT did not reproduce my style: there were too many equations, and the sections did not have the same structure.
+  Next year, ask him to analyze my style, and produce a prompt to reproduce it.
   Then check the prompt, try it on a subset of the data, and amend it.
-\item The Markdown produce by ChatGPT was (mostly) correct, but pandoc completely mangled the math.
+\item The Markdown produced by ChatGPT was (mostly) correct, but \texttt{pandoc} completely mangled the math.
   Next year, ask ChatGPT to produce Markdown suitable for conversion in \LaTeX{} with pandoc
-  (no unicode for the math, \verb|$...$| and \verb|$$...$$| for math instead of \verb|\(...\)| and \verb|\[...\]|)
+  (no unicode for the math, \verb|$...$| and \verb|$$...$$| for math instead of \verb|\(...\)| and \verb|\[...\]|,
+  use inline math for all mathematical quantities, even single letters)
   or, better, ask it to directly produce \LaTeX{}.
 \end{itemize}
 \clearpage
@@ -171,7 +172,7 @@ I'll proceed topic by topic. For each:
   it) with a \textbf{simplified summary} in your style.\\
 \item
   Then I'll give a \textbf{concise section-level summary} like in your
-  PDF (but here as plain text LaTeX-ish content).
+  PDF (but here as plain text \LaTeX-ish content).
 \end{itemize}
 
 I won't add URLs yet (that's step 4).
@@ -233,7 +234,7 @@ universal inference ideas.
 A. Ramdas and R. Wang (2025)
 
 This monograph develops e-values as an alternative primitive to
-p-values. An e-variable E is any nonnegative random variable with
+p-values. An e-variable $E$ is any nonnegative random variable with
 expectation at most one under the null; Markov's inequality turns it
 into a level-$\alpha$ test via the rule ``reject if $E \geq 1/\alpha$''. E-values combine
 naturally by averaging (under dependence) or multiplying (under
@@ -334,7 +335,7 @@ This tutorial revisits calibration diagnostics for probabilistic
 predictions. Given scores $S_1,\ldots,S_n$ and binary outcomes $R_1,\ldots,R_n$,
 the cumulative differences\\
 \[ C_k = \frac1n \sum_{j=1}^k (R_j - S_j) \]\\
-plotted against k/n form a calibration curve whose local slope measures
+plotted against $k/n$ form a calibration curve whose local slope measures
 miscalibration in score regions. KS and Kuiper-type statistics
 ($\max C_k$, range($C_k$)) have known null distributions after
 scaling by an estimated variance, via Brownian bridge approximations.
@@ -434,7 +435,7 @@ modeling of equities}\\
 A. Gopal (2024)
 
 NeuralFactors is a conditional generative factor model learned via a
-VAE. Each stock i at time t has characteristics (balance sheet, ratios,
+VAE. Each stock $i$ at time $t$ has characteristics (balance sheet, ratios,
 sector proxies) fed into a neural network that outputs:
 
 \begin{itemize}
@@ -569,7 +570,7 @@ ensembling}\\
 Y. Gorishniy et al.
 
 TabM is a BatchEnsemble of simple MLPs for tabular data. A shared weight
-matrix W is specialized into an ensemble member i by elementwise scaling
+matrix $W$ is specialized into an ensemble member $i$ by elementwise scaling
 with rank-1 matrices $r_i s_i^\top$; inputs and outputs are multiplied by small
 trainable vectors $r_i$ and $s_i$. Only these vectors (and small biases) are
 unique per ensemble member. Interestingly, they keep the original random
@@ -735,7 +736,7 @@ and kernel machines that recursively learn features}\\
 A. Radhakrishnan et al.
 
 They relate gradient-based feature learning in deep nets to RFMs. For a
-layer i, weights satisfy\\
+layer $i$, weights satisfy\\
 \[ W_i^\top W_i \propto \operatorname{Mean}
 \left(\frac{\partial \hat y}{\partial h_i}\right)\left(\frac{\partial \hat y}{\partial h_i}\right)^\top,
 \]\\
@@ -1014,7 +1015,7 @@ interactions.
 T. Pethick et al.~(2025)
 
 Recasts weight updates as solutions to \textbf{linear minimization
-oracles} over norm balls: given a gradient s,\\
+oracles} over norm balls: given a gradient $s$,\\
 \[ \text{lmo}(s) = \operatorname*{Argmin}_{ x\leq\rho} \langle s,
 x \rangle. \]\\
 Stochastic conditional gradient (Frank--Wolfe-like) updates the
@@ -1194,8 +1195,8 @@ Y. Yu et al.
 
 This paper uses ideas from discrete Hodge theory. Any antisymmetric edge
 function $Y(i,j)$ on a graph can be decomposed as\\
-\[ Y = \nabla \phi + \mathrm{curl}^\ast \Psi + H, \]\\
-where $\nabla \phi$ is gradient-like, curl*$\Psi$ is ``cyclic'' flow on triangles, and H
+\[ Y = \nabla \phi + \mathrm{curl}^\ast\, \Psi + H, \]\\
+where $\nabla \phi$ is gradient-like, curl*$\,\Psi$ is ``cyclic'' flow on triangles, and H
 is harmonic (both divergence-free and curl-free). A directed acyclic
 graph corresponds to a purely gradient flow: no curl.
 
@@ -1270,8 +1271,9 @@ For additive noise models\\
 \[ X_i = f_i(\mathrm{Pa}_i(X)) +
 \epsilon_i,\qquad \epsilon_i~\text{indep}, \]\\
 the joint density and hence its score $s(x) = \nabla_x \log p(x)$ determine the
-causal graph. The authors show that the Hessian entries $\partial^2 / (\partial x_i\,\partial x_j)$
-log p(x) vanish exactly for non-adjacent nodes, and exploit this to
+causal graph. The authors show that the Hessian entries
+$\partial^2 \log p(x) / (\partial x_i\,\partial x_j)$
+vanish exactly for non-adjacent nodes, and exploit this to
 identify leaves and construct a topological order: at each step, remove
 the variable whose second derivative w.r.t itself has smallest variance.
 
@@ -1446,7 +1448,7 @@ trains black-box sequence models (GRUs, transformers, ConvMixers, MLPs)
 to output causal graphs directly from time series. Training is
 supervised on synthetic data generated from known DGPs (e.g., Kuramoto,
 random nonlinear relations such as $e^x$, $x^2$, sigmoid, sin, cos, $\log \sigma(x)$,
-1/x, norms, clamping). The hope is to obtain a \textbf{causal discovery
+$1/x$, norms, clamping). The hope is to obtain a \textbf{causal discovery
 foundation model} that generalizes to new domains, akin to TabPFN for
 tabular data.
 
@@ -1483,7 +1485,7 @@ R. Massidda et al.
 
 COSMO avoids NOTEARS-style acyclicity penalties by parametrizing
 adjacency as\\
-\[ A_{ij} = H_{ij},\sigma!\left(\frac{p_i - p_j}{T}\right), \]\\
+\[ A_{ij} = H_{ij} \sigma \left(\frac{p_i - p_j}{T}\right), \]\\
 where $H$ is an undirected adjacency, $p$ is a ``priority'' vector, $\sigma$ is a
 sigmoid, and $T\to 0$. For small $T$, this becomes a hard orientation: edges
 always point from lower to higher priority, which guarantees acyclicity.
@@ -1813,7 +1815,7 @@ and many identification strategies:
 \begin{itemize}
 \tightlist
 \item
-  Backdoor adjustment: 
+  Backdoor adjustment:
   \[
   \mathbb{E}[Y(t)] =
   \mathbb{E}_H[\mathbb{E}(Y\mid T=t,H)].
@@ -2015,7 +2017,7 @@ Your notes tie together several ideas:
   Treating graph learning as estimation of an adjacency or Laplacian
   matrix from smoothness assumptions: signals x should vary slowly over
   the graph, so minimize $\mathrm{tr}(XLX^\top) =
-  \tfrac12\mathrm{tr}(WZ)$ where Z encodes squared distances between
+  \tfrac12\mathrm{tr}(WZ)$ where $Z$ encodes squared distances between
   samples.\\
 \item
   Enforcing Laplacian constraints (row sums zero, nonpositive
@@ -2085,7 +2087,7 @@ distance $\tilde D$ that best approximates a given pairwise distance $D$,
 under either $\ell^\infty$ or Frobenius norms.
 
 For $\ell^\infty$, the optimal ultrametric can be extracted from the minimum
-spanning tree (MST) of D by a simple shift; for $\mathcal{F}$, the problem is
+spanning tree (MST) of $D$ by a simple shift; for $\mathcal{F}$, the problem is
 NP-hard but pseudo-convex and can be approximately solved via
 gradient-based alternating optimization over node heights and tree
 structure. Plugging these ultrametrics into tree-Wasserstein yields
@@ -2264,7 +2266,7 @@ Cajas's notes complement Palomar with:
   \begin{itemize}
   \tightlist
   \item
-    Spectral risk measures: 
+    Spectral risk measures:
     \[ -\int q_X(u)\,\phi(u)\,du , \] with monotone
     weights $\phi(u)$.\\
   \item
@@ -2535,7 +2537,7 @@ quantified via:
   Autocorrelation $\beta$ = $\mathrm{cov}(p_t,p_{t-1}) / \mathrm{var}(p)$, or\\
 \item
   Predictability $\nu =
-  \frac{\mathrm{Var}(\hat p_t)}{\mathrm{Var}(p_t)}$).
+  \dfrac{\mathrm{Var}(\hat p_t)}{\mathrm{Var}(p_t)}$.
 \end{itemize}
 
 Both can be expressed as \textbf{generalized Rayleigh quotients}:
@@ -2666,7 +2668,7 @@ Adaptive lasso applies variable-adaptive $\ell^1$ penalties, e.g.\\
   \lambda\sum_i w_i\,|\beta_i|
   \\
   w_i &=
-  \frac{1}{|\hat\beta^{\text{(initial)}}_i|}. 
+  \frac{1}{|\hat\beta^{\text{(initial)}}_i|}.
 \end{align*}
 Sparse models whose small coefficients are penalized more strongly can
 achieve oracle properties (correct variable selection + asymptotic
@@ -2913,8 +2915,8 @@ itself to evolve according to a linear dynamical system:
 
 \[ \theta_t = h(w_t),\quad \dot w_t = A w_t. \]
 
-So while dynamics are nonlinear in x, the evolution of parameters is
-linear in a lifted state space w. This is conceptually a Koopman
+So while dynamics are nonlinear in $x$, the evolution of parameters is
+linear in a lifted state space $w$. This is conceptually a Koopman
 operator on parameters. It can capture non-stationary dynamics where the
 underlying ODE slowly changes over time.
 
@@ -3203,7 +3205,7 @@ Gated SAEs split feature selection (gates) from value prediction:
   \mathbf{1}_{g\ge 0}\odot \mathrm{ReLU}(W_1 x + b_1)
   \\
    \hat x &=
-W_2 y + b_2, 
+W_2 y + b_2,
 \end{align*}
 with a relation between $W_0$ and $W_1$ so that the gate controls whether a
 feature is used while a second linear map sets its magnitude. This
@@ -3342,7 +3344,7 @@ prediction in transformer models.
 (LoRE)}\\
 R. Guidotti et al.
 
-LoRE is a model-agnostic local explainer. For a point x, it:
+LoRE is a model-agnostic local explainer. For a point $x$, it:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -3353,7 +3355,7 @@ LoRE is a model-agnostic local explainer. For a point x, it:
 \item
   Trains a decision tree approximating the black box locally.\\
 \item
-  Extracts a rule describing x's decision and proposes counterfactuals:
+  Extracts a rule describing $x$'s decision and proposes counterfactuals:
   minimal rule changes that flip the predicted label.
 \end{enumerate}
 
@@ -3545,13 +3547,13 @@ evaluating target densities up to a normalizing constant. For
 training flows without data by minimizing the variance of importance
 weights:
 
-\[ \mathrm{Var}_{x\sim q_\theta}
+\[ \operatorname*{Var}_{x\sim q_\theta}
 \Bigl[\log \frac{p(x)}{q_\theta(x)}\Bigr], \]
 
-with p(x) given only through unnormalized energies. They derive losses
+with $p(x)$ given only through unnormalized energies. They derive losses
 based on log-sum-exp and demonstrate that minimizing the variance of
-log-weights leads the flow to match p.~This is useful in statistical
-physics and Bayesian inverse problems, where p is expensive but data
+log-weights leads the flow to match $p$. This is useful in statistical
+physics and Bayesian inverse problems, where $p$ is expensive but data
 samples are unavailable.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -3857,7 +3859,7 @@ predictions}\\
 S. Basu et al.~(2020)
 
 Individual influence approximations can be loose when many training
-points jointly affect a prediction. Group influence replaces single z by
+points jointly affect a prediction. Group influence replaces single $z$ by
 sets $U$, computing second-order expansions to better capture interactions
 within $U$. This is applicable in settings like dataset distillation and
 causal auditing of data subsets.
@@ -4392,7 +4394,7 @@ cluster overlap:
 \[ P(e) = \frac{|p(e)\cap t(e)\setminus{e}|}{|p(e)|},\quad R(e) =
 \frac{|p(e)\cap t(e)\setminus{e}|}{|t(e)|}. \]
 
-Averaging P(e), R(e) over elements yields better discrimination among
+Averaging $P(e)$, $R(e)$ over elements yields better discrimination among
 clusterings.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -4463,11 +4465,11 @@ S. Arlot et al.~(2012)
 KCP embeds data $X_1,\ldots,X_n$ into an RKHS via a kernel $\kappa$ and searches
 for segmentations minimizing
 \begin{align*}
- R(\tau) = {}& 
+ R(\tau) = {}&
  \frac{1}{n} \sum_i \kappa(x_i,x_i) - {}\\
  & \frac{1}{n}
 \sum_\ell \frac{1}{\tau_\ell-\tau_{\ell-1}} \sum_{i,j
-\in \text{segment }\ell} \kappa(x_i,x_j), 
+\in \text{segment }\ell} \kappa(x_i,x_j),
 \end{align*}
 
 plus a penalty for the number $D$ of segments: $c_1\log\binom{n-1}{D-1} +
