@@ -5,4 +5,5 @@ auto/
 *.out
 *.pdf
 *.bak
+*.toc
 PNG/

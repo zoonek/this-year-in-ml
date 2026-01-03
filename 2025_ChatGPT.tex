@@ -64,6 +64,8 @@
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{enumitem}
+\setlist{nosep,leftmargin=*}
 
 \def\section#1{\clearpage{\vspace*{0cm}\LARGE\centering\bfseries #1\par\bigskip\bigskip}}
 \def\subsection#1{{\par\bigskip\goodbreak\large\bfseries #1\par}}
@@ -80,6 +82,8 @@
 
 \section{Prompts}\label{prompt}
 
+\textsc{Human --}
+\itshape
 When I read research papers, I write a summary of them, all in a big,
 unsorted \LaTeX{} file. Every year, I review that file, identify the topics
 of the papers I have read, and sort the papers accordiong to those
@@ -119,17 +123,22 @@ Here is last year's high-level summary:\\
 
 Here are the detailed summaries from this year:\\
 \texttt{<papers></papers>}
-
+\upshape
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{Human --}
+\itshape
 \texttt{@output.tex} This file was converted from a markdown file, \texttt{@output.md},
 which used a mixture of \LaTeX{} and unicode for the equations.
 The conversion not only kept the Unicode, but also mangled some of the \LaTeX{}.
 Can you fix the \LaTeX{} file to use proper \LaTeX{} for all the math, without any unicode?
+\upshape
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{Human --}
+\itshape
 That is good: the unicode problems are fixed.
 But there are still a few \LaTeX{} issues:
 
@@ -139,14 +148,18 @@ But there are still a few \LaTeX{} issues:
 (You can see the original code in \texttt{@tmp/output.md}: it should be more readable.)
 
 Can you fix those remaining issues?
+\upshape
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{Human --}
+\itshape
 That looks better, but quite often the math is between brackets, e.g.,
 \verb|(\alpha)|, instead of
 \verb|\(\alpha\)| or
 \verb|$\alpha$|.
 Can you fix those?
+\upshape
 
 \section{Problems}
 
@@ -155,7 +168,8 @@ Can you fix those?
 \item ChatGPT did not reproduce my style: there were too many equations, and the sections did not have the same structure.
   Next year, ask him to analyze my style, and produce a prompt to reproduce it.
   Then check the prompt, try it on a subset of the data, and amend it.
-\item The Markdown produced by ChatGPT was (mostly) correct, but \texttt{pandoc} completely mangled the math.
+\item The Markdown produced by ChatGPT was (mostly) correct, but \texttt{pandoc} completely mangled the math,
+  and added a lot of spurious \verb|\\| (in lists, and before and after math mode).
   Next year, ask ChatGPT to produce Markdown suitable for conversion in \LaTeX{} with pandoc
   (no unicode for the math, \verb|$...$| and \verb|$$...$$| for math instead of \verb|\(...\)| and \verb|\[...\]|,
   use inline math for all mathematical quantities, even single letters)
@@ -163,21 +177,22 @@ Can you fix those?
 \end{itemize}
 \clearpage
 
+\textsc{ChatGPT --}
+\itshape
 I'll proceed topic by topic. For each:
 
 \begin{itemize}
 \tightlist
 \item
   I'll list the \textbf{papers kept} (title, authors, year if you had
-  it) with a \textbf{simplified summary} in your style.\\
+  it) with a \textbf{simplified summary} in your style.
 \item
   Then I'll give a \textbf{concise section-level summary} like in your
   PDF (but here as plain text \LaTeX-ish content).
 \end{itemize}
 
 I won't add URLs yet (that's step 4).
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\upshape
 
 \section{1. Anytime-valid inference, e-values, and sequential change
 detection}\label{anytime-valid-inference-e-values-and-sequential-change-detection}
@@ -251,13 +266,13 @@ how to use them for:
 \begin{itemize}
 \tightlist
 \item
-  level-$\alpha$ tests and confidence sets (via inversion),\\
+  level-$\alpha$ tests and confidence sets (via inversion),
 \item
   sequential testing (e-processes and Ville's inequality, allowing
-  arbitrary stopping),\\
+  arbitrary stopping),
 \item
   multiple testing (e-BH and its boosted variants for FDR, closed e-BH
-  for FWER/FDX), and\\
+  for FWER/FDX), and
 \item
   decision problems with constraints on null-world risks (e-based
   decision rules remain valid under more flexible decision spaces than
@@ -333,8 +348,8 @@ different tutorial)
 
 This tutorial revisits calibration diagnostics for probabilistic
 predictions. Given scores $S_1,\ldots,S_n$ and binary outcomes $R_1,\ldots,R_n$,
-the cumulative differences\\
-\[ C_k = \frac1n \sum_{j=1}^k (R_j - S_j) \]\\
+the cumulative differences
+\[ C_k = \frac1n \sum_{j=1}^k (R_j - S_j) \]
 plotted against $k/n$ form a calibration curve whose local slope measures
 miscalibration in score regions. KS and Kuiper-type statistics
 ($\max C_k$, range($C_k$)) have known null distributions after
@@ -386,8 +401,6 @@ testing against Brownian bridges yields principled diagnostics without
 arbitrary binning. Together, these works suggest a shift away from
 one-shot p-values towards sequences of e-values, confidence sequences,
 and explicit accounting of trial multiplicity and adaptivity.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{2. Generative models for financial time series and
 risk}\label{generative-models-for-financial-time-series-and-risk}
@@ -441,13 +454,13 @@ sector proxies) fed into a neural network that outputs:
 \begin{itemize}
 \tightlist
 \item
-factor loadings $\beta_{it}$, and\\
+factor loadings $\beta_{it}$, and
 \item
 Student-t distribution parameters $(\alpha_{it}, \sigma_{it}, \nu_{it})$
   for idiosyncratic returns.
 \end{itemize}
 
-Latent factors $z_{t+1}$ are modeled as Gaussian, and returns follow\\
+Latent factors $z_{t+1}$ are modeled as Gaussian, and returns follow
 \[ r_{i,t+1} \sim T_{\nu_{it}}\bigl(\alpha_{it} + \beta_{it}^\top z_{t+1},\, \sigma_{it}\bigr). \]
 
 Synthetic equity panels can be generated by sampling characteristics,
@@ -549,6 +562,8 @@ forecasting models into a single generative pipeline.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{ChatGPT --}
+\itshape
 I'll stop here so you can check that this level of summarization and
 tone matches what you want. If you're happy, I'll continue with the
 remaining topics (tabular / RFM, LLM agents, causal discovery, causal
@@ -557,8 +572,7 @@ interpretability, diffusion, bandits, trees/rules, evaluation, and
 ``other topics'') in the same style.
 
 I'll continue in the same format, topic by topic.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\upshape
 
 \section{3. Tabular deep learning and feature learning (RFM, kernels,
 meta-learners)}\label{tabular-deep-learning-and-feature-learning-rfm-kernels-metalearners}
@@ -619,7 +633,7 @@ directly:
 \item
   \textbf{Binning + piecewise linear}: discretize numerical features
   either by empirical quantiles or by greedy 1D decision trees, then
-  embed bins and use linear interpolation.\\
+  embed bins and use linear interpolation.
 \item
   \textbf{Periodic transforms}: map $x$ to $(\cos(2\pi c\cdot x), \sin(2\pi c\cdot x))$ with
   learned frequencies $c$.
@@ -651,10 +665,10 @@ H.J. Ye et al.~(2024)
 Neighbourhood component analysis (NCA) learns a metric so that a softmax
 over distances to training samples approximates label probabilities.
 Modern NCA replaces the linear map with a small deep network $\phi(x)$ and
-uses subsets of neighbours during training to scale. The prediction is\\
+uses subsets of neighbours during training to scale. The prediction is
 \[ \hat y(x) = \sum_i
 \frac{\exp(-d(\phi(x),\phi(x_i)))}{\sum_j\exp(-d(\phi(x),\phi(x_j)))}\,y_i.
-\]\\
+\]
 This is a strong and surprisingly simple baseline for tabular data.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -664,11 +678,10 @@ Y. Gorishniy et al.
 
 This benchmark shows that well-tuned simple architectures compete with
 elaborate ones:
-
 \begin{itemize}
 \tightlist
 \item
-  A ResNet with batch norm, dropout and shallow residual blocks.\\
+  A ResNet with batch norm, dropout and shallow residual blocks.
 \item
   FT-Transformer: tokenize all features (numerical via per-feature
   linear maps, categorical via embeddings), add a \textsc{cls} token, run a
@@ -709,9 +722,9 @@ D. Beaglehole et al.
 
 Recursive Feature Machines (RFMs) are kernel machines whose kernels are
 adapted to the data by iteratively reweighting input directions. The key
-tool is the \textbf{average gradient outer product} (AGOP):\\
+tool is the \textbf{average gradient outer product} (AGOP):
 \[ \text{AGOP}(f,X) = \operatorname{Mean}_i
-\nabla f(x_i) \nabla f(x_i)^\top. \]\\
+\nabla f(x_i) \nabla f(x_i)^\top. \]
 Its eigenvectors identify directions along which the predictor varies
 most. Kernel RFM iteratively:
 
@@ -719,7 +732,7 @@ most. Kernel RFM iteratively:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Fits a kernel ridge regression in a warped space $x\mapsto M\cdot x$,\\
+  Fits a kernel ridge regression in a warped space $x\mapsto M\cdot x$,
 \item
   Updates $M$ as a power of the AGOP, so that future kernels focus on
   important directions.
@@ -736,10 +749,10 @@ and kernel machines that recursively learn features}\\
 A. Radhakrishnan et al.
 
 They relate gradient-based feature learning in deep nets to RFMs. For a
-layer $i$, weights satisfy\\
+layer $i$, weights satisfy
 \[ W_i^\top W_i \propto \operatorname{Mean}
 \left(\frac{\partial \hat y}{\partial h_i}\right)\left(\frac{\partial \hat y}{\partial h_i}\right)^\top,
-\]\\
+\]
 so layers amplify directions with large average gradient. RFM mimics
 this by repeatedly fitting a kernel model and updating a Mahalanobis
 metric using AGOP. This gives a non-backprop, interpretable analogue of
@@ -883,8 +896,6 @@ When combined with data-driven metric learning (AGOP) and simple
 ensembles such as BatchEnsemble or Packed-Ensembles, they form a serious
 alternative to heavy, opaque transformer stacks on many tabular tasks.
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
-
 \section{4. Large language models as coding, reasoning and
 optimization
 agents}\label{large-language-models-as-coding-reasoning-and-optimization-agents}
@@ -928,16 +939,16 @@ coding:
 \begin{itemize}
 \tightlist
 \item
-  Maintains multiple independent ``island'' populations.\\
+  Maintains multiple independent ``island'' populations.
 \item
   Selects parents using power-law sampling over fitness ranks, modulated
-  by novelty scores.\\
+  by novelty scores.
 \item
   Applies novelty rejection based on embeddings (and, if needed, an LLM
-  call) to avoid clones.\\
+  call) to avoid clones.
 \item
   Treats the choice of base LLM as a multi-armed bandit (UCB1 on
-  relative improvement).\\
+  relative improvement).
 \item
   Periodically asks the LLM to analyze the archive and generate
   ``actionable insights'' to steer future mutations.
@@ -1015,9 +1026,9 @@ interactions.
 T. Pethick et al.~(2025)
 
 Recasts weight updates as solutions to \textbf{linear minimization
-oracles} over norm balls: given a gradient $s$,\\
+oracles} over norm balls: given a gradient $s$,
 \[ \text{lmo}(s) = \operatorname*{Argmin}_{ x\leq\rho} \langle s,
-x \rangle. \]\\
+x \rangle. \]
 Stochastic conditional gradient (Frank--Wolfe-like) updates the
 parameters as convex combinations of their current value and this oracle
 solution. By choosing different norms ($\ell^1$, $\ell^2$, $\ell^\infty$, spectral), one can
@@ -1075,7 +1086,7 @@ two-stage process:
 \tightlist
 \item
   The model (or a smaller helper) selects or rewrites a relevant subset
-  of context (``system 2 attention''),\\
+  of context (``system 2 attention''),
 \item
   The main model reasons only over this reduced context.
 \end{enumerate}
@@ -1151,38 +1162,42 @@ layer gives a false sense of safety.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{ChatGPT --}
+\itshape
 Given the length, I'll pause here. If this still matches what you want,
 I'll proceed with:
 
 \begin{itemize}
 \tightlist
 \item
-  Causal discovery and benchmarks\\
+  Causal discovery and benchmarks
 \item
-  Causal inference (effects \& policies)\\
+  Causal inference (effects \& policies)
 \item
-  Graph learning \& Laplacians\\
+  Graph learning \& Laplacians
 \item
-  Portfolio optimization \& finance\\
+  Portfolio optimization \& finance
 \item
-  Time series forecasting \& non-stationarity\\
+  Time series forecasting \& non-stationarity
 \item
-  Sparse / mechanistic interpretability\\
+  Sparse / mechanistic interpretability
 \item
-  Diffusion \& continuous-time modeling\\
+  Diffusion \& continuous-time modeling
 \item
-  Bandits \& Bayesian optimization\\
+  Bandits \& Bayesian optimization
 \item
-  Trees / rule ensembles / policy learning\\
+  Trees / rule ensembles / policy learning
 \item
-  Evaluation metrics \& change-point / clustering\\
+  Evaluation metrics \& change-point / clustering
 \item
   Other optimization / operator-learning topics
 \end{itemize}
+\upshape
 
+\textsc{ChatGPT --}
+\itshape
 Continuing in the same style.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\upshape
 
 \section{5. Causal discovery and time-series
 benchmarks}\label{causal-discovery-and-timeseries-benchmarks}
@@ -1194,8 +1209,8 @@ approach}\\
 Y. Yu et al.
 
 This paper uses ideas from discrete Hodge theory. Any antisymmetric edge
-function $Y(i,j)$ on a graph can be decomposed as\\
-\[ Y = \nabla \phi + \mathrm{curl}^\ast\, \Psi + H, \]\\
+function $Y(i,j)$ on a graph can be decomposed as
+\[ Y = \nabla \phi + \mathrm{curl}^\ast\, \Psi + H, \]
 where $\nabla \phi$ is gradient-like, curl*$\,\Psi$ is ``cyclic'' flow on triangles, and H
 is harmonic (both divergence-free and curl-free). A directed acyclic
 graph corresponds to a purely gradient flow: no curl.
@@ -1223,10 +1238,10 @@ observations. ReScore applies a boosting-like procedure:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Fit an initial DAG by a differentiable score-based learner.\\
+  Fit an initial DAG by a differentiable score-based learner.
 \item
   Reweight samples based on residuals: misfit points get higher
-  weights.\\
+  weights.
 \item
   Refit the DAG on the reweighted data.
 \end{enumerate}
@@ -1248,10 +1263,10 @@ maintain:
 \item
   A Bernoulli mask $s_{\tau ij}$ indicating whether variable $j$ at lag $\tau$
   is a parent of $i$, with probabilities parametrized via a sigmoid over
-  $\theta_{\tau ij}$.\\
+  $\theta_{\tau ij}$.
 \item
   A neural forecast $f_\phi(X\odot S)$ that predicts each $x_t$ from masked
-  histories.\\
+  histories.
 \item
   A moving imputation $\tilde x_t$ updated as a convex combination of
   old and new predictions.
@@ -1267,9 +1282,9 @@ both the graph and imputations for missing data.
 noise models}\\
 P. Rolland et al.
 
-For additive noise models\\
+For additive noise models
 \[ X_i = f_i(\mathrm{Pa}_i(X)) +
-\epsilon_i,\qquad \epsilon_i~\text{indep}, \]\\
+\epsilon_i,\qquad \epsilon_i~\text{indep}, \]
 the joint density and hence its score $s(x) = \nabla_x \log p(x)$ determine the
 causal graph. The authors show that the Hessian entries
 $\partial^2 \log p(x) / (\partial x_i\,\partial x_j)$
@@ -1352,7 +1367,7 @@ To sample differentiable DAGs, they combine:
 \begin{itemize}
 \tightlist
 \item
-  Gumbel--Softmax for edges,\\
+  Gumbel--Softmax for edges,
 \item
   Gumbel--Sinkhorn or softsort for permutations (topological orders).
 \end{itemize}
@@ -1465,7 +1480,7 @@ interventions. It trains:
 \tightlist
 \item
   Density models $p_\phi(X_i \mid X_{-i}, M)$ where M masks
-  non-parent variables, and\\
+  non-parent variables, and
 \item
   Edge parameters $(\gamma_{ij}, \theta_{ij})$ that encode presence and
   direction.
@@ -1484,8 +1499,8 @@ orientations (COSMO)}\\
 R. Massidda et al.
 
 COSMO avoids NOTEARS-style acyclicity penalties by parametrizing
-adjacency as\\
-\[ A_{ij} = H_{ij} \sigma \left(\frac{p_i - p_j}{T}\right), \]\\
+adjacency as
+\[ A_{ij} = H_{ij} \sigma \left(\frac{p_i - p_j}{T}\right), \]
 where $H$ is an undirected adjacency, $p$ is a ``priority'' vector, $\sigma$ is a
 sigmoid, and $T\to 0$. For small $T$, this becomes a hard orientation: edges
 always point from lower to higher priority, which guarantees acyclicity.
@@ -1509,7 +1524,7 @@ optimization is done with an augmented Lagrangian:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Minimize $\mathrm{loss}(W)+\lambda\rho(W)+\eta\rho(W)^2$,\\
+  Minimize $\mathrm{loss}(W)+\lambda\rho(W)+\eta\rho(W)^2$,
 \item
   Update $\lambda$, $\eta$, and repeat.
 \end{enumerate}
@@ -1544,9 +1559,9 @@ interventional data, one can distinguish:
 \begin{itemize}
 \tightlist
 \item
-  Direct causation $X\to Y$,\\
+  Direct causation $X\to Y$,
 \item
-  Pure selection effects, and\\
+  Pure selection effects, and
 \item
   Pure latent confounding.
 \end{itemize}
@@ -1580,11 +1595,11 @@ models}:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Sample synthetic graphs and generate data.\\
+  Sample synthetic graphs and generate data.
 \item
   Estimate graphs with a battery of classical algorithms (PC, FCI, GES,
   LiNGAM, CAM, GIES, IGSP, etc.) on different subsamples and variable
-  subsets.\\
+  subsets.
 \item
   Aggregate these outputs and global statistics (e.g., $\Sigma^{-1}$) into a
   single representation fed to a neural graph encoder (with axial
@@ -1683,35 +1698,39 @@ corpora.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{ChatGPT --}
+\itshape
 Given the size, I'll pause again. Next I'll cover:
 
 \begin{itemize}
 \tightlist
 \item
-  Causal inference \& treatment effects\\
+  Causal inference \& treatment effects
 \item
-  Graph learning \& Laplacians\\
+  Graph learning \& Laplacians
 \item
-  Portfolio optimization \& finance\\
+  Portfolio optimization \& finance
 \item
-  Time series forecasting \& non-stationarity\\
+  Time series forecasting \& non-stationarity
 \item
-  Sparse / mechanistic interpretability\\
+  Sparse / mechanistic interpretability
 \item
-  Diffusion \& continuous-time modeling\\
+  Diffusion \& continuous-time modeling
 \item
-  Bandits \& Bayesian optimization\\
+  Bandits \& Bayesian optimization
 \item
-  Trees / rule ensembles / policy learning\\
+  Trees / rule ensembles / policy learning
 \item
-  Evaluation metrics \& change-points / clustering\\
+  Evaluation metrics \& change-points / clustering
 \item
   Other optimization / operator-learning topics
 \end{itemize}
+\upshape
 
+\textsc{ChatGPT --}
+\itshape
 Continuing.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\upshape
 
 \section{6. Causal inference and treatment
 effects}\label{causal-inference-and-treatment-effects}
@@ -1728,7 +1747,7 @@ estimate average and conditional treatment effects:
 \begin{itemize}
 \tightlist
 \item
-  ATE: $\mathbb{E}[Y(1)-Y(0)]$,\\
+  ATE: $\mathbb{E}[Y(1)-Y(0)]$,
 \item
   CATE: $\mathbb{E}[Y(1)-Y(0)\mid X=x]$.
 \end{itemize}
@@ -1746,15 +1765,15 @@ Key points:
 \item
   \textbf{Double lasso / double ML}: partial out X from both Y and T,
   then regress residual Y on residual T with honest cross-fitting to
-  control regularization bias.\\
+  control regularization bias.
 \item
   \textbf{Meta-learners} (S-, T-, X-, R-, DR-learners) decompose CATE
   estimation into regression subproblems (fit outcome and/or propensity,
-  then combine to get $\tau(x)$).\\
+  then combine to get $\tau(x)$).
 \item
   \textbf{Policy learning}: directly optimize policies
   \(\pi(X)\in\{0,1\}\) under budget or fairness constraints using
-  estimates of causal effects, rather than just estimating $\tau(x)$.\\
+  estimates of causal effects, rather than just estimating $\tau(x)$.
 \item
   \textbf{Adaptive experiments} (MAB): standard empirical means are
   biased under policy adaptation; IPW and augmented weighting restore
@@ -1780,21 +1799,21 @@ Your notes from this text cover:
   errors in nuisance $\eta$), estimate $\eta$ with flexible ML (lasso, forests,
   nets), then solve \(\mathbb{E}\psi(W;\hat\theta,\hat\eta)=0\), using
   cross-fitting. This yields $\sqrt n$-consistent and asymptotically
-  normal estimates under weak conditions.\\
+  normal estimates under weak conditions.
 \item
-  \textbf{Partially linear models (PLM)}:\\
+  \textbf{Partially linear models (PLM)}:
   $Y = \beta T + g(X)+\varepsilon$; residualize $Y$ and $T$ wrt $X$, then
-  regress residuals.\\
+  regress residuals.
 \item
   \textbf{Interactive regression models (IRM)} for binary treatments
-  with heterogeneous effects $g(T,X)$.\\
+  with heterogeneous effects $g(T,X)$.
 \item
   \textbf{Doubly robust ATE estimators} (regression + IPW) and efficient
-  influence functions.\\
+  influence functions.
 \item
   \textbf{Instrumental variables}: orthogonal scores using both outcome
   and treatment residuals with respect to the instrument; robust
-  statistics (Neyman's $C(\alpha)$) for weak IVs.\\
+  statistics (Neyman's $C(\alpha)$) for weak IVs.
 \item
   \textbf{Sensitivities} to unobserved confounders: omitted variable
   bias expressed in terms of the effect of the confounder on treatment
@@ -1825,22 +1844,22 @@ and many identification strategies:
   \frac{T}{e(H)} - \frac{1-T}{1-e(H)}\]
   for ATE (and
   variants for ATT/ATC/ATO), and their finite-sample instability when $e$
-  is extreme.\\
+  is extreme.
 \item
-  Matching on covariates or propensity scores.\\
+  Matching on covariates or propensity scores.
 \item
   Difference-in-differences and event-study designs under ``parallel
-  trends'' assumptions.\\
+  trends'' assumptions.
 \item
   Instrumental variables and principal stratification (always takers,
-  compliers, never takers, defiers), leading to LATE/CACE.\\
+  compliers, never takers, defiers), leading to LATE/CACE.
 \item
   Front-door adjustment when a measured mediator sits between treatment
   and outcome, and backdoor paths via unobserved confounders can be
-  blocked by combining treatment$\to$mediator and mediator$\to$outcome models.\\
+  blocked by combining treatment$\to$mediator and mediator$\to$outcome models.
 \item
   Mediation analysis: total, controlled, and natural direct/indirect
-  effects.\\
+  effects.
 \item
   Time-varying confounders and treatment-confounder feedback, motivating
   marginal structural models and inverse probability of censoring
@@ -1909,7 +1928,7 @@ This partial order can be used to:
 \tightlist
 \item
   orient otherwise undirected edges in constraint-based algorithms (PC),
-  or\\
+  or
 \item
   constrain search in score-based methods (GES), e.g., by forbidding
   edges that violate the order.
@@ -1958,8 +1977,6 @@ Y) and to constrain or refine the output of PC/GES. This makes LLMs an
 imperfect but usable source of causal \textbf{constraints}, rather than
 an end-to-end solution.
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
-
 \section{7. Graph learning, Laplacians, and Wasserstein
 geometry}\label{graph-learning-laplacians-and-wasserstein-geometry}
 
@@ -1975,7 +1992,7 @@ maximizing a Laplacian-structured Gaussian likelihood with $\ell^1$ sparsity:
 
 \[
 \begin{array}{ll}
-\text{minimize}_L & \operatorname{tr}(LS) - \log\det^\ast L + \alpha\|L\|_{1,\mathrm{off}}\\
+\text{minimize}_L & \operatorname{tr}(LS) - \log\det^\ast L + \alpha\|L\|_{1,\mathrm{off}} \\
 \text{s.t.} & L\mathbf{1}=0,\quad L_{ij}=L_{ji}\le0,\ L\succeq 0.
 \end{array}
 \]
@@ -2018,15 +2035,15 @@ Your notes tie together several ideas:
   matrix from smoothness assumptions: signals x should vary slowly over
   the graph, so minimize $\mathrm{tr}(XLX^\top) =
   \tfrac12\mathrm{tr}(WZ)$ where $Z$ encodes squared distances between
-  samples.\\
+  samples.
 \item
   Enforcing Laplacian constraints (row sums zero, nonpositive
   off-diagonals) and additional priors: degree regularization, target
   number of components via low-rank penalties $(\mathrm{tr}(F^\top L
-  F))$, etc.\\
+  F))$, etc.
 \item
   Robustifying to heavy-tailed data by replacing quadratic forms with
-  $\log(1+\cdot)$ as in Student likelihoods.\\
+  $\log(1+\cdot)$ as in Student likelihoods.
 \item
   Controlling connectivity and degrees (no isolated nodes) via
   constraints like $\operatorname{diag}(L)=1$ or $W\cdot \mathbf{1}=1$.
@@ -2118,7 +2135,7 @@ $(\mathcal{D}_2=\{(x'_j,y'_j)\})$ by optimal transport over an
 \begin{itemize}
 \tightlist
 \item
-  $d_X$ between features (e.g., Euclidean),\\
+  $d_X$ between features (e.g., Euclidean),
 \item
   $d_Y$ between labels, defined via a distance between label-conditional
   feature distributions: \[ d_Y(y,y') =
@@ -2169,31 +2186,35 @@ selection.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{ChatGPT --}
+\itshape
 Next I'll move to:
 
 \begin{itemize}
 \tightlist
 \item
-  Portfolio optimization \& finance\\
+  Portfolio optimization \& finance
 \item
-  Time series forecasting \& non-stationarity\\
+  Time series forecasting \& non-stationarity
 \item
-  Sparse / mechanistic interpretability\\
+  Sparse / mechanistic interpretability
 \item
-  Diffusion \& continuous-time modeling\\
+  Diffusion \& continuous-time modeling
 \item
-  Bandits \& Bayesian optimization\\
+  Bandits \& Bayesian optimization
 \item
-  Trees / rule ensembles / policy learning\\
+  Trees / rule ensembles / policy learning
 \item
-  Evaluation metrics \& change-points / clustering\\
+  Evaluation metrics \& change-points / clustering
 \item
   Misc. optimization / operator-learning topics
 \end{itemize}
+\upshape
 
+\textsc{ChatGPT --}
+\itshape
 Continuing.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\upshape
 
 \section{8. Portfolio optimization, risk measures, and finance
 applications}\label{portfolio-optimization-risk-measures-and-finance-applications}
@@ -2211,32 +2232,32 @@ portfolios. It covers:
 \tightlist
 \item
   Stylized facts (non-stationarity, volatility clustering, fat tails,
-  leverage, cross-sectional dependence).\\
+  leverage, cross-sectional dependence).
 \item
   Mean-variance and mean--risk formulations, with \textbf{fractional
   programs} for Sharpe and Kelly criteria. Fractional objectives are
   handled via bisection, Dinkelbach's transform, or Schaible's
-  perspective transform, turning them into convex problems.\\
+  perspective transform, turning them into convex problems.
 \item
   Shrinkage and robust estimation of means and covariances
   (James--Stein, Ledoit--Wolf, OAS, factor models, Black--Litterman),
-  including random matrix pitfalls.\\
+  including random matrix pitfalls.
 \item
   Time-series models (ARMA, GARCH, stochastic volatility, multivariate
   GARCH, DCC) and state-space models (Kalman filters) for volatility and
-  correlation.\\
+  correlation.
 \item
   Graph-based portfolios: constructing MST / TMFG over correlations or
   learned Laplacians, then using hierarchical or Schur methods to
-  combine assets and factors.\\
+  combine assets and factors.
 \item
   Risk measures beyond variance, including VaR, CVaR, EVaR, drawdowns,
   and spectral measures, with conic formulations (CVaR, EVaR) and
-  scenario-based linearizations (MAD, CVaR).\\
+  scenario-based linearizations (MAD, CVaR).
 \item
   Risk parity and risk budgeting portfolios (for variance and more
   general homogeneous risk measures), with convex and non-convex
-  formulations and connections to eigenvalue problems.\\
+  formulations and connections to eigenvalue problems.
 \item
   Robust optimization (stochastic, chance-constrained, worst-case),
   including analytic centers and ``near-optimal centering'' to trade off
@@ -2257,7 +2278,7 @@ Cajas's notes complement Palomar with:
 \begin{itemize}
 \item
   A survey of early work (Markowitz, CAPM, APT, risk parity,
-  hierarchical risk parity, Kelly).\\
+  hierarchical risk parity, Kelly).
 \item
   A catalogue of \textbf{risk measures} (coherent, convex, distortion,
   spectral, deviation, downside, range, drawdown, higher-moment,
@@ -2268,22 +2289,22 @@ Cajas's notes complement Palomar with:
   \item
     Spectral risk measures:
     \[ -\int q_X(u)\,\phi(u)\,du , \] with monotone
-    weights $\phi(u)$.\\
+    weights $\phi(u)$.
   \item
     Entropic risk measures (EVaR):
     \[ \mathrm{EVaR}_\alpha(X)=\inf_{z>0}\frac{1}{z}\log \frac{\mathbb{E}[e^{X/z}]}{\alpha}. \]
   \item
-    Relativistic VaR (RLVaR) based on $\kappa$-logarithms.\\
+    Relativistic VaR (RLVaR) based on $\kappa$-logarithms.
   \item
     Tail Gini and CVaR ranges.
   \end{itemize}
 \item
   Constrained optimization formulations (including turnover, transaction
   costs, market impact, cardinality, minimum position sizes), often via
-  mixed-integer programs or conic formulations.\\
+  mixed-integer programs or conic formulations.
 \item
   Risk parity and hierarchical risk parity variants, including nested
-  cluster optimization.\\
+  cluster optimization.
 \item
   E/S-style and factor-based constraints represented as graph or factor
   penalties.
@@ -2304,11 +2325,11 @@ A collection of chapters on:
 \tightlist
 \item
   Bayesian portfolios (including Black--Litterman, hierarchical priors,
-  and Kalman filtering for dynamic portfolios).\\
+  and Kalman filtering for dynamic portfolios).
 \item
-  Machine-learning-assisted allocations.\\
+  Machine-learning-assisted allocations.
 \item
-  Factor models and nontraditional risk measures.\\
+  Factor models and nontraditional risk measures.
 \item
   Case studies in equities, FX, and alternatives.
 \end{itemize}
@@ -2337,7 +2358,7 @@ where the \textbf{relevance} $r_i(x)$ decomposes into:
 \item
   a similarity term:
   $-\tfrac12(x_i-x)^\top V^{-1}(x_i-x)$, i.e., minus
-  Mahalanobis distance, and\\
+  Mahalanobis distance, and
 \item
   an informativeness term: half the sum of informativeness of $x$ and
   $x_i$, measuring distance to the training mean.
@@ -2363,11 +2384,11 @@ These papers build on the relevance representation:
 \begin{itemize}
 \item
   For each observation $x_t$, compute OLS-based relevance weights over
-  the training set.\\
+  the training set.
 \item
   To improve robustness and interpretability, instead of using all
   training points, restrict to those with relevance above a threshold
-  $r^*$, and rescale weights to preserve average leverage.\\
+  $r^*$, and rescale weights to preserve average leverage.
 \item
   On a \textbf{grid} of relevance thresholds and variable subsets,
   compute ``partial-sample'' regressions and record:
@@ -2375,10 +2396,10 @@ These papers build on the relevance representation:
   \begin{itemize}
   \tightlist
   \item
-    Fit $R^2$,\\
+    Fit $R^2$,
   \item
     Asymmetry (difference between fit on high- vs low-relevance
-    subsamples), and\\
+    subsamples), and
   \item
     Adjusted fit = (\#variables) $\times$ (fit + asymmetry).
   \end{itemize}
@@ -2446,7 +2467,7 @@ proposes approximations:
 \tightlist
 \item
   Replace return variance with linear risk proxies (e.g., $\min_t
-  \sum_i r_{it} w_i$) or absolute deviations).\\
+  \sum_i r_{it} w_i$) or absolute deviations).
 \item
   Use mixed-integer formulations to enforce simple constraints on
   drawdown or on the number of assets.
@@ -2482,7 +2503,7 @@ seen as:
 \tightlist
 \item
   A small number of \textbf{price factors} (risk/taste-driven,
-  persistent premia), and\\
+  persistent premia), and
 \item
   Many \textbf{attribution factors} (backward-looking decompositions of
   returns with zero unconditional premia).
@@ -2505,7 +2526,7 @@ text:
 \item
   Recommender-style: log portfolio weights $ \log w_{ui}
   \approx \langle \phi_u,\phi_i\rangle$ where $u$ is an investor, $i$ an
-  asset.\\
+  asset.
 \item
   Word2vec/BERT-style: order assets in a portfolio by weight, treat them
   as ``sentences'', and learn context embeddings.
@@ -2534,7 +2555,7 @@ quantified via:
 \begin{itemize}
 \tightlist
 \item
-  Autocorrelation $\beta$ = $\mathrm{cov}(p_t,p_{t-1}) / \mathrm{var}(p)$, or\\
+  Autocorrelation $\beta$ = $\mathrm{cov}(p_t,p_{t-1}) / \mathrm{var}(p)$, or
 \item
   Predictability $\nu =
   \dfrac{\mathrm{Var}(\hat p_t)}{\mathrm{Var}(p_t)}$.
@@ -2662,7 +2683,7 @@ interpretable alternative to deep nets.
 \textbf{The adaptive lasso and its oracle properties}\\
 H. Zou (2006)
 
-Adaptive lasso applies variable-adaptive $\ell^1$ penalties, e.g.\\
+Adaptive lasso applies variable-adaptive $\ell^1$ penalties, e.g.
 \begin{align*}
   \hat\beta &= \operatorname*{Argmin}_\beta \|y - X\beta\|_2^2 +
   \lambda\sum_i w_i\,|\beta_i|
@@ -2685,8 +2706,8 @@ P. Goulet Colombe et al.
 
 Shows that forecasts of many ML models (ridge, kernel ridge, nets,
 random forests, boosting) can be written as \textbf{linear combinations
-of training labels}:\\
-\[ \hat y_j = \sum_{i\in \text{Train}} w_{ij}\, y_i. \]\\
+of training labels}:
+\[ \hat y_j = \sum_{i\in \text{Train}} w_{ij}\, y_i. \]
 These weights can be interpreted as a ``data portfolio'' for each test
 point. The authors propose diagnostics such as contributions
 $c_{ij}=w_{ij}y_i$, weight concentration, negative-weight mass,
@@ -2719,10 +2740,10 @@ A simple regime approach:
 \tightlist
 \item
   Select a small set of macro/market variables (S\&P 500, term spreads,
-  short rates, oil, copper, VIX, stock--bond correlation).\\
+  short rates, oil, copper, VIX, stock--bond correlation).
 \item
   Measure Euclidean similarity between today's state and the historical
-  states.\\
+  states.
 \item
   Examine subsequent returns of assets that historically out- or
   under-performed in similar environments.
@@ -2777,31 +2798,35 @@ offer more realistic ways to decide when, and on whom, to bet.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{ChatGPT --}
+\itshape
 Due to length, I'll stop here. Remaining topics to cover (in the same
 way):
 
 \begin{itemize}
 \tightlist
 \item
-  Time series forecasting \& non-stationarity\\
+  Time series forecasting \& non-stationarity
 \item
-  Sparse / mechanistic interpretability\\
+  Sparse / mechanistic interpretability
 \item
-  Diffusion \& continuous-time modeling\\
+  Diffusion \& continuous-time modeling
 \item
-  Bandits \& Bayesian optimization\\
+  Bandits \& Bayesian optimization
 \item
   Trees / rule ensembles / policy learning (more general, outside
-  finance)\\
+  finance)
 \item
-  Evaluation metrics \& change-points / clustering\\
+  Evaluation metrics \& change-points / clustering
 \item
   Misc. optimization / operator-learning topics
 \end{itemize}
+\upshape
 
+\textsc{ChatGPT --}
+\itshape
 Continuing.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\upshape
 
 \section{9. Time series forecasting and
 non-stationarity}\label{time-series-forecasting-and-nonstationarity}
@@ -2823,10 +2848,10 @@ that each see different normalizations:
 \tightlist
 \item
   \textbf{Stationary attention}: patch embeddings minus moving averages
-  (remove low-frequency drift).\\
+  (remove low-frequency drift).
 \item
   \textbf{Downsampled attention}: attention between coarse-grained
-  patches to model slow trends.\\
+  patches to model slow trends.
 \item
   \textbf{Cointegrated attention}: attention on raw patches to retain
   long-run dependencies.
@@ -2971,14 +2996,14 @@ A survey of error and scoring metrics for TS forecasting. Emphasizes:
 \begin{itemize}
 \tightlist
 \item
-  Always compare to simple baselines (naïve, seasonal naïve).\\
+  Always compare to simple baselines (naïve, seasonal naïve).
 \item
   Be wary of non-stationarity, seasonality, heteroskedasticity and
-  structural breaks when choosing metrics.\\
+  structural breaks when choosing metrics.
 \item
   For probabilistic forecasts, use \textbf{proper scoring rules} such as
   CRPS or log-likelihood; account for dimensionality (energy scores can
-  be misleading).\\
+  be misleading).
 \item
   Avoid data leakage via improper cross-validation (e.g., rolling vs
   shuffling).
@@ -2997,10 +3022,10 @@ Chronos treats time series like text by:
 \begin{itemize}
 \tightlist
 \item
-  Mean-scaling and \textbf{quantizing} values into discrete tokens.\\
+  Mean-scaling and \textbf{quantizing} values into discrete tokens.
 \item
   Training a T5-style transformer to predict future tokens
-  autoregressively.\\
+  autoregressively.
 \item
   Enhancing training data via \textbf{TSMixup} and \textbf{KernelSynth}
   (Gaussian process--based synthetic series).
@@ -3034,10 +3059,10 @@ Describes the \textbf{maximum entropy bootstrap} for TS, which:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Separates the order of observations from their values.\\
+  Separates the order of observations from their values.
 \item
   Fits a piecewise maximum-entropy distribution consistent with the data
-  (e.g., matching means on intervals).\\
+  (e.g., matching means on intervals).
 \item
   Resamples values from this distribution while preserving the original
   order.
@@ -3060,13 +3085,13 @@ For panel data and deep predictors of returns, they propose a
 \begin{itemize}
 \tightlist
 \item
-  Fit a model $\hat y_{it}$ on returns $r_{it}$.\\
+  Fit a model $\hat y_{it}$ on returns $r_{it}$.
 \item
-  Compute residuals $\varepsilon_{it}$.\\
+  Compute residuals $\varepsilon_{it}$.
 \item
   For each bootstrap, sample a common $\eta_t\sim \mathcal{N}(0,1)$ across assets
   (preserving cross-sectional dependence) and set $r^*_{it} =
-  \hat y_{it} + \eta_t \varepsilon_{it}$.\\
+  \hat y_{it} + \eta_t \varepsilon_{it}$.
 \item
   Fine-tune the model for a few epochs and recompute predictions.
 \end{itemize}
@@ -3105,27 +3130,31 @@ a lone GARCH fit or a single neural network run.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{ChatGPT --}
+\itshape
 Given the length, I'll pause again. Remaining topics:
 
 \begin{itemize}
 \tightlist
 \item
-  Sparse / mechanistic interpretability\\
+  Sparse / mechanistic interpretability
 \item
-  Diffusion \& continuous-time modeling\\
+  Diffusion \& continuous-time modeling
 \item
-  Bandits \& Bayesian optimization\\
+  Bandits \& Bayesian optimization
 \item
-  Trees / rule ensembles / general policy learning\\
+  Trees / rule ensembles / general policy learning
 \item
-  Evaluation metrics \& change-points / clustering\\
+  Evaluation metrics \& change-points / clustering
 \item
   Misc. optimization / operator-learning topics
 \end{itemize}
+\upshape
 
+\textsc{ChatGPT --}
+\itshape
 Continuing.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\upshape
 
 \section{10. Sparse / mechanistic interpretability and
 SAEs}\label{sparse-mechanistic-interpretability-and-saes}
@@ -3163,7 +3192,7 @@ Extends SAE analysis to Google's Gemma-2. They train SAEs over:
 \begin{itemize}
 \tightlist
 \item
-  MLP activations, and\\
+  MLP activations, and
 \item
   Residual stream activations,
 \end{itemize}
@@ -3223,9 +3252,9 @@ A systematic study of design choices for SAEs on LLMs:
 \tightlist
 \item
   \textbf{Top-k activation} (or MultiTopK) instead of $L^1$ penalties to
-  enforce exact sparsity.\\
+  enforce exact sparsity.
 \item
-  Initialize decoder $W_2$ as the transpose of encoder $W_1$.\\
+  Initialize decoder $W_2$ as the transpose of encoder $W_1$.
 \item
   Add an \textbf{auxiliary loss} that reconstructs inputs from
   normally-dead units, to keep more features alive.
@@ -3286,10 +3315,10 @@ monosemantic units. Once trained, one can:
 \begin{itemize}
 \tightlist
 \item
-  Identify important units for a behaviour,\\
+  Identify important units for a behaviour,
 \item
   Extract small ``circuits'' (paths through the transcoder) that
-  reproduce that behaviour, and\\
+  reproduce that behaviour, and
 \item
   Modify or remove them.
 \end{itemize}
@@ -3311,7 +3340,7 @@ behaviours. They show:
 \tightlist
 \item
   Many such circuits can be discovered and labeled (e.g.~``gender
-  bias'', ``refusal'', ``in-character persona'').\\
+  bias'', ``refusal'', ``in-character persona'').
 \item
   Editing them (by ablating or rescaling features) has predictable
   causal effects on model outputs.
@@ -3351,9 +3380,9 @@ LoRE is a model-agnostic local explainer. For a point $x$, it:
 \tightlist
 \item
   Generates a synthetic neighbourhood around $x$ (with a genetic algorithm
-  that seeks informative perturbations near the decision boundary).\\
+  that seeks informative perturbations near the decision boundary).
 \item
-  Trains a decision tree approximating the black box locally.\\
+  Trains a decision tree approximating the black box locally.
 \item
   Extracts a rule describing $x$'s decision and proposes counterfactuals:
   minimal rule changes that flip the predicted label.
@@ -3405,8 +3434,6 @@ years ago, we now have concrete, working tools to ask not just
 \emph{what} models predict, but \emph{which internal features and
 circuits} they use.
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
-
 \section{11. Diffusion, continuous-time flows, and Schrödinger
 bridges}\label{diffusion-continuous-time-flows-and-schruxf6dinger-bridges}
 
@@ -3441,11 +3468,11 @@ The tutorial also:
 \tightlist
 \item
   Relates flows and diffusions via Fokker--Planck: an SDE and its
-  associated ODE have the same marginals but different sample paths.\\
+  associated ODE have the same marginals but different sample paths.
 \item
   Shows how to incorporate constraints (e.g., manifold support $\Omega$ or
   discrete supports) via \textbf{$\Omega$-bridges} or deterministic correction
-  forces.\\
+  forces.
 \item
   Derives relationships between velocity fields, data scores $\nabla \log \rho_t$
   and denoising; Tweedie's formula connects rectified flows to
@@ -3590,8 +3617,6 @@ apart distributions really are. For finance and physics, where both path
 details and tail behaviour matter, these tools provide a richer and more
 controllable framework than GANs or naive flows.
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
-
 \section{12. Bandits, off-policy evaluation, and Bayesian
 optimization}\label{bandits-off-policy-evaluation-and-bayesian-optimization}
 
@@ -3649,11 +3674,11 @@ Covers a range of bandit algorithms:
 \begin{itemize}
 \tightlist
 \item
-  $\varepsilon$-greedy, softmax, pursuit methods.\\
+  $\varepsilon$-greedy, softmax, pursuit methods.
 \item
-  UCB variants (UCB1, UCB-V, etc.).\\
+  UCB variants (UCB1, UCB-V, etc.).
 \item
-  Exp3/Exp4 for adversarial bandits.\\
+  Exp3/Exp4 for adversarial bandits.
 \item
   Contextual extensions and regret bounds.
 \end{itemize}
@@ -3670,9 +3695,9 @@ DynUCB introduces \textbf{clustered LinUCB}:
 \begin{itemize}
 \tightlist
 \item
-  Fit a LinUCB model for each user.\\
+  Fit a LinUCB model for each user.
 \item
-  Periodically cluster the user parameter vectors with k-means.\\
+  Periodically cluster the user parameter vectors with k-means.
 \item
   For each user, use a mixture (or cluster centroid) model to compute
   LinUCB indices.
@@ -3716,7 +3741,7 @@ with \textbf{bootstrap Thompson sampling}:
 \begin{itemize}
 \tightlist
 \item
-  Fit a tree model $f$ to predict rewards from contexts.\\
+  Fit a tree model $f$ to predict rewards from contexts.
 \item
   For Thompson sampling, fit several trees on bootstrap resamples of the
   data and, at each round, randomly pick one tree and choose the arm
@@ -3738,7 +3763,7 @@ Epoch-greedy interleaves exploration and exploitation:
 \tightlist
 \item
   In \textbf{exploration} steps, pick arms uniformly at random and
-  collect data.\\
+  collect data.
 \item
   After enough exploration, in \textbf{exploitation} steps, choose arms
   according to the best policy in a finite policy class, as estimated
@@ -3826,9 +3851,9 @@ where $H$ is the Hessian of the empirical loss. They use this to:
 \begin{itemize}
 \tightlist
 \item
-  Identify training points most responsible for a given prediction.\\
+  Identify training points most responsible for a given prediction.
 \item
-  Construct upweighting approximations of leave-one-out risk.\\
+  Construct upweighting approximations of leave-one-out risk.
 \item
   Build adversarial training points.
 \end{itemize}
@@ -3906,7 +3931,7 @@ $H^{-1}$ with either:
 \tightlist
 \item
   Rank-k Empirical Fisher inverses (using Sherman--Morrison on rank-1
-  updates), or\\
+  updates), or
 \item
   Swapping expectation and inversion to simplify.
 \end{itemize}
@@ -3930,9 +3955,9 @@ multi-step lookahead BO as an RL problem:
 \tightlist
 \item
   State: a set of past queried points and outcomes, embedded by DeepSets
-  and Transformers.\\
+  and Transformers.
 \item
-  Action: a new point to evaluate.\\
+  Action: a new point to evaluate.
 \item
   Reward: improvement in best value, possibly discounted.
 \end{itemize}
@@ -3952,11 +3977,11 @@ Survey of techniques for high-dimensional BO:
 \begin{itemize}
 \tightlist
 \item
-  Random embeddings to low-dimensional subspaces.\\
+  Random embeddings to low-dimensional subspaces.
 \item
-  Additive or axis-aligned assumptions on the objective.\\
+  Additive or axis-aligned assumptions on the objective.
 \item
-  Local BO (e.g.~CMA-ES-like local search framed as BO).\\
+  Local BO (e.g.~CMA-ES-like local search framed as BO).
 \item
   Lengthscale priors scaled with dimension.
 \end{itemize}
@@ -3994,24 +4019,28 @@ dimension) hold.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{ChatGPT --}
+\itshape
 Given the length, I'll stop here. Remaining topics:
 
 \begin{itemize}
 \tightlist
 \item
-  Trees / rule ensembles / policy learning (beyond finance)\\
+  Trees / rule ensembles / policy learning (beyond finance)
 \item
-  Evaluation metrics \& change-points / clustering\\
+  Evaluation metrics \& change-points / clustering
 \item
   Miscellaneous optimization / operator-learning topics
 \end{itemize}
 
 If you'd like, I can proceed to those next, then we'll be done with step
 3.
+\upshape
 
+\textsc{ChatGPT --}
+\itshape
 Continuing.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\upshape
 
 \section{13. Trees, rule ensembles, and policy learning (beyond
 finance)}\label{trees-rule-ensembles-and-policy-learning-beyond-finance}
@@ -4029,9 +4058,9 @@ not globally optimal. Bertsimas and Dunn formulate tree induction as a
 \begin{itemize}
 \tightlist
 \item
-  Binary variables for whether an internal node splits.\\
+  Binary variables for whether an internal node splits.
 \item
-  Binary variables to choose the splitting feature at each node.\\
+  Binary variables to choose the splitting feature at each node.
 \item
   Constraints linking sample assignments, feature tests, and leaf
   labels.
@@ -4056,7 +4085,7 @@ They adapt the MIP formulation to incorporate:
 \tightlist
 \item
   Group fairness constraints (e.g., equal error rates across protected
-  groups), and\\
+  groups), and
 \item
   Fairness penalties in the objective.
 \end{itemize}
@@ -4089,9 +4118,9 @@ an itemset; the algorithm:
 \begin{itemize}
 \tightlist
 \item
-  Explores the itemset lattice,\\
+  Explores the itemset lattice,
 \item
-  Prunes subtrees using upper bounds on attainable accuracy, and\\
+  Prunes subtrees using upper bounds on attainable accuracy, and
 \item
   Guarantees optimal trees under given constraints (max depth, min
   support).
@@ -4136,10 +4165,10 @@ is guided by \textbf{parameter instability tests}:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Fit a model (e.g., linear regression) $Y\sim g(X;\theta)$ in the current node.\\
+  Fit a model (e.g., linear regression) $Y\sim g(X;\theta)$ in the current node.
 \item
   Test whether residuals or score contributions depend on candidate
-  splitters $Z$ (supLM tests, fluctuation tests à la Zeileis \& Hornik).\\
+  splitters $Z$ (supLM tests, fluctuation tests à la Zeileis \& Hornik).
 \item
   If significant instability is detected for some $Z$, split on $Z$ and
   refit models in children.
@@ -4178,9 +4207,9 @@ doubly robust estimates of counterfactual outcomes:
 \tightlist
 \item
   Estimate potential outcomes $\hat Y(0,X)$, $\hat Y(1,X)$ and
-  propensity scores $e(X)$.\\
+  propensity scores $e(X)$.
 \item
-  Construct DR pseudo-outcomes $\Gamma_{it}$ for each treatment $t$.\\
+  Construct DR pseudo-outcomes $\Gamma_{it}$ for each treatment $t$.
 \item
   Build a tree whose leaves assign treatments to maximize accumulated $\Gamma$
   (or minimize cost), subject to tree complexity constraints.
@@ -4200,7 +4229,7 @@ Tackles the joint problem of:
 \tightlist
 \item
   Learning counterfactual models (possibly piecewise linear in leaves),
-  and\\
+  and
 \item
   Learning an optimal treatment policy tree.
 \end{itemize}
@@ -4236,7 +4265,7 @@ into a decision tree that is both accurate and statistically
 \tightlist
 \item
   Fit a tree on pseudo-observations (x, f(x)+noise), where noise
-  promotes exploration near the decision boundary.\\
+  promotes exploration near the decision boundary.
 \item
   Use statistical tests on the Gini index to prune and choose the depth
   and number of pseudo-samples so that splits are likely to be stable
@@ -4258,7 +4287,7 @@ decision trees:
 \begin{itemize}
 \tightlist
 \item
-  Maintain a population of trees.\\
+  Maintain a population of trees.
 \item
   For mutation, prompt the LLM with problem context, existing trees and
   their fitness, and ask it to propose new trees that are different,
@@ -4282,10 +4311,10 @@ to escape this limitation:
 \item
   \textbf{MIP-based exact trees} (Bertsimas \& Dunn, Aghaei et al.,
   Verwer \& Zhang) guarantee optimality under rich constraints,
-  including fairness.\\
+  including fairness.
 \item
   \textbf{Itemset-based search} (DL8.5) leverages frequent patterns to
-  constrain the search.\\
+  constrain the search.
 \item
   \textbf{Model-based trees} (ctree, MOB) integrate parametric models
   and statistical tests into the splitting criterion.
@@ -4300,8 +4329,6 @@ iteratively refine interpretable surrogates.
 The picture is that of a \textbf{continuum between trees as models and
 trees as policies}, with optimization and modern statistical theory
 ensuring that interpretability is no longer synonymous with mediocrity.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{14. Evaluation metrics, clustering comparison, and
 change-point
@@ -4419,11 +4446,11 @@ overlap, fragment, or shift. The proposed metrics allow weighting:
 \begin{itemize}
 \tightlist
 \item
-  Existence (any overlap vs none),\\
+  Existence (any overlap vs none),
 \item
-  Size (how much of the anomaly is covered),\\
+  Size (how much of the anomaly is covered),
 \item
-  Position (early vs late detection), and\\
+  Position (early vs late detection), and
 \item
   Cardinality (penalizing over-fragmentation).
 \end{itemize}
@@ -4443,10 +4470,10 @@ Propose a classification-based change-point method:
 \tightlist
 \item
   For a candidate split time $\tau$, label points before $\tau$ as class 0 and
-  after $\tau$ as class 1.\\
+  after $\tau$ as class 1.
 \item
   Train a random forest (or other classifier) to predict the label from
-  $x_t$.\\
+  $x_t$.
 \item
   Use classification performance (e.g., cross-validated accuracy) as a
   measure of evidence for a change at $\tau$.
@@ -4490,7 +4517,7 @@ human-annotated changepoints. Uses metrics like:
 \begin{itemize}
 \tightlist
 \item
-  Jaccard similarity between sets of detected and true segments,\\
+  Jaccard similarity between sets of detected and true segments,
 \item
   F1@$\delta$, considering detections correct if within $\delta$ of true changepoints.
 \end{itemize}
@@ -4530,8 +4557,6 @@ methods like KCP let us detect distributional shifts in arbitrary
 feature spaces. But van den Burg and Williams remind us that even simple
 methods like PELT, when carefully tuned and benchmarked, can be hard to
 beat.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{15. Miscellaneous optimization and operator-learning
 topics}\label{miscellaneous-optimization-and-operator-learning-topics}
@@ -4580,6 +4605,8 @@ generic
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{Human --}
+\itshape
 Please resume. You still had to write the following section:
 
 \begin{itemize}
@@ -4587,10 +4614,12 @@ Please resume. You still had to write the following section:
 \item
   Miscellaneous optimization / operator-learning topics
 \end{itemize}
+\upshape
 
+\textsc{ChatGPT --}
+\itshape
 Right, I had only sketched that section. I'll now write it properly.
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\upshape
 
 \section{16. Miscellaneous optimization and operator-learning
 topics}\label{miscellaneous-optimization-and-operatorlearning-topics}
@@ -4620,10 +4649,10 @@ The papers formalize:
 \begin{itemize}
 \tightlist
 \item
-  Which symmetries exist for common architectures.\\
+  Which symmetries exist for common architectures.
 \item
   How gradient flow conserves certain quantities (Noether-style) in the
-  presence of symmetries.\\
+  presence of symmetries.
 \item
   Practical schemes that alternate gradient steps with symmetry moves
   (``teleports''), implemented via permutations and rescalings of weight
@@ -4647,7 +4676,7 @@ stochastic heavy ball methods and show:
 \tightlist
 \item
   Under suitable step sizes and friction $\gamma$, the method converges to
-  local minima.\\
+  local minima.
 \item
   Momentum can help escape shallow local minima and accelerate progress
   along flat directions.
@@ -4691,7 +4720,7 @@ and second moments), which is expensive at LLM scale. FRUGAL combines:
 \tightlist
 \item
   \textbf{Stateful} updates in a low-rank subspace: e.g., apply Adam on
-  a subspace spanned by a few basis vectors per layer.\\
+  a subspace spanned by a few basis vectors per layer.
 \item
   \textbf{Stateless} updates elsewhere, e.g., SGD or SignSGD.
 \end{itemize}
@@ -4737,10 +4766,10 @@ Operators (FNO)} represent these operators by:
 \tightlist
 \item
   Encoding the input function via point evaluations or basis
-  coefficients;\\
+  coefficients;
 \item
   Passing through a network (often spectral, e.g., convolution in
-  Fourier space);\\
+  Fourier space);
 \item
   Decoding back to function values on arbitrary grids.
 \end{itemize}
@@ -4904,14 +4933,15 @@ we currently only approximate.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{ChatGPT --}
+\itshape
 This completes step 3: for each topic, I've:
-
 \begin{itemize}
 \tightlist
 \item
-  Identified representative papers,\\
+  Identified representative papers,
 \item
-  Kept title/authors/year (when given), and\\
+  Kept title/authors/year (when given), and
 \item
   Summarized them in a style matching your 2024 notes.
 \end{itemize}
@@ -4920,11 +4950,15 @@ When you are ready, I can proceed to \textbf{step 4}: for each kept
 paper, I will add arXiv or OpenReview URLs where available (linking to
 abstract pages), without adding URLs for non-arXiv / non-OpenReview
 sources.
+\upshape
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\textsc{ChatGPT --}
+\itshape
 I don't have access to web search in this environment, so I can't safely
 look up and confirm exact arXiv or OpenReview URLs for each paper. To
 avoid introducing incorrect links, I'll skip step 4.
+\upshape
 
 \end{document}
