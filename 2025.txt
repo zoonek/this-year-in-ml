@@ -1,8 +1,11 @@
 2025 in Machine Learning
 
 Here is, as every year, a summary of some of the papers and books I read over the past year,
-covering topics such as multiple testing, interpretability, deep learning for time series and tabular data,
+covering topics such as multiple testing, interpretability,
+deep learning for time series and tabular data,
 diffusion, LLMs and causal discovery.
+
+= 2026-01-05_2025_in_ML.png
 
 * Multiple Testing
 
@@ -10,7 +13,7 @@ I will first review the traditional approach to statistical testing,
 including p-values, multiple testing, and sequential testing,
 before presenting the notion of e-value.
 
-** Statistical tests
++ Statistical tests
 
 Statistical tests answer the question "is there something noticeable in my data?".
 More precisely, we start with a description of what we mean by "there is nothing noticeable":
@@ -27,7 +30,7 @@ We can make two types or error:
 type I error, incorrectly rejecting H₀;
 type II error, not rejecting H₀ when we should have.
 
-** p-values
++ p-values
 
 Instead of test statistics (each test has its own distribution,
 so test statistics can be difficult to interpret), we can consider p-values,
@@ -52,7 +55,7 @@ i.e., P[p≤α]≤α for all distributions in H₀.
 (A similar problem happens with discrete distributions:
 the p-values then follow a discrete distribution as well, so it cannot be uniform.)
 
-** FWER and FDR
++ FWER and FDR
 
 There are several ways of generalizing the notion of type I error to multiple tests:
 we can look at the (expected) proportion of type I erorrs in N tests
@@ -105,7 +108,7 @@ or the distribution of the p-values under H₀ and H₁ (local FDR).
   B. Efron (2005)
   https://www.efron.ckirby.su.domains/papers/2005LocalFDR.pdf
 
-** Sequential testing
++ Sequential testing
 
 So far, we assumed we had access to all the data but,
 in many situations, data is progressively collected over time:
@@ -143,7 +146,7 @@ and uses critical values cₜ such that
   J.S. Koopmeiners (2012)
   https://www.biostat.umn.edu/~josephk/courses/pubh8482_fall2012/index.php?page=lectures
 
-** E-values
++ E-values
 
 When data arrives progressively over time, one observation at a time,
 we are tempted to perform the statistical tests continuously and monitor the p-value:
@@ -173,7 +176,7 @@ second, the tests focus on the log-power, rather than the power.
   https://arxiv.org/abs/2410.23614
 
 * Tabular data
-** Deep Learning
++ Deep Learning
 
 Deep learning models are still often seen as inferior to tree-based models
 (gradient descent, random forests)
@@ -267,7 +270,7 @@ may be general enough.
   https://arxiv.org/abs/2301.07573
   https://github.com/vanderschaarlab/synthcity
 
-** Kernel methods
++ Kernel methods
 
 Kernel methods with axis-aware kernels (ℓᵖ) also have that axis-aligned prior.
 For instance, recursive feature machines (RFM)
@@ -310,7 +313,7 @@ where I is a random subset of columns (rows).
 
 * Time series
 
-** Time series forecasts
++ Time series forecasts
 
 All too often, I see plots of time series forecasts
 that just show the time series (value against time)
@@ -324,7 +327,7 @@ This and other pitfalls are explained in more detail in the following review pap
   H. Hewamalage et al. (2022)
   https://arxiv.org/abs/2203.10716
 
-** Metadata
++ Metadata
 
 Since deep learning models can also process text,
 we can provide them, not only with numeric data,
@@ -338,7 +341,7 @@ etc.
   A.R. Williams et al. (2024)
   https://arxiv.org/abs/2410.18959
 
-** Foundation models
++ Foundation models
 
 Foundational time series models have started to appear but,
 so far, they are underwhelming.
@@ -355,7 +358,7 @@ so far, they are underwhelming.
   G. Woo et al. (2024)
   https://arxiv.org/abs/2402.02592
 
-** Synthetic data
++ Synthetic data
 
 Similarly, synthetic time series generation (for instance, in finance),
 is still unconvincing: the models struggle to reproduce some of the
@@ -365,7 +368,7 @@ stylized facts of real data.
   H. Huang et al. (ICLR 2024)
   https://openreview.net/forum?id=CdjnzWsQax
 
-** Non-stationarity
++ Non-stationarity
 
 Most time series models assume that the data is stationary or, at least,
 that it has been pre-processed into stationary time series.
@@ -387,7 +390,7 @@ and then work with standardized data.
   https://openreview.net/forum?id=5BqDSw8r5j
 
 * Interpretability
-** Mechanistic interpretability
++ Mechanistic interpretability
 
 Interpreting large (language) models is tricky:
 here are a few ways in which this can be done.
@@ -411,7 +414,7 @@ The following tutorial gives more details.
   Z. Yao and D. Rai (ICML 2025)
   https://icml.cc/virtual/2025/40007
 
-** SAEs and Transcoders
++ SAEs and Transcoders
 
 Most neurons are polysemantic: they detect several things at the same time,
 i.e., they encode a superposition of features.
@@ -461,7 +464,7 @@ transcoders try to reconstruct the output (of the whole network, or just a subgr
   J. Dunefsky et al. (2024)
   https://arxiv.org/abs/2406.11944
 
-** Interpretable random forests
++ Interpretable random forests
 
 Decision trees are interpretable but often perform poorly;
 conversely, random forests perform well but are not interpretable.
@@ -499,7 +502,7 @@ and end up with a more reliable model.
   Y. Zhou et al. (2018)
   https://arxiv.org/abs/1808.07573
 
-** Relevance
++ Relevance
 
 The output of many models can be expressed as linear combinations of training observations:
 for instance, for a random forest, the forecast is the average of the leaf nodes selected.
@@ -514,7 +517,7 @@ For linear models, this is sometimes called "relevance" forecasting.
   M. Czasonis et al. (2023)
   https://globalmarkets.statestreet.com/research/service/public/v1/article/insights/pdf/v2/d0cdca66-3c68-4fd5-9608-f8953dc0ac78/jfds_relevance_based_prediction.pdf
 
-** Shapley values
++ Shapley values
 
 The Shapley value assesses the importance of an input feature for a model
 by fitting that model on all possible subsets of features,
@@ -532,7 +535,7 @@ or with a large number of features (which gives a result close to the leave-out-
   Y. Kwon and J. Zou (2021)
   https://arxiv.org/abs/2110.14049
 
-** LIME, LRP, Taylor, etc.
++ LIME, LRP, Taylor, etc.
 
 Other ways of interpreting a model include
 layerwise relevance propagation (LRP, also available for attention layers),
@@ -552,7 +555,7 @@ and Taylor expansions.
   G. Montavon et al. (2015)
   https://arxiv.org/abs/1512.02479
 
-** LLM Interpretability
++ LLM Interpretability
 
 When word embeddings appeared, we noticed we could do arithmetic with them,
 for instance, giving the famous equation "king - man + woman = queen".
@@ -572,7 +575,7 @@ or truthfulness (we can tweak the LLM to limit hallucinations).
   https://arxiv.org/abs/2306.03341
 
 * Large Language Models
-** LLMs as optimizers
++ LLMs as optimizers
 
 CMA-ES is a simple, population-based optimization algorithm:
 start with random candidates, sampled from a Gaussian distribution;
@@ -625,7 +628,7 @@ you can ask, not for a solution, but for a Python program to search for a soluti
   B. Georgiev et al. (2025)
   https://arxiv.org/abs/2511.02864
 
-** CoT
++ CoT
 
 Chain-of-Thought (spliting a problem into a linear sequence of steps)
 has been generalized to tree-of-thought (examining several alternatives),
@@ -644,7 +647,7 @@ and graph-of-thought (tree branches can be merged).
   M. Besta et al. (2023)
   https://arxiv.org/abs/2308.09687
 
-** Formal proofs
++ Formal proofs
 
 To ensure that the LLM reasons correctly,
 you can ask it to provide answers in a formal language
@@ -659,7 +662,7 @@ which can then be checked
   Q. Lyu et al. (2023)
   https://arxiv.org/abs/2301.13379
 
-** Tools
++ Tools
 
 The array of tools available to LLMs can include generic tools, such as
 a Python interpreter,
@@ -678,7 +681,7 @@ or a database (for the LLM to store and retrieve the information it may need),
   C. Hu et al. (2023)
   https://arxiv.org/abs/2306.03901
 
-** RAG
++ RAG
 
 To augment your LLM with proprietary and/or up-to-date information,
 you can use RAG (retrieval-augmented generation): put all your documents
@@ -702,7 +705,7 @@ replacing nodes with an LLM-generated summary of their children).
   Y. Gao et al. (2023)
   https://arxiv.org/abs/2312.10997
 
-** Position embeddings
++ Position embeddings
 
 The attention mechanism is permutation-invariant: it should be unsuitable
 for sequence data such as text -- it ignores the order of the words.
@@ -716,7 +719,7 @@ while ALiBi adds position-based penalties to the attention scores.
   O. Press et al. (2021)
   https://arxiv.org/abs/2108.12409
 
-** Transformers
++ Transformers
 
 You can actually train an LLM with bytes instead of tokens,
 if you use hashed n-gram embeddings (for n≤8).
@@ -725,7 +728,7 @@ if you use hashed n-gram embeddings (for n≤8).
   A. Pagnoni et al. (2024)
   https://arxiv.org/abs/2412.09871
 
-** LLMs for non-text data
++ LLMs for non-text data
 
 LLM-like models can also be used for non-text data:
 images (after cutting them into patches), sounds,
@@ -735,7 +738,7 @@ or even items (in a recommendation system).
   Y. Deldjoo et al. (2024)
   https://arxiv.org/abs/2409.15173
 
-** Attacks
++ Attacks
 
 Here are some of the ways people have tried to attack an LLM:
 obfuscate the query by reversing the words or characters;
@@ -759,7 +762,7 @@ ask a weaker but uncensored model to decompose the problematic query into severa
 ask the stronger but censored model to answer those queries,
 ask the weaker but uncensored model to combine them into the final answer.
 
-** Older models
++ Older models
 
 The BERT model is not dead. It is an encoder-only model (used mainly for classification -- LLMs are generative models).
 Improvements include disentangled attention (contents and position embeddings remain separate),
@@ -787,7 +790,7 @@ On some tasks, e.g., open-ended NER (named entity recognition), they can compete
   W. Zhou et al. (2023)
   https://arxiv.org/abs/2308.03279
 
-** Old-school NLP
++ Old-school NLP
 
 Classical (pre-transformers) NLP is not dead: n-grams can be improved
 by considering words as bags of character n-grams,
@@ -808,7 +811,7 @@ Vowpal Wabbit's hashing trick to store the coefficients of the linear model you 
 
 * Training
 
-** LLMs
++ LLMs
 
 Large language models are trained in three steps:
 they first learn to continue a text (next word prediction),
@@ -830,7 +833,7 @@ and mode collapse (too much RL).
   J. Chen et al. (2025)
   https://arxiv.org/abs/2505.13026
 
-** PEFT
++ PEFT
 
 LoRA (low-rank adaptation) is one of the main
 PEFT (parameter-efficient fine-tuning) methods:
@@ -866,7 +869,7 @@ adapters (small feed-forward layers inserted between layers),
 BitFit (only re-train the biases),
 etc.
 
-** Data mixing
++ Data mixing
 
 Large language and vision models require more and more data,
 but data quality matters.
@@ -900,7 +903,7 @@ Second, generated data will be slightly off, and progressively drift away from r
   O. Shumailov et al. (2023)
   https://arxiv.org/abs/2305.17493
 
-** Influence functions
++ Influence functions
 
 Influence functions (the effect, on the loss,
 of upweighting one of the training samples)
@@ -927,7 +930,7 @@ more efficiently.
   A. Chhabra e al. (2025)
   https://arxiv.org/abs/2405.03869
 
-** Model Merging
++ Model Merging
 
 LoRAs are often just added, with weights summing to 1.
 Instead, select which columns to keep from which LoRA by looking at the sparsity of those columns.
@@ -944,7 +947,7 @@ Instead, average highly correlated features (to keep only one copy) and concaten
   G. Stoica et al. (2023)
   https://arxiv.org/abs/2305.03053
 
-** Spectral properties
++ Spectral properties
 
 The spectral properties of a neural network (e.g., the distribution of the singular values
 of the weight matrices, the eigenvalues of the Hessian -- more generally
@@ -962,7 +965,7 @@ this can be used to check how well-trained a network is.
 
 * Optimization
 
-** SGD Variants
++ SGD Variants
 
 The number of optimization algorithms, variants of stochastic gradient descent,
 is exploding, and they become difficult to track. AdamW seems to be the most popular for the moment,
@@ -1005,7 +1008,7 @@ some of the geometry of the loss function.
   Essential AI (2025)
   https://arxiv.org/abs/2505.02222
 
-** LiSSA
++ LiSSA
 
 Second-order optimization methods (Newton and variants, such as L-BFGS)
 are faster in number of iterations, but slower because of the Hessian inverse.
@@ -1018,7 +1021,7 @@ but uses a Taylor expansion of the inverse, without computing the whole Hessian
   N. Agarwal et al. (2017)
   https://arxiv.org/abs/1602.03943
 
-** Bayesian optimization and reinforcement learning
++ Bayesian optimization and reinforcement learning
 
 Bayesian optimization
 keeps track of an estimate of the quality of each possible point,
@@ -1033,7 +1036,7 @@ you could use reinforcement learning for less myopic decisions.
   https://arxiv.org/abs/2411.00171
 
 * Causal Discovery
-** Benchmarks
++ Benchmarks
 
 It is difficult to compare causal discovery algorithms because,
 for most datasets, we do not have a ground truth causal graph:
@@ -1067,7 +1070,7 @@ cooling system of a particle accelerator), river flow, etc.
   G. Stein et al. (2025)
   https://arxiv.org/abs/2503.17452
 
-** Supervised causal discovery
++ Supervised causal discovery
 
 There have been some attempt to train foundational causal discovery models.
 Do not expect them to work well as generic causal discovery models but,
@@ -1087,7 +1090,7 @@ for that domain.
   X. Wang and K. Kording (2022)
   https://arxiv.org/abs/2209.05598
 
-** Causal discovery algorithms
++ Causal discovery algorithms
 
 The classical causal discovery algorithms are
 the PC algorithm, which performs independence and conditional independence test
@@ -1098,7 +1101,7 @@ and the NOTEARS model, which fits a linear model with a differentiable DAG penal
 
 There are now many generalizations or variants of those algorithms.
 
-** Topological Ordering
++ Topological Ordering
 
 Causal discovery, i.e., finding a causal graph from data alone,
 is diffucult. A much easier, and still very useful task,
@@ -1136,7 +1139,7 @@ In particular, there is no need for a DAG constraint.
   R. Massidda et al. (2023)
   https://arxiv.org/abs/2309.08406
 
-** PC
++ PC
 
 The PC algorithm often relies on partial correlation tests,
 but we other conditional independence tests are available.
@@ -1145,7 +1148,7 @@ but we other conditional independence tests are available.
   F. Montagna et al. (2024)
   https://arxiv.org/abs/2407.18755
 
-** GES
++ GES
 
 The GES algorithm is a greedy search: it is suboptimal.
 It can be improved by boosting, i.e., by re-fitting the models after increasing the weights of samples with a bad fit.
@@ -1197,7 +1200,7 @@ with that from the model.
   G. Mosccheryakov et al. (2021)
   https://arxiv.org/abs/2106.01140
 
-** Time series
++ Time series
 
 For time series, classical causal discovery algorithms can be combined with a VAR
 (vector auto-regressive) model or an SVAR (structural VAR, i.e., sparse VAR):
@@ -1211,7 +1214,7 @@ this is what VAR-LiNGAM and DynoTEARS do.
   R. Pamfil et al. (2020)
   https://arxiv.org/abs/2002.00498
 
-** NOTEARS
++ NOTEARS
 
 NOTEARS is a differentiable condition on the adjacency matrix
 of a graph for it to be a DAG.
@@ -1250,7 +1253,7 @@ this is what the DAG-GNN, GranDAG and cGAN models do.
   I. Ng et al. (2019)
   https://arxiv.org/abs/1911.07420
 
-** Pitfalls
++ Pitfalls
 
 When applying causal discovery algorithms, we should be aware of some of their limitations.
 For instance, they implicitly assume that the true causal graph is sparse:
@@ -1276,7 +1279,7 @@ and the algorithm will try to account for them by adding spurious edges.
   B. Huang et al. (2018)
   https://www.kdd.org/kdd2018/accepted-papers/view/generalized-score-functions-for-causal-discovery
 
-** LLMs and causality
++ LLMs and causality
 
 There have been attempts to check if LLM already knew, or could learn,
 how to apply the PC algorithm, or the rules of do-calculus.
@@ -1297,7 +1300,7 @@ but this is inefficient and error-prone.
   A. Jojic et al.
   https://arxiv.org/abs/2303.14310
 
-** Causal discovery: interventional data
++ Causal discovery: interventional data
 
 If you have access to interventional data,
 causal discovery may be easier:
@@ -1315,7 +1318,7 @@ they can be viewed as natural experiments.
   N. Gnecco et al. (2020)
   https://arxiv.org/abs/1908.05097
 
-** Unobserved confounders
++ Unobserved confounders
 
 Another assumption of many causal discovery algorithms
 is the absence of unobserved confounders.
@@ -1345,7 +1348,7 @@ E[Y|do(T=1)]?
   https://www.researchgate.net/publication/365241285_Sensitivity_Analyses_for_Unmeasured_Confounders
   https://r-causal.github.io/tipr/
 
-** Books
++ Books
 
 A. Molak's book is not recent, but I had not read it, and it is still up-to-date.
 If you want an easy-to-read and hands-on introduction to causal inference and causal discovery,
@@ -1378,7 +1381,7 @@ If you are using R, you can also check the following.
   B.A. Brumback (2022)
 
 * Finance
-** Portfolio optimization
++ Portfolio optimization
 
 If you are unfamiliar with portfolio optimization, the following paper covers the basics,
 rather exhaustively, from the simple Markowitz optimization problem
@@ -1419,7 +1422,7 @@ but covers similar topics.
 
 If you only read one of those books, I recommend D. Palomar's.
 
-** Learning graphs from data
++ Learning graphs from data
 
 Given many observations from several variables (e.g., returns for several stocks),
 we may want to represent the relations between those variables
@@ -1459,7 +1462,7 @@ and allow for fat tail distributions.
   D.P. Palomar (2025)
   https://portfoliooptimizationbook.com/
 
-** Jump models
++ Jump models
 
 There are many ways of defining "regimes",
 in particular,
@@ -1489,7 +1492,7 @@ We can also add a sparsity penalty, to perform feature selection.
   D.M. Witten and R. Tibshirani (2010)
   https://pmc.ncbi.nlm.nih.gov/articles/PMC2930825/pdf/nihms201124.pdf
 
-** Learning to rank
++ Learning to rank
 
 The prelude to portfolio construction is often a model forecasting
 future returns, with the L^2 norm as loss function.
@@ -1507,7 +1510,7 @@ with more importance given to the top and bottom ranks
   Enhancing long-short portfolios: a refined approach using learning to rank algorithms
   M. Linger et al. (2025)
 
-** Supervised portfolios
++ Supervised portfolios
 
 Instead of forecasting future returns, future financial ratios, or their ranks,
 we could directly forecast portfolio weights.
@@ -1516,7 +1519,7 @@ we could directly forecast portfolio weights.
   G. Chevalier et al. (2022)
   https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4230955
 
-** Deep Learning in Finance
++ Deep Learning in Finance
 
 Neural networks may not be good predictors of future returns,
 but the latent representations those models provide can nonetheless be useful
@@ -1600,7 +1603,7 @@ diffusion defines a non-optimal transport between the noise distribution and the
 we do not need it to be optimal.
 
 * Other topics
-** Decision trees
++ Decision trees
 
 Decision (and regression) trees are traditionally built greedily:
 find the best way (according to some creterion)
@@ -1641,7 +1644,7 @@ and genetic algorithms.
   T. Liu et al. (2025)
   https://arxiv.org/abs/2503.14217
 
-** Probabilistic forecasts
++ Probabilistic forecasts
 
 Instead of a point forecast, we may prefer a probabilistic forecast:
 not a single value, but a probability distribution (the model can provide it as a parametric distribution,
@@ -1657,7 +1660,7 @@ integrated from 0 to 1.
   É. Marcotte et al. (2023)
   https://arxiv.org/abs/2304.09836
 
-** Calibration
++ Calibration
 
 Probabilistic models do not output a single prediction,
 but a probability distribution of predictions.
@@ -1683,7 +1686,7 @@ and then simply re-calibrate the model.
   E. Berta et al. (2025)
   https://arxiv.org/abs/2501.19195
 
-** Symbolic regression
++ Symbolic regression
 
 Symbolic regression is often performed with genetic algorithms
 or, more recently, with LLMs. Alternatively, we could use reinforcement learning (RL)
@@ -1698,7 +1701,7 @@ but, to allow for more exploration, it should be risk-seeking reinforcement lear
   W. Tenach et al. (2023)
   https://arxiv.org/abs/2303.03192
 
-** Score
++ Score
 
 The score function (the gradient of the logarithm of a probability density),
 which appears in diffusion models,
@@ -1712,7 +1715,7 @@ you can use it to fit unnormalized densities.
   A. Hyvärinen (2005)
   https://jmlr.org/papers/v6/hyvarinen05a.html
 
-** Sparse PCA and CCA
++ Sparse PCA and CCA
 
 It is relatively easy to add constraints or penalties on
 PCA (principal component analysis) or CCA (canonical correlation analysis):
@@ -1726,7 +1729,7 @@ check the authors' code instead, it has a few improvements.)
   http://web4.cs.ucl.ac.uk/staff/d.barber/workshops/amac/sigg.pdf
   https://github.com/chrsigg/nscancor
 
-** Graphs
++ Graphs
 
 When your graph is too large, you may want to shrink it,
 by reducing the number of nodes (coarsening, i.e., merging nodes)
@@ -1738,7 +1741,7 @@ is a simple sparsification method.
   J. Baston et al. (2009)
   http://cs-www.cs.yale.edu/homes/spielman/PAPERS/CACMsparse.pdf
 
-** Low rank approximations
++ Low rank approximations
 
 When we want a parsimonious parametrization of a large matrix,
 we often used a low-rank approximation, A'B.
@@ -1748,7 +1751,7 @@ The FastFood parametrization approximates Gaussian matrices.
   Q. Le et al. (2013)
   https://arxiv.org/abs/1408.3060
 
-** Optimal transport
++ Optimal transport
 
 Optimal transport and the Wasserstein distance are easy to compute in dimension one,
 but much mode expensive in higher dimensions.
