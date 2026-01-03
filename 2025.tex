@@ -95,7 +95,7 @@ diffusion, LLMs and causal discovery.
 For a longer reading list:
 
 \begin{reference}
-  \emph{\url{http://zoonek.free.fr/Ecrits/articles.pdf}}
+  \emph{\emph{\url{http://zoonek.free.fr/Ecrits/articles.pdf}}}
 \end{reference}
 
 \section{Multiple Testing}
@@ -108,28 +108,30 @@ before presenting the notion of e-value.
 
 Statistical tests answer the question ``is there something noticeable in my data?''.
 More precisely, we start with a description of what we mean by ``there is nothing noticeable'':
-this is the null hypotheses, $H_0$ -- a set of probability distributions,
+this is the \d{null hypothesis}, $H_0$ -- a set of probability distributions,
 for instance the set of all probability distributions on $\RR$ with mean zero.
-We then compute a quantity the test statistic,
+We then compute a quantity, the \d{test statistic},
 which has a known distribution(*)
 if the data comes from one of the distributions in $H_0$.
-If the test statistic is above its $1-\alpha$ quantile, for a predefined value of $\alpha$
-(often 5\%), we reject $H_0$ (we claim that there is something noticeable in the data), otherwise, we do not reject $H_0$
+If the test statistic is above its $1-\alpha$ quantile (the \d{critical value}),
+for a predefined value of $\alpha$ (often 5\%),
+we \d{reject} $H_0$ (we claim that there is something noticeable in the data),
+otherwise, we do not reject $H_0$
 (we answer that we do not have enough data to see if there is something noticeable in the data).
 
 We can make two types or error:
-type I error, incorrectly rejecting $H_0$;
-type II error, not rejecting $H_0$ when we should have.
+\d{type I} error, incorrectly rejecting $H_0$;
+\d{type II} error, not rejecting $H_0$ when we should have.
 
 \subsection{p-values}
 
 Instead of test statistics (each test has its own distribution,
-so test statistics can be difficult to interpret), we can consider p-values,
+so test statistics can be difficult to interpret), we can consider \d{p-values},
 i.e., transformations of the test statistics that are uniformly distributed(*) in [0,1]
 if the data comes from $H_0$, and closer to 0 if not.
 
 Note that the p-value is the probability of seeing such an extreme test statistic if the data comes from $H_0$ --
-it is not the probability that $H_0$ is true.
+it is \emph{not} the probability that $H_0$ is true.
 
 Another way of interpreting the p-value is as a random number,
 which either comes from the uniform distribution(*) if $H_0$ is true,
@@ -138,11 +140,11 @@ We have a single observation ($n=1$), we do not know what that unspecified distr
 and we have to decide whether it comes from $H_0$ or not.
 
 (*) We made a simplification in that description: it is not always possible for the p-value to be uniformly distributed.
-For instance, if  the null hypothesis is composite, i.e., if it contains several distributions,
+For instance, if  the null hypothesis is \d{composite}, i.e., if it contains several distributions,
 the distribution of the test statistic and therefore of the p-value may depend on which distribution in $H_0$ the data comes from.
 In this case, we just require that the distribution of the p-values, for each distribution in $H_0$,
-be stochastically greater than Unif(0,1),
-i.e., $P[p\leq\alpha]\leq\alpha$ for all distributions in $H_0$.
+be \d{stochastically greater} than Unif(0,1),
+i.e., $P[p\leq\alpha]\leq\alpha$ for all distributions $P$ in $H_0$.
 (A similar problem happens with discrete distributions:
 the p-values then follow a discrete distribution as well, so it cannot be uniform.)
 
@@ -150,59 +152,62 @@ the p-values then follow a discrete distribution as well, so it cannot be unifor
 
 There are several ways of generalizing the notion of type I error to multiple tests:
 we can look at the (expected) proportion of type I errors in $N$ tests
-(FDR, false discovery rate)
-or at the probability of making one or more type I error in $N$ tests (FWER, family-wise error rate).
+(FDR, \d{false discovery rate})
+or at the probability of making one or more type I error in $N$ tests (FWER, \d{family-wise error rate}).
 If the number of tests is large, it will be difficult to control the FWER.
 
 Adjusting the p-values for the FWER is easy:
-if the tests are independent, use Šidák's adjustment, $p \leftarrow 1 - (1-p)^N$,
-or its approximation, Bonferroni's adjustment, $p \leftarrow Np$.
+if the tests are independent, use \d{Šidák's adjustment},
+\[ p \leftarrow 1 - (1-p)^N, \]
+or its approximation, \d{Bonferroni's adjustment},
+\[ p \leftarrow Np. \]
 
-Those adjustments can be improved if you have the list of p-values (Holm-Bonferroni):
+Those adjustments can be improved if you have the list of p-values (\d{Holm-Bonferroni}):
 sort the p-values (from smallest to largest),
 and adjust them as
-$p_k \leftarrow (N-k+1) p_k$
-(more precisely, $p_k \leftarrow \max \bigl\{ (N-\ell+1) p_\ell , \ \ell \leq k \bigr\}$;
+\[ p_k \leftarrow (N-k+1) p_k \]
+(more precisely, \[ p_k \leftarrow \max \bigl\{ (N-\ell+1) p_\ell , \ \ell \leq k \bigr\}; \]
 the Holm-Šidák adjustment is similar).
 
 For FDR, this is trickier:
-sort the p-values, from the smallest to the largest, and use the Benjamini-Hochberg (BH) adjustment,
-$p_k \leftarrow (N/k) p_k$ 
+sort the p-values, from the smallest to the largest, and use the \d{Benjamini-Hochberg} (BH) adjustment,
+\[ p_k \leftarrow (N/k) p_k \]
 or, more precisely,
-$p_k \leftarrow \min \bigl\{ N p_\ell / \ell , \ \ell \geq k \bigr\}$
-(for dependent tests, the Benjamini-Yekutieli (BHY) adjustment multiplies this by
+\[ p_k \leftarrow \min \bigl\{ N p_\ell / \ell , \ \ell \geq k \bigr\} \]
+(for dependent tests, the \d{Benjamini-Yekutieli} (BHY) adjustment multiplies this by
 $\sum_{k \leq N} 1/k$).
 (Strictly speaking, the BH procedure does not control the FDR, but $P(H_0) \times\text{FDR}$,
 where $P(H_0)$ is unknown, but often close to 1.)
 
 If you have raw data (e.g., model residuals) instead of just p-values,
-you can also use resampling to control the FWER: this will automatically account for dependencies between the tests.
+you can also use \emph{resampling} to control the FWER:
+this will automatically account for dependencies between the tests.
 
 \begin{reference}
-  A reality check for data snooping
+  \emph{A reality check for data snooping}
   H.L. White (2000)
   \url{https://users.ssc.wisc.edu/~behansen/718/White2000.pdf}
 \end{reference}
 
 \begin{reference}
-  Stepwise Multiple Testing as Formalized Data Snooping
+  \emph{Stepwise Multiple Testing as Formalized Data Snooping}
   J.P Romano and M.W. Wolf (2003)
   \url{http://www-stat.wharton.upenn.edu/~steele/Courses/956/Resource/MultipleComparision/RomanoWolf05.pdf}
 \end{reference}
 
 If there is a very large number of tests (tens of thousands),
 we can do have a better FDR control
-by estimating $P(H_0)$ (q-values)
-or the distribution of the p-values under $H_0$ and $H_1$ (local FDR).
+by estimating $P(H_0)$ (\d{q-values})
+or the distribution of the p-values under $H_0$ and $H_1$ (\d{local FDR}).
 
 \begin{reference}
-  Statistical significance for genomewide studies
+  \emph{Statistical significance for genomewide studies}
   J.D. Storey and R. Tibshirani (2003)
   \url{https://genomics.princeton.edu/storeylab/papers/fdringenomics.pdf}
 \end{reference}
 
 \begin{reference}
-  Local false discovery rates
+  \emph{Local false discovery rates}
   B. Efron (2005)
   \url{https://www.efron.ckirby.su.domains/papers/2005LocalFDR.pdf}
 \end{reference}
@@ -217,7 +222,7 @@ a times $1,2,\dots,T$, perform a test each time, and stop collecting data as soo
 Of course, we cannot use the single-test critical values to decide when to reject the null:
 the type I error would be too large.
 
-We can proceed as follows (group sequential design).
+We can proceed as follows (\d{group sequential design}).
 Design the tests so that the test statistics
 form a Brownian motion $S_1,\dots,S_T$,
 $\cov( S_S, S_t ) = \min(s,t)$; 
@@ -230,18 +235,24 @@ from the critical values $c_1,\dots,c_T$
 \[ \alpha = P \bigl[ \exists t \ :\ Z_t \geq c_t \bigr]. \]
 
 If we fix $\alpha$, there are many solutions for the $c_t$'s:
-for instance, we can choose them to be constant (Pocock boundary)
-or (better) to be proportional to $1/\sqrt t$ (O'Brien-Fleming -- early stopping requires stronger evidence).
+for instance, we can choose them to be constant (\d{Pocock boundary})
+or (better) to be proportional to $1/\sqrt t$ (\d{O'Brien-Fleming} --
+early stopping requires stronger evidence).
 It is also possible to adjust the p-values.
 
-More generally, alpha-spending considers a spending function
+More generally, \d{alpha-spending} considers a spending function
 $\alpha: [0,1]\to[0,\alpha]$,
 $\alpha(0)=0$, $\alpha(1)=\alpha$, increasing,
 and uses critical values $c_t$ such that
-\[ P\bigl[ Z_t>c_t, Z_1<c_1, \dots,Z_{t-1}<c_{t-1} \bigr] = \alpha(t/T) - \alpha\bigl((t-1)/T\bigr). \]
+\[
+  P\bigl[ Z_t\!>\!c_t, Z_1\!<\!c_1, \dots,Z_{t-1}\!<\!c_{t-1} \bigr] =
+  \alpha\left( \dfrac tT \right)
+  -
+  \alpha\left( \dfrac{t-1}{T} \right).
+\]
 
 \begin{reference}
-  Sequential analysis testing
+  \emph{Sequential analysis testing}
   J.S. Koopmeiners (2012)
   \url{https://www.biostat.umn.edu/~josephk/courses/pubh8482_fall2012/index.php?page=lectures}
 \end{reference}
@@ -253,28 +264,28 @@ we are tempted to perform the statistical tests continuously and monitor the p-v
 this is p-value peeking -- the p-values are incorrect.
 But they need not be.
 
-Instead of a sequence of p-values, you could build an E-process:
+Instead of a sequence of p-values, you could build an \d{e-process}:
 a stochastic process $(E_t)_t$, such that
 $E\geq0$,
 $E[ E_\tau | H_0 ] \leq 1$ for all stopping times $\tau$,
 and $P[\exists t : E_t \leq 1 / \alpha ] \leq \alpha$.
 They are not too difficult to build, using likelihood ratios
-and a generalization of Kelly's principle,
+and a generalization of \d{Kelly's principle},
 even for composite null hypotheses.
 They also provide (valid) sequences of p-values, and valid sequences of confidence intervals.
 
 There are a few drawbacks, though:
 first, you need more data to reach the same conclusions (but not as much as you could fear);
-second, the tests focus on the log-power, rather than the power.
+second, the tests focus on the \d{log-power}, rather than the power.
 
 \begin{reference}
-  Game theoretic statistics and  sequential anytime valid inference (SAVI):  a martingale theory of evidence
+  \emph{Game theoretic statistics and  sequential anytime valid inference (SAVI):  a martingale theory of evidence}
   (ICML 2025)
   \url{https://slideslive.com/39043357/gametheoretic-statistics-and-sequential-anytimevalid-inference-savi-a-martingale-theory-of-evidence}
 \end{reference}
 
 \begin{reference}
-  Hypothesis testing with e-values
+  \emph{Hypothesis testing with e-values}
   A. Ramdas and R. Wang (2025)
   \url{https://arxiv.org/abs/2410.23614}
 \end{reference}
@@ -285,11 +296,11 @@ second, the tests focus on the log-power, rather than the power.
 Deep learning models are still often seen as inferior to tree-based models
 (gradient descent, random forests)
 for tabular data,
-in part because of their rotation invariance --
-trees are axis-aligned, which often helps them identify structure in tabular data.
+in part because of their \emph{rotation invariance} --
+trees are \emph{axis-aligned}, which often helps them identify structure in tabular data.
 
 \begin{reference}
-  Why do tree-based models still outperform deep learning on tabular data?
+  \emph{Why do tree-based models still outperform deep learning on tabular data?}
   L. Grinsztajn et al. (2022)
   \url{https://arxiv.org/abs/2207.08815}
 \end{reference}
@@ -297,7 +308,7 @@ trees are axis-aligned, which often helps them identify structure in tabular dat
 This may be changing thanks to better pre-processing,
 
 \begin{reference}
-  On embeddings for numerical features  in tabular deep learning
+  \emph{On embeddings for numerical features  in tabular deep learning}
   Y. Gorishniy et al. (2022)
   \url{https://arxiv.org/abs/2203.05556}
 \end{reference}
@@ -305,7 +316,7 @@ This may be changing thanks to better pre-processing,
 transformers,
 
 \begin{reference}
-  Revisiting deep learning models  for tabular data
+  \emph{Revisiting deep learning models  for tabular data}
   Y. Gorishniy et al. (2022)
   \url{https://arxiv.org/abs/2203.05556}
 \end{reference}
@@ -313,7 +324,7 @@ transformers,
 better tuning,
 
 \begin{reference}
-  Well-tuned simple nets  excel on tabular datasets
+  \emph{Well-tuned simple nets  excel on tabular datasets}
   A. Kadra et al. (2021)
   \url{https://arxiv.org/abs/2106.11189}
 \end{reference}
@@ -321,19 +332,19 @@ better tuning,
 and more agressive ensembling.
 
 \begin{reference}
-  TabM: advancing tabular deep learning  with parameter-efficient ensembling
+  \emph{TabM: advancing tabular deep learning  with parameter-efficient ensembling}
   Y. Grishniy et al. (2024)
   \url{https://arxiv.org/abs/2410.24210}
 \end{reference}
 
 \begin{reference}
-  BatchEnsemble: an alternative approach  to efficient ensemble and lifelong learning
+  \emph{BatchEnsemble: an alternative approach  to efficient ensemble and lifelong learning}
   Y. Wen et al. (2020)
   \url{https://arxiv.org/abs/2002.06715}
 \end{reference}
 
 \begin{reference}
-  Packed-Ensembles  for efficient uncertainty estimation
+  \emph{Packed-Ensembles  for efficient uncertainty estimation}
   O. Laurent et al. (2023)
   \url{https://arxiv.org/abs/2210.09184}
 \end{reference}
@@ -343,7 +354,7 @@ or statistical models inside them,
 for instance, a k-NN layer
 
 \begin{reference}
-  TabR: Tabular deep learning  meets nearest neighbours in 2023
+  \emph{TabR: Tabular deep learning  meets nearest neighbours in 2023}
   Y. Gorishniy et al. (2024)
   \url{https://arxiv.org/abs/2307.14338}
 \end{reference}
@@ -354,51 +365,51 @@ which were all over the news for a short while for a reason I did not understand
 are just stacked GAM layers).
 
 \begin{reference}
-  KAN: Kolmogorov-Arnold networks
+  \emph{KAN: Kolmogorov-Arnold networks}
   Z. Liu et al. (2024)
   \url{https://arxiv.org/abs/2404.19756}
 \end{reference}
 
 \begin{reference}
-  Granger causality detection with Kolmogorov-Arnold networks
+  \emph{Granger causality detection with Kolmogorov-Arnold networks}
   H. Lin et al. (2024)
   \url{https://arxiv.org/abs/2412.15373}
 \end{reference}
 
-Foundational tabular data models have started to appear, in particular TabPFN
+\d{Foundational} tabular data models have started to appear, in particular TabPFN
 (but there are still scalability issues).
 
 \begin{reference}
-  Zero-shot meta-learning  for tabular prediction tasks  with adversarially pre-trained transformer
+  \emph{Zero-shot meta-learning  for tabular prediction tasks  with adversarially pre-trained transformer}
   Y. Wu and D.L. Bergman (2025)
   \url{https://arxiv.org/abs/2502.04573}
 \end{reference}
 
 \begin{reference}
-  TabPFN unleashed: a scalable and effective solution to tabular classification problems
+  \emph{TabPFN unleashed: a scalable and effective solution to tabular classification problems}
   S.Y. Liu and H.J. Ye (2025)
   \url{https://arxiv.org/abs/2502.02527}
 \end{reference}
 
 Comparing those models can be problematic: each paper tends to use different benchmarks,
 the largest models may have seen some of the test data,
-and sythnetic data may present artefacts or (when based on resampling)
-may be general enough.
+and synthetic data may present artefacts or (when based on resampling)
+may not be general enough.
 
 \begin{reference}
-  TabArena: a living benchmark for machine learning on tabular data
+  \emph{TabArena: a living benchmark for machine learning on tabular data}
   N. Erickson et al. (2025)
   \url{https://arxiv.org/abs/2506.16791}
 \end{reference}
 
 \begin{reference}
-  TabSDS: a lightweight, fully  non-parametric, and model free approach  for generating synthetic tabular data
+  \emph{TabSDS: a lightweight, fully  non-parametric, and model free approach  for generating synthetic tabular data}
   E.C. Neto (2025)
   \url{https://openreview.net/forum?id=UtlFqRDJKl&noteId=qOfuCQDIyO}
 \end{reference}
 
 \begin{reference}
-  Synthcity: facilitating innovative use cases  of synthetic data in different data modalities
+  \emph{Synthcity: facilitating innovative use cases  of synthetic data in different data modalities}
   Z. Qian et al.
   \url{https://arxiv.org/abs/2301.07573}
   \url{https://github.com/vanderschaarlab/synthcity}
@@ -407,46 +418,46 @@ may be general enough.
 \subsection{Kernel methods}
 
 Kernel methods with axis-aware kernels ($\ell^p$) also have that axis-aligned prior.
-For instance, recursive feature machines (RFM)
+For instance, \d{recursive feature machines} (RFM)
 fit a ridge regression in a warped space,
 $x \mapsto Mx$,
-where $M$ is the average gradient outer product (AGOP)
-\[ \operatorname{Mean} \nabla f(x_i) \nabla(x_i)^\top \]
+where $M$ is the \d{average gradient outer product} (AGOP)
+\[ \operatorname{Mean}_i \nabla f(x_i) \, \nabla(x_i)^\top \]
 whose eigenvectors identify the directions along which the predictor varies the most.
 One can stack such models,
 or use them to recursively partition the data
 (note that training such models does not require backpropagation).
 
 \begin{reference}
-  Mechanism of feature learning in convolution
+  \emph{Mechanism of feature learning in convolution}
   D. Beaglehole et al. (2023)
   \url{https://arxiv.org/abs/2309.00570}
 \end{reference}
 
 \begin{reference}
-  Average gradient outer product  as a mechanism for deep neural collapse
+  \emph{Average gradient outer product  as a mechanism for deep neural collapse}
   D. Beaglehole et al. (2024)
   \url{https://arxiv.org/abs/2402.13728}
 \end{reference}
 
 \begin{reference}
-  xRFM: accurate, scalable and interpretable feature learning models for tabular data
+  \emph{xRFM: accurate, scalable and interpretable feature learning models for tabular data}
   D. Beaglehole et al. (2025)
   \url{https://arxiv.org/abs/2508.10053}
 \end{reference}
 
-Kernel methods do not scale to large datasets, but one can use the Nyström approximation.
+Kernel methods do not scale to large datasets, but we can use the \d{Nyström approximation}.
 \[ A \approx A[:,I] A[I,I]^\dagger A[I,:] \]
 where $I$ is a random subset of columns (rows).
 
 \begin{reference}
-  Towards large kernel models
+  \emph{Towards large kernel models}
   A. Abedsoltan et al. (2023)
   \url{https://arxiv.org/abs/2302.02605}
 \end{reference}
 
 \begin{reference}
-  Randomly pivoted Cholesky:  practical approximation of a kernel matrix  with few entry evaluations
+  \emph{Randomly pivoted Cholesky:  practical approximation of a kernel matrix  with few entry evaluations}
   Y. Chen et al. (2022)
   \url{https://arxiv.org/abs/2207.06503}
 \end{reference}
@@ -464,7 +475,7 @@ even with a simple baseline using the latest available value as forecast.
 This and other pitfalls are explained in more detail in the following review paper.
 
 \begin{reference}
-  Forecast evaluation for data scientists: common pitfalls and best practices
+  \emph{Forecast evaluation for data scientists: common pitfalls and best practices}
   H. Hewamalage et al. (2022)
   \url{https://arxiv.org/abs/2203.10716}
 \end{reference}
@@ -480,7 +491,7 @@ e.g., seasonality for temperatures, weekly patterns and holidays for sales data,
 etc.
 
 \begin{reference}
-  Context is key: a benchmark for forecasting with essential textual information
+  \emph{Context is key: a benchmark for forecasting with essential textual information}
   A.R. Williams et al. (2024)
   \url{https://arxiv.org/abs/2410.18959}
 \end{reference}
@@ -491,19 +502,19 @@ Foundational time series models have started to appear but,
 so far, they are underwhelming.
 
 \begin{reference}
-  TimeFM: A decoder-only foundation model for time-series forecasting
+  \emph{TimeFM: A decoder-only foundation model for time-series forecasting}
   A. Das et al. (2023)
   \url{https://arxiv.org/abs/2310.10688}
 \end{reference}
 
 \begin{reference}
-  Chronos: learning the language of time series
+  \emph{Chronos: learning the language of time series}
   A.F. Ansari et al. (2024)
   \url{https://arxiv.org/abs/2403.07815}
 \end{reference}
 
 \begin{reference}
-  Moirai: Unified Training of Universal Time Series Forecasting Transformers
+  \emph{Moirai: Unified Training of Universal Time Series Forecasting Transformers}
   G. Woo et al. (2024)
   \url{https://arxiv.org/abs/2402.02592}
 \end{reference}
@@ -515,7 +526,7 @@ is still unconvincing: the models struggle to reproduce some of the
 stylized facts of real data.
 
 \begin{reference}
-  Generative learning for financial time series with irregular and scale-invariant patterns
+  \emph{Generative learning for financial time series with irregular and scale-invariant patterns}
   H. Huang et al. (ICLR 2024)
   \url{https://openreview.net/forum?id=CdjnzWsQax}
 \end{reference}
@@ -530,19 +541,19 @@ forecast the mean and variance of the desired output (the continuation of the ti
 and then work with standardized data.
 
 \begin{reference}
-  Dish-TS: a general paradigm for alleviating distribution shift in time series forecasting
+  \emph{Dish-TS: a general paradigm for alleviating distribution shift in time series forecasting}
   W. Fan et al. (2023)
   \url{https://arxiv.org/abs/2302.14829}
 \end{reference}
 
 \begin{reference}
-  Reversible instance normalization  for accurate time-series forecasting  against distribution shift
+  \emph{Reversible instance normalization  for accurate time-series forecasting  against distribution shift}
   T. Kim et al. (2022)
   \url{https://openreview.net/forum?id=cGDAkQo1C0p}
 \end{reference}
 
 \begin{reference}
-  Adaptive normalization  for non-stationary time series forecasting:  a temporal slice perspective
+  \emph{Adaptive normalization  for non-stationary time series forecasting:  a temporal slice perspective}
   Z. Liu et al. (2023)
   \url{https://openreview.net/forum?id=5BqDSw8r5j}
 \end{reference}
@@ -553,8 +564,8 @@ and then work with standardized data.
 Interpreting large (language) models is tricky:
 here are a few ways in which this can be done.
 
-If you want to check if a given feature is present
-in a network, and where, you can train a probe (a simple, shallow neural network)
+If you want to check if a given \d{feature} is present
+in a network, and where, you can train a \d{probe} (a simple, shallow neural network)
 on a given layer: if you can detect the presence or absence of the feature from that layer's activations,
 you can conclude that it was present in that layer.
 
@@ -562,23 +573,23 @@ If you want to know which features are present, without providing a list of poss
 you can pick a neuron and check (manually) on which type of input (e.g., which token)
 it is activated.
 
-Instead of features, one can also look for interpretable circuits:
+Instead of features, one can also look for interpretable \d{circuits}:
 subgraphs of the computation graph (the nodes are layers, or bits of layers, e.g., attention heads)
 performing a given task.
 
 The following tutorial gives more details.
 
 \begin{reference}
-  Mechanistic interpretability  for language models
+  \emph{Mechanistic interpretability  for language models}
   Z. Yao and D. Rai (ICML 2025)
   \url{https://icml.cc/virtual/2025/40007}
 \end{reference}
 
 \subsection{SAEs and Transcoders}
 
-Most neurons are polysemantic: they detect several things at the same time,
-i.e., they encode a superposition of features.
-To account for this, you can learn a sparse auto-encoder (SAE) on the layer of interest:
+Most neurons are \d{polysemantic}: they detect several things at the same time,
+i.e., they encode a \d{superposition} of features.
+To account for this, you can learn a \d{sparse auto-encoder} (SAE) on the layer of interest:
 traditional auto-encoders project their input onto a low-dimensional space (bottleneck)
 and try to reconstruct it; in sparse auto-encoders, the bottleneck layer has a higher dimension than the input,
 but it is penalized to be sparse.
@@ -586,29 +597,29 @@ but it is penalized to be sparse.
 Tricks to improve SAE training include
 TopK activations (to remove the sparsifying penalty),
 auxiliary reconstruction loss (for the reconstruction error from dead latents, to limit their number),
-JumpReLU activation (zero out activations below some threshold),
-Matryoshka loss (several loss terms, for the reconstruction from the first $k_1$, $k_2$, $k_3$, etc. dimensions).
+\d{JumpReLU} activation (zero out activations below some threshold),
+\d{Matryoshka loss} (several loss terms, for the reconstruction from the first $k_1$, $k_2$, $k_3$, etc. dimensions).
 
 \begin{reference}
-  Scaling and evaluating sparse autoencoders
+  \emph{Scaling and evaluating sparse autoencoders}
   L. Gao et al. (2024)
   \url{https://arxiv.org/abs/2406.04093}
 \end{reference}
 
 \begin{reference}
-  Jumping ahead: improving reconstruction fidelity with JumpReLU sparse autoencoders
+  \emph{Jumping ahead: improving reconstruction fidelity with JumpReLU sparse autoencoders}
   S. Rajamanoharan et al. (2024)
   \url{https://arxiv.org/abs/2407.14435}
 \end{reference}
 
 \begin{reference}
-  Learning multi-level features  with Matryoshka sparse autoencoders
+  \emph{Learning multi-level features  with Matryoshka sparse autoencoders}
   B. Bussmann et al. (2025)
   \url{https://arxiv.org/abs/2503.17547}
 \end{reference}
 
 \begin{reference}
-  Matryoshka representation learning
+  \emph{Matryoshka representation learning}
   A. Kusupati et al. (2022)
   \url{https://arxiv.org/abs/2205.13147}
 \end{reference}
@@ -616,24 +627,26 @@ Matryoshka loss (several loss terms, for the reconstruction from the first $k_1$
 To explore pretrained SAEs for Gemma and Claude:
 
 \begin{reference}
-  Gemma Scope: open sparse autoencoders everywhere all at once on Gemma 2
+  \emph{Gemma Scope: open sparse autoencoders everywhere all at once on Gemma 2}
   T. Lieberum et al. (2024)
   \url{https://arxiv.org/abs/2408.05147}
   \url{https://www.neuronpedia.org/gemma-scope-2}
 \end{reference}
 
 \begin{reference}
-  Scaling monosemanticity: extracting interpretable features from Claude 3 Sonnet
+  \emph{Scaling monosemanticity: extracting interpretable features from Claude 3 Sonnet}
   A. Templeton et al. (2024)
   \url{https://transformer-circuits.pub/2024/scaling-monosemanticity/}
 \end{reference}
 
-Transcoders are very similar to SAEs:
-while SAEs try to reconstruct a layer's activations from that layer's activations after going through a wider but sparse layer,
-transcoders try to reconstruct the output (of the whole network, or just a subgraph) from the input after going through a wide but sparse layer.
+\d{Transcoders} are very similar to SAEs:
+while SAEs try to reconstruct a layer's activations from that layer's activations
+after going through a wider but sparse layer,
+transcoders try to reconstruct the output (of the whole network, or just a subgraph)
+from the input after going through a wide but sparse layer.
 
 \begin{reference}
-  Transcoders find  interpretable LLM feature circuits
+  \emph{Transcoders find  interpretable LLM feature circuits}
   J. Dunefsky et al. (2024)
   \url{https://arxiv.org/abs/2406.11944}
 \end{reference}
@@ -643,12 +656,12 @@ transcoders try to reconstruct the output (of the whole network, or just a subgr
 Decision trees are interpretable but often perform poorly;
 conversely, random forests perform well but are not interpretable.
 It is possible to slightly tweak a random forest to make it interpretable:
-after training, extract all the ``rules'' from the random forest
+after training, extract all the \d{rules} from the random forest
 (paths from the root of a tree to a node), only keep the most common ones,
 and use them as predictors in a lasso regression.
 
 \begin{reference}
-  RuleFit: Predictive learning via rule ensembles
+  \emph{RuleFit: Predictive learning via rule ensembles}
   J.H. Friedman nad B.E. Popescu (2008)
   \url{https://arxiv.org/abs/0811.1679}
 \end{reference}
@@ -656,32 +669,31 @@ and use them as predictors in a lasso regression.
 There are many variants of this idea.
 
 \begin{reference}
-  Node Harvest
+  \emph{Node Harvest}
   N. Meinshausen (2010)
   \url{https://arxiv.org/abs/0910.2145}
 \end{reference}
 
 \begin{reference}
-  Sirus: Interpretable random forests via rule extraction
+  \emph{Sirus: Interpretable random forests via rule extraction}
   C. B\'enard et al. (2020)
   \url{https://arxiv.org/abs/2004.14841}
 \end{reference}
 
 \begin{reference}
-  RIPE: Rule induction partitioning estimator: design of an interpretable prediction algorihm
+  \emph{RIPE: Rule induction partitioning estimator: design of an interpretable prediction algorihm}
   V. Margot et al. (2028)
   \url{https://arxiv.org/abs/1807.04602}
 \end{reference}
 
-
-One can also distill a random forest into a decision tree (a ``student tree'').
+One can also \d{distill} a random forest into a decision tree (a student tree).
 Decision trees are notoriously unstable, but if we train them on
 real observations plus noise, we can increase the number of observations,
 better cover the decision boundaries of the teacher model,
 and end up with a more reliable model.
 
 \begin{reference}
-  Approximation trees:  statistical stability in model distillation
+  \emph{Approximation trees:  statistical stability in model distillation}
   Y. Zhou et al. (2018)
   \url{https://arxiv.org/abs/1808.07573}
 \end{reference}
@@ -691,16 +703,16 @@ and end up with a more reliable model.
 The output of many models can be expressed as linear combinations of training observations:
 for instance, for a random forest, the forecast is the average of the leaf nodes selected.
 Those weights measure the importance of each training sample to a given forecasts.
-For linear models, this is sometimes called ``relevance'' forecasting.
+For linear models, this is sometimes called \emph{relevance} forecasting.
 
 \begin{reference}
-  Dual interpretation  of machine learning forecasts
+  \emph{Dual interpretation  of machine learning forecasts}
   P. Goulet Colombe et al. (2024)
   \url{https://arxiv.org/abs/2412.13076}
 \end{reference}
 
 \begin{reference}
-  Relevance-based prediction: a transparent and adaptive alternative to machine learning
+  \emph{Relevance-based prediction: a transparent and adaptive alternative to machine learning}
   M. Czasonis et al. (2023)
   \url{https://globalmarkets.statestreet.com/research/service/public/v1/article/insights/pdf/v2/d0cdca66-3c68-4fd5-9608-f8953dc0ac78/jfds_relevance_based_prediction.pdf}
 \end{reference}
@@ -720,7 +732,7 @@ to focus more on models with a small number of features (and remove the noise fr
 or with a large number of features (which gives a result close to the leave-out-one (LOO) importance).
 
 \begin{reference}
-  Beta Shapley: a unified and noise-reduced data valuation framework for machine learning
+  \emph{Beta Shapley: a unified and noise-reduced data valuation framework for machine learning}
   Y. Kwon and J. Zou (2021)
   \url{https://arxiv.org/abs/2110.14049}
 \end{reference}
@@ -734,19 +746,19 @@ in the neighbourhood of the new sample)
 and Taylor expansions.
 
 \begin{reference}
-  AttnLRP: Attention-aware layer-wise relevance propagation for transformers
+  \emph{AttnLRP: Attention-aware layer-wise relevance propagation for transformers}
   R. Achtibat et al. (2024)
   \url{https://arxiv.org/abs/2402.05602}
 \end{reference}
 
 \begin{reference}
-  Local rule-based explanations  of black box decision systems
+  \emph{Local rule-based explanations  of black box decision systems}
   R. Guidotti et al. (2018)
   \url{https://arxiv.org/abs/1805.10820}
 \end{reference}
 
 \begin{reference}
-  Explaining nonlinear classification decisions with deep Taylor decomposition
+  \emph{Explaining nonlinear classification decisions with deep Taylor decomposition}
   G. Montavon et al. (2015)
   \url{https://arxiv.org/abs/1512.02479}
 \end{reference}
@@ -763,13 +775,13 @@ we can identify directions corresponding to timestamps
 or truthfulness (we can tweak the LLM to limit hallucinations).
 
 \begin{reference}
-  Time is encoded in the weights  of finetuned language models
+  \emph{Time is encoded in the weights  of finetuned language models}
   K. Nylund et al. (2023)
   \url{https://arxiv.org/abs/2312.13401}
 \end{reference}
 
 \begin{reference}
-  Inference-time intervention: eliciting  truthful answers from a language model
+  \emph{Inference-time intervention: eliciting  truthful answers from a language model}
   K. Li et al. (2023)
   \url{https://arxiv.org/abs/2306.03341}
 \end{reference}
@@ -777,7 +789,7 @@ or truthfulness (we can tweak the LLM to limit hallucinations).
 \section{Large Language Models}
 \subsection{LLMs as optimizers}
 
-CMA-ES is a simple, population-based optimization algorithm:
+\d{CMA-ES} is a simple, population-based optimization algorithm:
 start with random candidates, sampled from a Gaussian distribution;
 keep the best ones;
 fit a Gaussian distribution to them;
@@ -791,13 +803,13 @@ give the error to the LLM and ask it to improve the functions it gave;
 iterate until the solutions are satisfactory.
 
 \begin{reference}
-  Data-driven discovery of dynamical systems  in pharmacology using large language models
+  \emph{Data-driven discovery of dynamical systems  in pharmacology using large language models}
   S. Holt et al. (2023)
   \url{https://arxiv.org/abs/2312.04350}
 \end{reference}
 
 \begin{reference}
-  Language model cross-over:  variation through few-shot prompting
+  \emph{Language model cross-over:  variation through few-shot prompting}
   E. Leyerson et al. (2023)
   \url{https://arxiv.org/abs/2302.12170}
 \end{reference}
@@ -806,13 +818,13 @@ The same idea can be used to optimize the prompts for an LLM,
 if you have an objective and automated way of assessing the quality of the answer.
 
 \begin{reference}
-  Optimizing instructions and demonstrations form multi-stage language model programs
+  \emph{Optimizing instructions and demonstrations form multi-stage language model programs}
   K. Opsahl-Ong et al. (2024)
   \url{https://arxiv.org/abs/2406.11695}
 \end{reference}
 
 \begin{reference}
-  DSPy: compiling declarative language model calls into self-improving pipelines
+  \emph{DSPy: compiling declarative language model calls into self-improving pipelines}
   O. Khattab et al. (2023)
   \url{https://arxiv.org/abs/2310.03714}
 \end{reference}
@@ -821,50 +833,50 @@ To solve combinatorial problems or find numeric bounds for some mathematical pro
 you can ask, not for a solution, but for a Python program to search for a solution.
 
 \begin{reference}
-  AlphaEvolve: a coding agent  for scientific and algorithmic discovery
+  \emph{AlphaEvolve: a coding agent  for scientific and algorithmic discovery}
   A. Novikov et al. (2025)
   \url{https://arxiv.org/abs/2506.13131}
 \end{reference}
 
 \begin{reference}
-  OpenEvolve:  an opensource evolutionary coding agent
+  \emph{OpenEvolve:  an opensource evolutionary coding agent}
   A. Sharma (2025)
   \url{https://huggingface.co/blog/codelion/openevolve}
 \end{reference}
 
 \begin{reference}
-  ShinkaEvolve: towards open-ended  and sample-efficient program evolution
+  \emph{ShinkaEvolve: towards open-ended  and sample-efficient program evolution}
   R.T. Lange et al. (2025)
   \url{https://arxiv.org/abs/2509.19349}
 \end{reference}
 
 \begin{reference}
-  Mathematical exploration  and discovery at scale
+  \emph{Mathematical exploration  and discovery at scale}
   B. Georgiev et al. (2025)
   \url{https://arxiv.org/abs/2511.02864}
 \end{reference}
 
-\subsection{CoT}
+\subsection{Chain-of-thought}
 
-Chain-of-Thought (spliting a problem into a linear sequence of steps)
+Chain-of-Thought (CoT, spliting a problem into a linear sequence of steps)
 has been generalized to tree-of-thought (examining several alternatives),
 forest-of-thought (idem, several times in parallel, with voting at the end)
 and graph-of-thought (tree branches can be merged).
 
 \begin{reference}
-  Tree of thoughts: deliberate problem solving with large language models
+  \emph{Tree of thoughts: deliberate problem solving with large language models}
   S. Yao et al. (2023)
   \url{https://arxiv.org/abs/2305.10601}
 \end{reference}
 
 \begin{reference}
-  Forest-of-Thought: scaling test-time compute for enhancing LLM reasoning
+  \emph{Forest-of-Thought: scaling test-time compute for enhancing LLM reasoning}
   Z. Bi et al. (2024)
   \url{https://arxiv.org/abs/2412.09078}
 \end{reference}
 
 \begin{reference}
-  Graph of Thoughts: Solving Elaborate Problems with Large Language Models
+  \emph{Graph of Thoughts: Solving Elaborate Problems with Large Language Models}
   M. Besta et al. (2023)
   \url{https://arxiv.org/abs/2308.09687}
 \end{reference}
@@ -877,13 +889,13 @@ you can ask it to provide answers in a formal language
 which can then be checked
 
 \begin{reference}
-  Baldur: whole-proof generation and repair with large language models
+  \emph{Baldur: whole-proof generation and repair with large language models}
   E. First et al. (2023)
   \url{https://arxiv.org/abs/2303.04910}
 \end{reference}
 
 \begin{reference}
-  Faithful chain-of-thought reasoning
+  \emph{Faithful chain-of-thought reasoning}
   Q. Lyu et al. (2023)
   \url{https://arxiv.org/abs/2301.13379}
 \end{reference}
@@ -896,19 +908,19 @@ other deep learning models (e.g., all those on HuggingFace),
 or a database (for the LLM to store and retrieve the information it may need),
 
 \begin{reference}
-  Executable code actions  elicit better LLM agents
+  \emph{Executable code actions  elicit better LLM agents}
   X. Wang et al. (2024)
   \url{https://arxiv.org/abs/2402.01030}
 \end{reference}
 
 \begin{reference}
-  HuggingGPT: solving AI tasks with ChatGPT and its friends in Hugging Face
+  \emph{HuggingGPT: solving AI tasks with ChatGPT and its friends in Hugging Face}
   Y. Shen et al. (2023)
   \url{https://arxiv.org/abs/2303.17580}
 \end{reference}
 
 \begin{reference}
-  ChatDB: augmenting LLMs  with databases as their symbolic memory
+  \emph{ChatDB: augmenting LLMs  with databases as their symbolic memory}
   C. Hu et al. (2023)
   \url{https://arxiv.org/abs/2306.03901}
 \end{reference}
@@ -916,7 +928,7 @@ or a database (for the LLM to store and retrieve the information it may need),
 \subsection{RAG}
 
 To augment your LLM with proprietary and/or up-to-date information,
-you can use RAG (retrieval-augmented generation): put all your documents
+you can use \d{RAG} (retrieval-augmented generation): put all your documents
 in a database (often, a vector store), retrieve the documents relevant for a query,
 and give it to the LLM, as part of its context.
 The documents may need pre-processing (e.g., with docling,
@@ -925,20 +937,20 @@ and chunking (for large documents, try hierarchical chunking,
 replacing nodes with an LLM-generated summary of their children).
 
 \begin{reference}
-  Docling technical report
+  \emph{Docling technical report}
   C. Auer et al. (2024)
   \url{https://arxiv.org/abs/2408.09869}
   \url{https://github.com/docling-project/docling}
 \end{reference}
 
 \begin{reference}
-  Raptor: recursive abstractive processing  for tree-organized retrieval
+  \emph{Raptor: recursive abstractive processing  for tree-organized retrieval}
   P. Sarthi et al. (2024)
   \url{https://arxiv.org/abs/2401.18059}
 \end{reference}
 
 \begin{reference}
-  Retrieval augmented generation  for large language models: a survey
+  \emph{Retrieval augmented generation  for large language models: a survey}
   Y. Gao et al. (2023)
   \url{https://arxiv.org/abs/2312.10997}
 \end{reference}
@@ -948,13 +960,13 @@ replacing nodes with an LLM-generated summary of their children).
 The attention mechanism is permutation-invariant: it should be unsuitable
 for sequence data such as text -- it ignores the order of the words.
 In spite of that, it is at the heart of the transformer architecture used in LLMs,
-thanks to the addition of a sine (or learned) positional embedding (PE) to the first layer.
+thanks to the addition of a sine (or learned) \d{positional embedding} (PE) to the first layer.
 There are many variants:
-for instance, RoPE multiplies keys and queries with a sine embedding (which rotates them),
-while ALiBi adds position-based penalties to the attention scores.
+for instance, \d{RoPE} multiplies keys and queries with a sine embedding (which rotates them),
+while \d{ALiBi} adds position-based penalties to the attention scores.
 
 \begin{reference}
-  Train short, test long: attention with linear biases enables input length extrapolation
+  \emph{Train short, test long: attention with linear biases enables input length extrapolation}
   O. Press et al. (2021)
   \url{https://arxiv.org/abs/2108.12409}
 \end{reference}
@@ -962,10 +974,10 @@ while ALiBi adds position-based penalties to the attention scores.
 \subsection{Transformers}
 
 You can actually train an LLM with bytes instead of tokens,
-if you use hashed $n$-gram embeddings (for $n\leq8$).
+if you use \emph{hashed} $n$-gram embeddings (for $n\leq8$).
 
 \begin{reference}
-  Byte latent transformer:  patches scale better than tokens
+  \emph{Byte latent transformer:  patches scale better than tokens}
   A. Pagnoni et al. (2024)
   \url{https://arxiv.org/abs/2412.09871}
 \end{reference}
@@ -977,7 +989,7 @@ images (after cutting them into patches), sounds,
 or even items (in a recommendation system).
 
 \begin{reference}
-  Recommendation with generative models
+  \emph{Recommendation with generative models}
   Y. Deldjoo et al. (2024)
   \url{https://arxiv.org/abs/2409.15173}
 \end{reference}
@@ -990,62 +1002,63 @@ fine-tune with prompts violating the terms-of-service of the target LLM and quer
 target the non-text parts of a multimodal model;
 
 \begin{reference}
-  FlipAttack: jailbreal LLMs via flipping
+  \emph{FlipAttack: jailbreal LLMs via flipping}
   Y. Liu et al. (2024)
   \url{https://arxiv.org/abs/2410.02832}
 \end{reference}
 
 \begin{reference}
-  Removing RLHF protections in GPT-4  via fine-tuning
+  \emph{Removing RLHF protections in GPT-4  via fine-tuning}
   Q. Zhan et al. (2023)
   \url{https://arxiv.org/abs/2311.05553}
 \end{reference}
 
 \begin{reference}
-  Abusing images and sounds for indirect instruction injection in multi-modal LLMs
+  \emph{Abusing images and sounds for indirect instruction injection in multi-modal LLMs}
   E. Bagdasaryan et al. (2023)
   \url{https://arxiv.org/abs/2307.10490}
 \end{reference}
 
-The most successful current attacks are decomposition attacks:
+The most successful current attacks are \d{decomposition attacks}:
 ask a weaker but uncensored model to decompose the problematic query into several innocuous queries,
 ask the stronger but censored model to answer those queries,
 ask the weaker but uncensored model to combine them into the final answer.
 
 \subsection{Older models}
 
-The BERT model is not dead. It is an encoder-only model (used mainly for classification -- LLMs are generative models).
+The \d{BERT} model is not dead.
+It is an encoder-only model (used mainly for classification -- LLMs are generative models).
 Improvements include disentangled attention (contents and position embeddings remain separate),
 or different pretext tasks (e.g., replaced token detection instead of masked language modeling).
 
 \begin{reference}
-  DeBERTa: decoding-enhanced BERT  with disentangled attention
+  \emph{DeBERTa: decoding-enhanced BERT  with disentangled attention}
   P. He et al. (2020)
   \url{https://arxiv.org/abs/2006.03654}
 \end{reference}
 
 \begin{reference}
-  Electra: pre-training text encoders  as discriminators rather than generators
+  \emph{Electra: pre-training text encoders  as discriminators rather than generators}
   K. Clark et al. (2020)
   \url{https://arxiv.org/abs/2003.10555}
 \end{reference}
 
 \begin{reference}
-  DeBERTav3: improving DeBERTa  using Electra-style pre-training  with gradient-disentangled embedding sharing
+  \emph{DeBERTav3: improving DeBERTa  using Electra-style pre-training  with gradient-disentangled embedding sharing}
   P. He et al. (2021)
   \url{https://arxiv.org/abs/2111.09543}
 \end{reference}
 
-On some tasks, e.g., open-ended NER (named entity recognition), they can compete with LLMs.
+On some tasks, e.g., \d{open-ended NER} (named entity recognition), they can compete with LLMs.
 
 \begin{reference}
-  GLiNER: generalist model for named entity recognition using bidirectional transformer
+  \emph{GLiNER: generalist model for named entity recognition using bidirectional transformer}
   U. Zaratiana et al. (2024)
   \url{https://arxiv.org/abs/2311.08526}
 \end{reference}
 
 \begin{reference}
-  UniversalNER: targeted distilation  from large language models  for open named entity recognition
+  \emph{UniversalNER: targeted distilation  from large language models  for open named entity recognition}
   W. Zhou et al. (2023)
   \url{https://arxiv.org/abs/2308.03279}
 \end{reference}
@@ -1055,22 +1068,22 @@ On some tasks, e.g., open-ended NER (named entity recognition), they can compete
 Classical (pre-transformers) NLP is not dead: $n$-grams can be improved
 by considering words as bags of character $n$-grams,
 and made scalable by using
-Vowpal Wabbit's hashing trick to store the coefficients of the linear model you train with them.
+Vowpal Wabbit's \d{hashing trick} to store the coefficients of the linear model you train with them.
 
 \begin{reference}
-  Bag of tricks for efficient text classification
+  \emph{Bag of tricks for efficient text classification}
   A. Joulin et al. (2016)
   \url{https://arxiv.org/abs/1607.01759}
 \end{reference}
 
 \begin{reference}
-  FastText.zip:  compressing text classification models
+  \emph{FastText.zip:  compressing text classification models}
   A. Joulin et al. (2016)
   \url{https://arxiv.org/abs/1612.03651}
 \end{reference}
 
 \begin{reference}
-  Enriching word vectors  with subword information
+  \emph{Enriching word vectors  with subword information}
   P. Bojanowski et al. (2016)
   \url{https://arxiv.org/abs/1607.04606}
 \end{reference}
@@ -1081,15 +1094,15 @@ Vowpal Wabbit's hashing trick to store the coefficients of the linear model you 
 
 Large language models are trained in three steps:
 they first learn to continue a text (next word prediction),
-then they learn to behave as an assistant, i.e., to answer user's queries, with supervised fine-tuning (SFT),
-and they are finally aligned to human preferences (do no harm) with reinforcement learning (RL).
+then they learn to behave as an assistant, i.e., to answer user's queries, with \d{supervised fine-tuning} (SFT),
+and they are finally \d{aligned} to human preferences (do no harm) with reinforcement learning (RL).
 
 Instead of SFT+RL, DeepSeek uses SFT+RL+SFT+RL;
-for the reinforcement learning part, it uses GRPO, i.e.,
+for the reinforcement learning part, it uses \d{GRPO}, i.e.,
 it replaces the critic, which had to be trained, with a simple average.
 
 \begin{reference}
-  DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning
+  \emph{DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning}
   \url{https://arxiv.org/abs/2501.12948}
 \end{reference}
 
@@ -1098,50 +1111,50 @@ to avoid overfitting (too much SFT)
 and mode collapse (too much RL).
 
 \begin{reference}
-  Stepwise adaptive integration of supervised  fine-tuning and reinforcement learning  for task-specific LLMs
+  \emph{Stepwise adaptive integration of supervised  fine-tuning and reinforcement learning  for task-specific LLMs}
   J. Chen et al. (2025)
   \url{https://arxiv.org/abs/2505.13026}
 \end{reference}
 
 \subsection{PEFT}
 
-LoRA (low-rank adaptation) is one of the main
-PEFT (parameter-efficient fine-tuning) methods:
+\d{LoRA} (low-rank adaptation) is one of the main
+\d{PEFT} (parameter-efficient fine-tuning) methods:
 instead of fine-tuning all the weights, you only train a low-rank offset to the current (frozen) weights,
 $W+A'B$. There are many variants:
-QLoRA uses quantized weights;
-ReLoRA periodically merges the LoRA weights into the base model and resets them;
-DoRA extends LoRA to continual learning by encouraging updates orthogonal to those of the previous task;
-GaLore reduces the memory requirement of gradient based optimization by replacing the gradients with low-rank approximations.
+\d{QLoRA} uses quantized weights;
+\d{ReLoRA} periodically merges the LoRA weights into the base model and resets them;
+\d{DoRA} extends LoRA to continual learning by encouraging updates orthogonal to those of the previous task;
+\d{GaLore} reduces the memory requirement of gradient based optimization by replacing the gradients with low-rank approximations.
 One can also use $W\odot (A'B)$ instead (for a rank-1 adjustment, this amounts to multiplying
 the inputs of the layer with a scalar,
 different for each coordinate, and multiplying the outputs with a scalar, different for each coordinate)
 
 \begin{reference}
-  FRUGAL: Memory-efficient optimization by reducing state overhead for scalable training
+  \emph{FRUGAL: Memory-efficient optimization by reducing state overhead for scalable training}
   P. Zmushko et al. (2025)
   \url{https://arxiv.org/abs/2411.07837}
 \end{reference}
 
 Another PEFT method, for LLMs, is to learn a prompt prefix: a string that would be prepended to the user query.
-Instead of an actual prompt (a sequence of tokens), it could be a soft prompt: a sequence of embeddings --
+Instead of an actual prompt (a sequence of tokens), it could be a \d{soft prompt}: a sequence of embeddings --
 since this is no longer discrete, it is easier to train, and it can be injected at different levels
 in the network, not just in the input.
 
 \begin{reference}
-  LLaMA-adapter: efficient fine-tuning of language models with zero-init attention
+  \emph{LLaMA-adapter: efficient fine-tuning of language models with zero-init attention}
   R. Zhang et al. (2023)
   \url{https://arxiv.org/abs/2303.16199}
 \end{reference}
 
 \begin{reference}
-  Scaling down to scale up:  a guide to parameter-efficient fine-tuning
+  \emph{Scaling down to scale up:  a guide to parameter-efficient fine-tuning}
   V. Lialin et al. (2023)
   \url{https://arxiv.org/abs/2303.15647}
 \end{reference}
 
 Other PEFT methods include
-adapters (small feed-forward layers inserted between layers),
+\d{adapters} (small feed-forward layers inserted between layers),
 BitFit (only re-train the biases),
 etc.
 
@@ -1149,18 +1162,18 @@ etc.
 
 Large language and vision models require more and more data,
 but data quality matters.
-The training curriculum also matters: easier samples are more useful at the begining (pre-training),
+The training \d{curriculum} also matters: easier samples are more useful at the begining (pre-training),
 harder samples at the end (fine-tuning). They can be identified, for instance, by clustering the data
 (using some embedding) and identifying dense clusters (easier) and more diffuse ones (harder).
 
 \begin{reference}
-  Chameleon: a flexible data-mixing framework for language model pretraining and finetuning
+  \emph{Chameleon: a flexible data-mixing framework for language model pretraining and finetuning}
   W. Xie et al. (2025)
   \url{https://arxiv.org/abs/2505.24844}
 \end{reference}
 
 \begin{reference}
-  Domain2Vec: vectorizing datasets to find  the optimal data mixture without training
+  \emph{Domain2Vec: vectorizing datasets to find  the optimal data mixture without training}
   M. Zhang et al. (2025)
   \url{https://arxiv.org/abs/2506.10952}
 \end{reference}
@@ -1171,7 +1184,7 @@ then learn the best convex combination of their outputs,
 and use this weighting to remix the data.
 
 \begin{reference}
-  MixMin: finding data mixtures  via convex minimization
+  \emph{MixMin: finding data mixtures  via convex minimization}
   A. Thudi et al. (2025)
   \url{https://arxiv.org/abs/2502.10510}
 \end{reference}
@@ -1182,7 +1195,7 @@ distribution tails will progressively disappear.
 Second, generated data will be slightly off, and progressively drift away from real data.
 
 \begin{reference}
-  The curse of recursion: training on  generated data makes models forget
+  \emph{The curse of recursion: training on  generated data makes models forget}
   O. Shumailov et al. (2023)
   \url{https://arxiv.org/abs/2305.17493}
 \end{reference}
@@ -1196,19 +1209,19 @@ They can be computed efficiently (with LiSSA),
 and they can be generalized to groups of observations.
 
 \begin{reference}
-  Understanding black-box predictions  via influence functions
+  \emph{Understanding black-box predictions  via influence functions}
   P.W. Koh and P. Liang (2017)
   \url{https://arxiv.org/abs/1703.04730}
 \end{reference}
 
 \begin{reference}
-  DataInf: efficiently estimating data influence in LoRA-tuned LLMs and diffusion models
+  \emph{DataInf: efficiently estimating data influence in LoRA-tuned LLMs and diffusion models}
   Y. Kwon et al. (2023)
   \url{https://arxiv.org/abs/2310.00902}
 \end{reference}
 
 \begin{reference}
-  On second-order group influence functions  for black-box predictions
+  \emph{On second-order group influence functions  for black-box predictions}
   S. Basu et al. (2020)
   \url{https://arxiv.org/abs/1911.00418}
 \end{reference}
@@ -1217,7 +1230,7 @@ Outlier detection algorithms can provide the same information,
 more efficiently.
 
 \begin{reference}
-  Outlier gradient analysis:  efficiently identifying detrimental  training samples for deep learning
+  \emph{Outlier gradient analysis:  efficiently identifying detrimental  training samples for deep learning}
   A. Chhabra e al. (2025)
   \url{https://arxiv.org/abs/2405.03869}
 \end{reference}
@@ -1228,17 +1241,17 @@ LoRAs are often just added, with weights summing to 1.
 Instead, select which columns to keep from which LoRA by looking at the sparsity of those columns.
 
 \begin{reference}
-  ZipLoRA: any subject in any style  by effectively merging LoRAs
+  \emph{ZipLoRA: any subject in any style  by effectively merging LoRAs}
   V. Shah et al. (2023)
   \url{https://arxiv.org/abs/2311.13600}
 \end{reference}
 
 Merging models (same architecture but different training data and/or tasks) is trickier.
 You could assume that the features are the same, up to a permutation, and try to learn that permutation.
-Instead, average highly correlated features (to keep only one copy) and concatenate the others.
+Instead, average highly correlated features (to keep only one copy of them) and concatenate the others.
 
 \begin{reference}
-  ZipIt! Merging models  from different tasks without training
+  \emph{ZipIt! Merging models  from different tasks without training}
   G. Stoica et al. (2023)
   \url{https://arxiv.org/abs/2305.03053}
 \end{reference}
@@ -1251,14 +1264,14 @@ any matrix you can get from the network) change as the network is trained:
 this can be used to check how well-trained a network is.
 
 \begin{reference}
-  Traditional and heavy-tailed regularization in neural network models
+  \emph{Traditional and heavy-tailed regularization in neural network models}
   C.H. Martin and M.W. Mahoney (2019)
   \url{https://arxiv.org/abs/1901.08276}
   \url{https://github.com/CalculatedContent/WeightWatcher}
 \end{reference}
 
 \begin{reference}
-  Investigating the overlooked Hessian structure: from CNNs to LLMs
+  \emph{Investigating the overlooked Hessian structure: from CNNs to LLMs}
   Q.Y. Tang et al. (2025)
   \url{https://openreview.net/forum?id=o62ZzfCEwZ&noteId=j6GImKzqjc}
 \end{reference}
@@ -1268,10 +1281,11 @@ this can be used to check how well-trained a network is.
 \subsection{SGD Variants}
 
 The number of optimization algorithms, variants of stochastic gradient descent,
-is exploding, and they become difficult to track. AdamW seems to be the most popular for the moment,
+is exploding, and they become difficult to track.
+\d{AdamW} seems to be the most popular for the moment,
 
 \begin{reference}
-  Decoupled Weight Decay Regularization
+  \emph{Decoupled Weight Decay Regularization}
   I. Loshchilov and F. Hutter (2017)
   \url{https://arxiv.org/abs/1711.05101}
 \end{reference}
@@ -1281,7 +1295,7 @@ For instance, the convergence speed of gradient descent itself
 can be improved by adding periodic long steps.
 
 \begin{reference}
-  Provably faster gradient descent via long steps
+  \emph{Provably faster gradient descent via long steps}
   B. Grimmer (2023)
   \url{https://arxiv.org/abs/2307.06324}
 \end{reference}
@@ -1297,7 +1311,7 @@ At the other extreme, SignSGD only uses the sign of the gradient.
 Tools from convex optimization can also be combined with gradient descent.
 
 \begin{reference}
-  Training deep learning models  with norm-constrained LMOs
+  \emph{Training deep learning models  with norm-constrained LMOs}
   T. Pethick et al. (2025)
   \url{https://arxiv.org/abs/2502.07529}
 \end{reference}
@@ -1306,12 +1320,12 @@ Second-order optimization (i.e., Newton's method and its approximations:
 LBFGS, K-FAC, Shampoo, etc.) take the curvature of the loss function into account
 to speed up convergence.
 
-Muon is a first-order method (for models whose weights are matrices and not just vectors),
+\d{Muon} is a first-order method (for models whose weights are matrices and not just vectors),
 which tweaks the gradient matrix to make it orthogonal: this implicitly accounts for
 some of the geometry of the loss function.
 
 \begin{reference}
-  Practical efficiency of Muon for pretraining
+  \emph{Practical efficiency of Muon for pretraining}
   Essential AI (2025)
   \url{https://arxiv.org/abs/2505.02222}
 \end{reference}
@@ -1326,7 +1340,7 @@ but uses a Taylor expansion of the inverse, without computing the whole Hessian
 (it only requires Hessian-vector products).
 
 \begin{reference}
-  Second-order stochastic optimization  for machine learning in linear time
+  \emph{Second-order stochastic optimization  for machine learning in linear time}
   N. Agarwal et al. (2017)
   \url{https://arxiv.org/abs/1602.03943}
 \end{reference}
@@ -1342,7 +1356,7 @@ Instead of looking at one-step-ahead decisions,
 you could use reinforcement learning for less myopic decisions.
 
 \begin{reference}
-  Earl-NO: reinforcement learning  for multi-step lookahead,  high-dimensional Bayesian optimization
+  \emph{Earl-NO: reinforcement learning  for multi-step lookahead,  high-dimensional Bayesian optimization}
   M. Cheon et al. (2024)
   \url{https://arxiv.org/abs/2411.00171}
 \end{reference}
@@ -1355,7 +1369,7 @@ for most datasets, we do not have a ground truth causal graph:
 at best, we have a suspected causal graph from domain knwoledge.
 
 \begin{reference}
-  OCDB: revisiting causal discovery  with a comprehensive benchmark  and evaluation framework
+  \emph{OCDB: revisiting causal discovery  with a comprehensive benchmark  and evaluation framework}
   W. Zhou et al. (2024)
   \url{https://arxiv.org/abs/2406.04598}
 \end{reference}
@@ -1364,7 +1378,7 @@ Synthetic data also has problems: it tends to present artefacts, absent from rea
 that can be leveraged by some of the algorithms.
 
 \begin{reference}
-  CausalTime: realistically generated time series for benchmarking of causal discovery
+  \emph{CausalTime: realistically generated time series for benchmarking of causal discovery}
   Y. Cheng et al. (2023)
   \url{https://arxiv.org/abs/2310.01753}
 \end{reference}
@@ -1375,45 +1389,45 @@ actual physical devices (light tunnel, wind tunnel,
 cooling system of a particle accelerator), river flow, etc.
 
 \begin{reference}
-  The causal chambers: real physical systems  as a testbed for AI methodology
+  \emph{The causal chambers: real physical systems  as a testbed for AI methodology}
   J.L. Gamella et al. (2024)
   \url{https://arxiv.org/abs/2404.11341}
 \end{reference}
 
 \begin{reference}
-  Causal discovery in a complex industrial system: a time series benchmark
+  \emph{Causal discovery in a complex industrial system: a time series benchmark}
   S.W. Mogensen et al. (2023)
   \url{https://arxiv.org/abs/2310.18654}
 \end{reference}
 
 \begin{reference}
-  CausalRivers: scaling up benchmarking of causal discovery for real-world time series
+  \emph{CausalRivers: scaling up benchmarking of causal discovery for real-world time series}
   G. Stein et al. (2025)
   \url{https://arxiv.org/abs/2503.17452}
 \end{reference}
 
 \subsection{Supervised causal discovery}
 
-There have been some attempt to train foundational causal discovery models.
+There have been some attempt to train \d{foundational} causal discovery models.
 Do not expect them to work well as generic causal discovery models but,
 if you have a lot of data from a given domain (with ground truth causal graphs),
 you may be able to use the same approach to train supervised causal discovery models
 for that domain.
 
 \begin{reference}
-  Embracing the blackbox:  heading towards foundation models  for causal discovery from time series data
+  \emph{Embracing the blackbox:  heading towards foundation models  for causal discovery from time series data}
   G. Stein et al. (2024)
   \url{https://arxiv.org/abs/2402.09305}
 \end{reference}
 
 \begin{reference}
-  Sample, estimate, aggregate: a recipe  for causal discovery foundation models
+  \emph{Sample, estimate, aggregate: a recipe  for causal discovery foundation models}
   M. Wu et al. (2024)
   \url{https://arxiv.org/abs/2402.01929}
 \end{reference}
 
 \begin{reference}
-  Learning domain-specific  causal discovery from time series
+  \emph{Learning domain-specific  causal discovery from time series}
   X. Wang and K. Kording (2022)
   \url{https://arxiv.org/abs/2209.05598}
 \end{reference}
@@ -1436,13 +1450,13 @@ is diffucult. A much easier, and still very useful task,
 is to find a topological order consistent with that causal graph.
 
 \begin{reference}
-  Score matching enables causal discovery  of nonlinear additive noise models
+  \emph{Score matching enables causal discovery  of nonlinear additive noise models}
   P. Rolland et al. (2022)
   \url{https://arxiv.org/abs/2203.04413}
 \end{reference}
 
 \begin{reference}
-  Diffusion models for causal discovery  via topological ordering
+  \emph{Diffusion models for causal discovery  via topological ordering}
   P. Sanchez et al.
   \url{https://arxiv.org/abs/2210.06201}
 \end{reference}
@@ -1450,13 +1464,13 @@ is to find a topological order consistent with that causal graph.
 You can just ask an LLM for that topological order,
 
 \begin{reference}
-  Causal inference using LLM-guided discovery
+  \emph{Causal inference using LLM-guided discovery}
   A. Vashishtha et al. (2023)
   \url{https://openreview.net/forum?id=RvmrhrPy7j}
 \end{reference}
 
 \begin{reference}
-  Causal order: the key to leveraging  imperfect experts in causal inference
+  \emph{Causal order: the key to leveraging  imperfect experts in causal inference}
   A. Vashishtha et al. (2024)
   \url{https://arxiv.org/abs/2310.15117}
 \end{reference}
@@ -1464,7 +1478,7 @@ You can just ask an LLM for that topological order,
 or use reinforcement learning (RL).
 
 \begin{reference}
-  Ordering-based causal discovery  with reinforcement learning
+  \emph{Ordering-based causal discovery  with reinforcement learning}
   X. Wang et al. (2021)
   \url{https://arxiv.org/abs/2105.06631}
 \end{reference}
@@ -1474,7 +1488,7 @@ then find a graph consistent with that order, i.e., a triangular adjacency matri
 In particular, there is no need for a DAG constraint.
 
 \begin{reference}
-  Constraint-free structure learning  with smooth acyclic orientations
+  \emph{Constraint-free structure learning  with smooth acyclic orientations}
   R. Massidda et al. (2023)
   \url{https://arxiv.org/abs/2309.08406}
 \end{reference}
@@ -1485,18 +1499,19 @@ The PC algorithm often relies on partial correlation tests,
 but we other conditional independence tests are available.
 
 \begin{reference}
-  Score matching through the roof:  linear, nonlinear, and latent variables  causal discovery
+  \emph{Score matching through the roof:  linear, nonlinear, and latent variables  causal discovery}
   F. Montagna et al. (2024)
   \url{https://arxiv.org/abs/2407.18755}
 \end{reference}
 
 \subsection{GES}
 
-The GES algorithm is a greedy search: it is suboptimal.
-It can be improved by boosting, i.e., by re-fitting the models after increasing the weights of samples with a bad fit.
+The GES algorithm is a \d{greedy search}: it is suboptimal.
+It can be improved by \d{boosting}, i.e.,
+by re-fitting the models after increasing the weights of samples with a bad fit.
 
 \begin{reference}
-  Boosting differentiable causal discovery  via adaptive sample reweighting
+  \emph{Boosting differentiable causal discovery  via adaptive sample reweighting}
   A. Zhang et al. (2023)
   \url{https://arxiv.org/abs/2303.03187}
 \end{reference}
@@ -1504,56 +1519,56 @@ It can be improved by boosting, i.e., by re-fitting the models after increasing 
 One could also replace the greedy search with reinforcement learning.
 
 \begin{reference}
-  Causal discovery with reinforcement learning
+  \emph{Causal discovery with reinforcement learning}
   S. Zhu et al. (2019)
   \url{https://arxiv.org/abs/1906.04477}
 \end{reference}
 
 There is no reason to limit ourselves to an approximate search:
 if the number of variables is small, we can perform an exact search,
-using dynamic programming or, better, A*.
+using \d{dynamic programming} or, better, \d{A*}.
 
 \begin{reference}
-  A* Lasso for learning a sparse Bayesian network structure for continuous variables
+  \emph{A* Lasso for learning a sparse Bayesian network structure for continuous variables}
   J. Xiang and S. Kim (2013)
   \url{https://papers.nips.cc/paper_files/paper/2013/hash/8ce6790cc6a94e65f17f908f462fae85-Abstract.html}
 \end{reference}
 
 \begin{reference}
-  Learning optimal Bayesian networks:  a shortest path perspective
+  \emph{Learning optimal Bayesian networks:  a shortest path perspective}
   C. Yuan and B. Malone (2013)
   \url{https://www.jair.org/index.php/jair/article/view/10835}
 \end{reference}
 
 \begin{reference}
-  Learning optimal Bayesian networks  using A* search
+  \emph{Learning optimal Bayesian networks  using A* search}
   C. Yuan et al. (2011)
   \url{https://www.ijcai.org/Proceedings/11/Papers/364.pdf}
 \end{reference}
 
 As before, we could split the task in two, and first learn a topological order,
 and then use the GES algorithm with edges compatible with that order:
-this is what the CAM algorithm does.
+this is what the \d{CAM} algorithm does.
 
 \begin{reference}
-  CAM: Causal additive models,  high-dimensional order search  and penalized regression
+  \emph{CAM: Causal additive models,  high-dimensional order search  and penalized regression}
   P. Pühlmann et al. (2014)
   \url{https://arxiv.org/abs/1310.1533}
 \end{reference}
 
 If we remove the DAG constraint and allow non-causal interactions (for instance, coming from
-unobserved confounders), we have a structural equation model (SEM).
+unobserved confounders), we have a \d{structural equation model} (SEM).
 They are usually estimated by comparing the sample variance matrix of the data
 with that from the model.
 
 \begin{reference}
-  semopy: a Python package  for structural equation modeling
+  \emph{semopy: a Python package  for structural equation modeling}
   G. Meschcheryakov and A.A. Igolkina (2019)
   \url{https://arxiv.org/abs/1905.09376}
 \end{reference}
 
 \begin{reference}
-  semopy 2: a structural equation modeling package with random effects in Python
+  \emph{semopy 2: a structural equation modeling package with random effects in Python}
   G. Mosccheryakov et al. (2021)
   \url{https://arxiv.org/abs/2106.01140}
 \end{reference}
@@ -1562,16 +1577,16 @@ with that from the model.
 
 For time series, classical causal discovery algorithms can be combined with a VAR
 (vector auto-regressive) model or an SVAR (structural VAR, i.e., sparse VAR):
-this is what VAR-LiNGAM and DynoTEARS do.
+this is what \d{VAR-LiNGAM} and \d{DynoTEARS} do.
 
 \begin{reference}
-  Estimation of a structural vector autoregression model using non-Gaussianity
+  \emph{Estimation of a structural vector autoregression model using non-Gaussianity}
   A. Hyvärinen et al. (2010)
   \url{https://www.jmlr.org/papers/v11/hyvarinen10a.html}
 \end{reference}
 
 \begin{reference}
-  DynoTears:  structure learning from time series data
+  \emph{DynoTears:  structure learning from time series data}
   R. Pamfil et al. (2020)
   \url{https://arxiv.org/abs/2002.00498}
 \end{reference}
@@ -1586,18 +1601,18 @@ with positive coefficients will do -- it turns out that the decreasing coefficie
 of the exponential, which quickly vanish, are not necessary.
 
 \begin{reference}
-  Truncated matrix power iteration  for differentiable DAG learning
+  \emph{Truncated matrix power iteration  for differentiable DAG learning}
   Z. Zhang et al. (2022)
   \url{https://arxiv.org/abs/2208.14571}
 \end{reference}
 
 One can also notice that an adjacency matrix is the adjacency matrix of a DAG iff
-its spectral radius is zero, i.e., if its only eigenvalue is zero:
+its \d{spectral radius} is zero, i.e., if its only eigenvalue is zero:
 indeed, if we re-order the rows and columns with a topological order
 the matrix becomes upper triangular with zeroes on the diagonal.
 
 \begin{reference}
-  Scaling structural learning with NoBears to  infer causal transcriptome networks
+  \emph{Scaling structural learning with NoBears to  infer causal transcriptome networks}
   H.C. Lee et al. (2019)
   \url{https://arxiv.org/abs/1911.00081}
 \end{reference}
@@ -1605,22 +1620,22 @@ the matrix becomes upper triangular with zeroes on the diagonal.
 The NOTEARS penalty was initially used with a linear model but,
 since the model is estimated with deep learning tools (stochastic gradient descent, etc.),
 we can use a nonlinear model instead:
-this is what the DAG-GNN, GranDAG and cGAN models do.
+this is what the \d{DAG-GNN}, \d{GranDAG} and \d{cGAN} models do.
 
 \begin{reference}
-  DAG-GNN: DAG structure learning  with graph neural networks
+  \emph{DAG-GNN: DAG structure learning  with graph neural networks}
   Y. Yu et al. (2019)
   \url{https://arxiv.org/abs/1904.10098}
 \end{reference}
 
 \begin{reference}
-  Gradient-based neural DAG learning
+  \emph{Gradient-based neural DAG learning}
   S. Lachapelle et al. (2019)
   \url{https://arxiv.org/abs/1906.02226}
 \end{reference}
 
 \begin{reference}
-  A graph autoencoder approach  to causal structure learning
+  \emph{A graph autoencoder approach  to causal structure learning}
   I. Ng et al. (2019)
   \url{https://arxiv.org/abs/1911.07420}
 \end{reference}
@@ -1628,21 +1643,21 @@ this is what the DAG-GNN, GranDAG and cGAN models do.
 \subsection{Pitfalls}
 
 When applying causal discovery algorithms, we should be aware of some of their limitations.
-For instance, they implicitly assume that the true causal graph is sparse:
+For instance, they implicitly assume that the true causal graph is \d{sparse}:
 while correct in many domains, it is not the case in all.
 
 \begin{reference}
-  Causal discovery for observational sciences using supervised machine learning
+  \emph{Causal discovery for observational sciences using supervised machine learning}
   A.H. Petersen et al. (2022)
   \url{https://arxiv.org/abs/2202.12813}
 \end{reference}
 
 The PC algorithm is based on conditional independence tests,
-but if there are deterministic relations, everything becomes (conditionally) independent.
-You should remove those variables from your data.
+but if there are \d{deterministic relations}, everything becomes (conditionally) independent.
+You should remove those variables from your data or account for them.
 
 \begin{reference}
-  On causal discovery  in presence of deterministic relations
+  \emph{On causal discovery  in presence of deterministic relations}
   L. Li et al. (2024)
   \url{https://openreview.net/forum?id=jE6VXUhxq9}
 \end{reference}
@@ -1652,7 +1667,7 @@ fitting linear models leaves dependencies between the residuals
 and the algorithm will try to account for them by adding spurious edges.
 
 \begin{reference}
-  Generalized score functions  for causal discovery
+  \emph{Generalized score functions  for causal discovery}
   B. Huang et al. (2018)
   \url{https://www.kdd.org/kdd2018/accepted-papers/view/generalized-score-functions-for-causal-discovery}
 \end{reference}
@@ -1664,13 +1679,13 @@ how to apply the PC algorithm, or the rules of do-calculus.
 The results were disappointing.
 
 \begin{reference}
-  Can large language models  infer causation from correlation?
+  \emph{Can large language models  infer causation from correlation?}
   Z. Jin et al. (2023)
   \url{https://arxiv.org/abs/2306.05836}
 \end{reference}
 
 \begin{reference}
-  CLadder: assessing causal reasoning  in language models
+  \emph{CLadder: assessing causal reasoning  in language models}
   Z. Jin et al. (2023)
   \url{https://arxiv.org/abs/2312.04350}
 \end{reference}
@@ -1679,29 +1694,29 @@ More generally, you can use an LLM to run an algorithm, step by step, unrolling 
 but this is inefficient and error-prone.
 
 \begin{reference}
-  GPT is becoming a Turing machine:  here are some ways to program it
+  \emph{GPT is becoming a Turing machine:  here are some ways to program it}
   A. Jojic et al. (2023)
   \url{https://arxiv.org/abs/2303.14310}
 \end{reference}
 
-\subsection{Causal discovery: interventional data}
+\subsection{Interventional data}
 
 If you have access to interventional data,
 causal discovery may be easier:
 the causal graph is the graph that generalizes best from observational to interventional data.
 
 \begin{reference}
-  Efficient neural causal discovery  without cyclicity constraints
+  \emph{Efficient neural causal discovery  without cyclicity constraints}
   P. Lippe et al. (2021)
   \url{https://arxiv.org/abs/2107.10483}
 \end{reference}
 
 If you do not have interventional data,
-you can try to use extreme observations as proxies for interventions --
-they can be viewed as natural experiments.
+you can try to use \d{extreme observations} as proxies for interventions --
+they can be viewed as \d{natural experiments}.
 
 \begin{reference}
-  Causal discovery in heavy-tailed models
+  \emph{Causal discovery in heavy-tailed models}
   N. Gnecco et al. (2020)
   \url{https://arxiv.org/abs/1908.05097}
 \end{reference}
@@ -1711,10 +1726,10 @@ they can be viewed as natural experiments.
 Another assumption of many causal discovery algorithms
 is the absence of unobserved confounders.
 It is sometimes possible to detect them,
-for instance, with rank conditions.
+for instance, with \d{rank conditions}.
 
 \begin{reference}
-  Causal structure learning in Hawkes processes with complex latent confounder networks
+  \emph{Causal structure learning in Hawkes processes with complex latent confounder networks}
   S. Jin and B. Huang (2025)
   \url{https://arxiv.org/abs/2508.11727}
 \end{reference}
@@ -1722,21 +1737,21 @@ for instance, with rank conditions.
 Some algorithms account for unobserved confounders but, in practice,
 they tell you that there might be a missing confounder
 almost everywhere.
-You may be able to get away with proxies for missing confounders, though.
+You may be able to get away with \d{proxies} for missing confounders, though.
 
 \begin{reference}
-  Deep proxy causal learning and its application to confounded bandit policy evaluation
+  \emph{Deep proxy causal learning and its application to confounded bandit policy evaluation}
   L. Xu et al. (2024)
   \url{https://arxiv.org/abs/2106.03907}
 \end{reference}
 
-If in doubt, you can perform a sensitivity analysis, i.e.,
+If in doubt, you can perform a \d{sensitivity analysis}, i.e.,
 answer the question
 ``how strong should a missing confounder be to change the sign of
 $E\bigl[Y|\text{do}(T=1)\bigr]$''?
 
 \begin{reference}
-  Sensitivity analyses  for unmeasured confounders
+  \emph{Sensitivity analyses  for unmeasured confounders}
   L. D'Agostino McGowan (2022)
   \url{https://www.researchgate.net/publication/365241285_Sensitivity_Analyses_for_Unmeasured_Confounders}
   \url{https://r-causal.github.io/tipr/}
@@ -1749,15 +1764,15 @@ If you want an easy-to-read and hands-on introduction to causal inference and ca
 I recommend it.
 
 \begin{reference}
-  Causal inference and discovery in Python
+  \emph{Causal inference and discovery in Python}
   A. Molak (2023)
 \end{reference}
 
 S. Wager's book focuses on the statistical properties (C)ATE (conditional average treatment effect) estimators
-(S-, T-, X-, R-, DR-learners), stressing the need for cross-fitting.
+(S-, T-, X-, R-, DR-learners), stressing the need for \d{cross-fitting}.
 
 \begin{reference}
-  Causal inference:  a statistical learning approach
+  \emph{Causal inference:  a statistical learning approach}
   S. Wager (2024)
   \url{https://web.stanford.edu/~swager/causal_inf_book.pdf}
 \end{reference}
@@ -1765,7 +1780,7 @@ S. Wager's book focuses on the statistical properties (C)ATE (conditional averag
 V. Chernozhukov's book covers similar topics, and also provides R and Python notebooks.
 
 \begin{reference}
-  Applied causal inference  powered by ML and AI
+  \emph{Applied causal inference  powered by ML and AI}
   V. Chernozhukov et al. (2024)
   \url{https://causalml-book.org/}
 \end{reference}
@@ -1773,14 +1788,14 @@ V. Chernozhukov's book covers similar topics, and also provides R and Python not
 If you are using R, you can also check the following.
 
 \begin{reference}
-  Causal inference in R
+  \emph{Causal inference in R}
   M. Barrett et al. (2025)
   \url{https://r-causal.github.io/causal_workshop_website/}
   \url{https://www.r-causal.org/}
 \end{reference}
 
 \begin{reference}
-  Fundamentals of causal inference with R
+  \emph{Fundamentals of causal inference with R}
   B.A. Brumback (2022)
 \end{reference}
 
@@ -1792,7 +1807,7 @@ rather exhaustively, from the simple Markowitz optimization problem
 to all the constraints and penalty we usually add. It focuses on convex optimization.
 
 \begin{reference}
-  Markowitz portfolio construction at seventy
+  \emph{Markowitz portfolio construction at seventy}
   S. Boyd et al. (2024)
   \url{https://arxiv.org/abs/2401.05080}
 \end{reference}
@@ -1800,18 +1815,18 @@ to all the constraints and penalty we usually add. It focuses on convex optimiza
 Here are a few books, if you want to go beyond those basics.
 
 D. Palomar's book focuses on optimization algorithms beyond convex optimization, in particular
-MM (Majorization-Minimization), SCA (sequential convex approximation),
-ADMM (alternating direction of multipliers), and convex-concave fractional programs.
+MM (\d{Majorization-Minimization}), SCA (\d{sequential convex approximation}),
+\d{ADMM} (alternating direction of multipliers), and convex-concave fractional programs.
 For instance, for a fully-invested, long-only portfolio,
 we cannot add an $L^1$ penalty to make it sparse:
 the fully-invested long-only constraint says that the $L^1$ norm is always 1;
 instead we can use the $L^p$ norm, for $0<p<1$ -- the problem is no longer convex, but just quasi-convex.
 
-The book also has clear chapters on learning graphs from data,
-and on risk parity.
+The book also has clear chapters on \d{learning graphs from data},
+and on \d{risk parity}.
 
 \begin{reference}
-  Portfolio optimization
+  \emph{Portfolio optimization}
   D.P. Palomar (2025)
   \url{https://portfoliooptimizationbook.com/}
 \end{reference}
@@ -1820,7 +1835,7 @@ D. Cajas's book is a catalogue of risk measures,
 with code explaining how to use them in portfolio optimization problems.
 
 \begin{reference}
-  Advanced portfolio optimization
+  \emph{Advanced portfolio optimization}
   D. Cajas (2025)
 \end{reference}
 
@@ -1828,7 +1843,7 @@ M. Noger i Alonso's book is more finance-oriented,
 but covers similar topics.
 
 \begin{reference}
-  Quantitative portfolio optimization: advanced techniques and applications
+  \emph{Quantitative portfolio optimization: advanced techniques and applications}
   M. Noguer i Alonso et al. (2025)
 \end{reference}
 
@@ -1842,41 +1857,41 @@ as a graph.
 A naive way of doing so is to compute the correlation matrix between those variables,
 and add an edge for all correlations above some threshold.
 But this tends to produce a dense graph:
-if variables A and B are correlated, and B and C are correlated, then
-A and C are correlated, even if they are idependent given C.
+if variables $A$ and $B$ are correlated, and $B$ and $C$ are correlated, then
+$A$ and $C$ are correlated, even if they are independent given $C$.
 To address this problem and only keep ``direct'' correlations,
 we can use the partial correlation matrix instead, which tends to be sparser
 (up to sign, scale and diagonal, it is the inverse of the correlation matrix).
-This is what the graphical lasso:
+This is what the \d{graphical lasso}:
 find a matrix close to the inverse of the sample correlation matrix,
 with a sparsity penalty.
 
 \begin{reference}
-  Statistical learning with sparsity, chapter 9
+  \emph{Statistical learning with sparsity, chapter 9}
   T. Hastie et al. (2015)
   \url{https://hastie.su.domains/StatLearnSparsity/}
 \end{reference}
 
-There are variants of this approach, which look for the Laplacian matrix of the graph instead.
+There are variants of this approach, which look for the \d{Laplacian matrix} of the graph instead.
 Intuitively, signals (observations, i.e., rows in the data-frame)
 should vary slowly along the graph.
 We can easily add penalties (for degree, number of components)
 and allow for fat tail distributions.
 
 \begin{reference}
-  Optimization algorithms for graph Laplacian estimation via ADMM anbd MM
+  \emph{Optimization algorithms for graph Laplacian estimation via ADMM anbd MM}
   L. Zhao et al. (2019)
   \url{https://palomar.home.ece.ust.hk/papers/2019/ZhaoWangKumarPalomar-TSP2019.pdf}
 \end{reference}
 
 \begin{reference}
-  Graphical models in heavy-tailed markets
+  \emph{Graphical models in heavy-tailed markets}
   J.V. Cadoso et al. (2021)
   \url{https://openreview.net/forum?id=w1FvEPcwTnI}
 \end{reference}
 
 \begin{reference}
-  Portfolio optimization, chapter 5
+  \emph{Portfolio optimization, chapter 5}
   D.P. Palomar (2025)
   \url{https://portfoliooptimizationbook.com/}
 \end{reference}
@@ -1891,24 +1906,24 @@ K-means is not a good candidate, because it ignores time and would lead to frequ
 but we can add a penalty for regime changes: this is the jump model.
 
 \begin{reference}
-  Regime-aware factor allocation with optimal feature selection
+  \emph{Regime-aware factor allocation with optimal feature selection}
   Bosanic et al. (2025)
 \end{reference}
 
 \begin{reference}
-  Learning hidden Markov models with persistent states by penalizing jumps
+  \emph{Learning hidden Markov models with persistent states by penalizing jumps}
   P. Nystrup et al. (2020)
   \url{https://backend.orbit.dtu.dk/ws/files/255194701/Learning_hidden_Markov_models_with_persistent_states_by_penalizing_jumps_ACCEPTED_ESWA.pdf}
 \end{reference}
 
 \begin{reference}
-  jump-models
+  \emph{jump-models}
   Y. Shu
   \url{https://github.com/Yizhan-Oliver-Shu/jump-models}
 \end{reference}
 
 \begin{reference}
-  Feature selection in jump models
+  \emph{Feature selection in jump models}
   P. Nystrup et al. (2021)
   \url{https://backend.orbit.dtu.dk/ws/portalfiles/portal/266444218/1_s2.0_S0957417421009647_main.pdf}
 \end{reference}
@@ -1916,7 +1931,7 @@ but we can add a penalty for regime changes: this is the jump model.
 We can also add a sparsity penalty, to perform feature selection.
 
 \begin{reference}
-  A framework for feature selection in clustering
+  \emph{A framework for feature selection in clustering}
   D.M. Witten and R. Tibshirani (2010)
   \url{https://pmc.ncbi.nlm.nih.gov/articles/PMC2930825/pdf/nihms201124.pdf}
 \end{reference}
@@ -1931,25 +1946,25 @@ and which will have a large negative return --
 we do not care much about those in the middle.
 This preference is not reflected by the loss function.
 Instead of forecasting returns,
-we could try to rank stocks
+we could try to \emph{rank} stocks
 (learning-to-rank is used in information retrieval systems, such as search engines),
 with more importance given to the top and bottom ranks
 (stocks we may want to buy or sell).
 
 \begin{reference}
-  Enhancing long-short portfolios: a refined approach using learning to rank algorithms
+  \emph{Enhancing long-short portfolios: a refined approach using learning to rank algorithms}
   M. Linger et al. (2025)
 \end{reference}
 
 \subsection{Supervised portfolios}
 
 Instead of forecasting future returns, future financial ratios, or their ranks,
-we could directly forecast portfolio weights.
+we could directly forecast \emph{portfolio weights}.
 
 \begin{reference}
-  Interpretable supervised portfolios
+  \emph{Interpretable supervised portfolios}
   G. Chevalier et al. (2022)
-  \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4230955}
+  \url{https://ssrn.com/abstract=4230955}
 \end{reference}
 
 \subsection{Deep Learning in Finance}
@@ -1960,21 +1975,21 @@ but the latent representations those models provide can nonetheless be useful
 for instance, they can recover industry classifications.
 
 \begin{reference}
-  NeuralFactors: a novel factor learning approach to generative modeling of equities
+  \emph{NeuralFactors: a novel factor learning approach to generative modeling of equities}
   A. Gopal (2024)
   \url{https://arxiv.org/abs/2408.01499}
 \end{reference}
 
-You can also obtain such latent representations from text (news, 10K, etc.) or holding data.
+You can also obtain such latent representations from text (news, 10K, etc.) or \emph{holdings data}.
 
 \begin{reference}
-  Text-based network industries and endogenous product differentiation
+  \emph{Text-based network industries and endogenous product differentiation}
   G. Hoberg and G. Phillips (2009)
   \url{https://ssrn.com/abstract=1520062}
 \end{reference}
 
 \begin{reference}
-  Asset embeddings
+  \emph{Asset embeddings}
   X. Gabaix et al. (2025)
   \url{https://ssrn.com/abstract=4507511}
 \end{reference}
@@ -1984,11 +1999,11 @@ You can also obtain such latent representations from text (news, 10K, etc.) or h
 One-step generative models (GAN, VAE) have been supplanted by iterative ones,
 in particular diffusion, flows and auto-regressive models (GPT).
 
-Diffusion models consider the progressive addition of noise to an image,
+\d{Diffusion} models consider the progressive addition of noise to an image,
 and learn a model to do the opposite, i.e., to remove noise from an image or even,
 to turn noise into an image. Formally, the addition of noise
 can be described with a stochastic differential equation (SDE),
-and diffusion models such as DDPM learn the reverse-time SDE.
+and diffusion models such as \d{DDPM} learn the reverse-time SDE.
 (This can be generalized to non-text data: sound, time series, text, etc.)
 
 Diffusion models also have an interpretation in terms of probability distributions:
@@ -1998,30 +2013,30 @@ between the noise distribution and the data distribution.
 
 But the stochastic differential equation is not the only process leading to that path:
 we can also obtain the same path with an ordinary differential equation (ODE) --
-this is what the DDIM diffusion model does. The probability distributions are the same,
+this is what the \d{DDIM} diffusion model does. The probability distributions are the same,
 but the individual trajectories are not: with SDEs, they were stochastic,
 with ODEs, they are smooth.
 
 There have been a few variants or extensions of those models.
-For instance, classifier-free guidance (CFG) models train a single model
+For instance, \d{classifier-free guidance} (CFG) models train a single model
 which can be used for both conditional and unconditional generation
 (i.e., with or without a prompt); at inference time, we can use
 a linear combination of the conditional and unconditional models,
 with more weight given to the conditional part (more than 100\%).
 
 \begin{reference}
-  Classifier-free diffusion guidance
+  \emph{Classifier-free diffusion guidance}
   J. Ho and T. Salimans (2021)
   \url{https://arxiv.org/abs/2207.12598}
 \end{reference}
 
 While diffusion models have to move step by step to progressively transform the noise ($t=0$) into an image ($t=1$),
-consistency models try to do it all at once, by training a model to transform an image
+\d{consistency models} try to do it all at once, by training a model to transform an image
 with a given amount of noise to an image with another amount of noise (from $t$ to $s$) in one step;
 it can then be used to go from $t=0$ to $t=1$.
 
 \begin{reference}
-  Consistency models
+  \emph{Consistency models}
   Y. Song et al. (2023)
   \url{https://arxiv.org/abs/2303.01469}
 \end{reference}
@@ -2031,11 +2046,11 @@ from the noise distribution to the data distribution. We can use the path
 defined by the denoising SDE, but we could use any other path:
 we only care abour the starting and ending points.
 In particular, we can use an ODE whose trajectories are straight lines:
-this is a rectified flow.
+this is a \d{rectified flow}.
 Going from noise to data can then be done in a single Euler step.
 
 \begin{reference}
-  Continuous time generative models
+  \emph{Continuous time generative models}
   Q. Liu (ICML 2025)
   \url{https://icml.cc/virtual/2025/40011}
 \end{reference}
@@ -2055,31 +2070,31 @@ But, as most greedy approaches, this is suboptimal:
 for instance, a decision tree cannot learn XOR in this way --
 no single split looks good: we need two splits to split the data in a useful way.
 
-Instead, it is actually possible to look for an optimal decision tree;
+Instead, it is actually possible to look for an \d{optimal decision tree};
 optimality can be formulated as a mixed integer program.
 
 \begin{reference}
-  Optimal classification trees
+  \emph{Optimal classification trees}
   D. Bertsimas and J. Dunn (2015)
   \url{https://link.springer.com/article/10.1007/s10994-017-5633-9}
 \end{reference}
 
 \begin{reference}
-  Learning optimal classification trees  using a binary linear program formulation
+  \emph{Learning optimal classification trees  using a binary linear program formulation}
   S. Verwer and Y. Zhang (2019)
   \url{https://ojs.aaai.org/index.php/AAAI/article/view/3978}
 \end{reference}
 
-Other methods to build (nearly) optimal decision trees include frequent itemset mining
+Other methods to build (nearly) optimal decision trees include \d{frequent itemset mining}
 
 \begin{reference}
-  Optimal constraint-based decision tree induction from itemset lattices
+  \emph{Optimal constraint-based decision tree induction from itemset lattices}
   S. Nijssen and E. Fromont (2010)
   \url{https://hal.science/hal-00499436v1/document}
 \end{reference}
 
 \begin{reference}
-  Learning optimal decision trees  using caching branch-and-bound search
+  \emph{Learning optimal decision trees  using caching branch-and-bound search}
   G. Aglin et al. (2020)
   \url{https://ojs.aaai.org/index.php/AAAI/article/view/5711}
 \end{reference}
@@ -2087,13 +2102,13 @@ Other methods to build (nearly) optimal decision trees include frequent itemset 
 and genetic algorithms.
 
 \begin{reference}
-  evtree: evolutionary learning of globally optimal classification and regression trees in R
+  \emph{evtree: evolutionary learning of globally optimal classification and regression trees in R}
   T. Grubinger et al. (2014)
   \url{https://www.jstatsoft.org/article/view/v061i01}
 \end{reference}
 
 \begin{reference}
-  Decision tree induction through LLMs  via semantically-aware evolution
+  \emph{Decision tree induction through LLMs  via semantically-aware evolution}
   T. Liu et al. (2025)
   \url{https://arxiv.org/abs/2503.14217}
 \end{reference}
@@ -2105,13 +2120,13 @@ not a single value, but a probability distribution (the model can provide it as 
 e.g., the parameters of a Gaussian or other distribution,
 or as samples from that distribution).
 To assess the quality of a probabilistic forecast,
-one can use proper scoring rules,
-such as the continuous ranked probability score (CRPS):
+one can use \d{proper scoring rules},
+such as the \d{continuous ranked probability score} (CRPS):
 it is the quantile (pinball) loss
 integrated from 0 to 1.
 
 \begin{reference}
-  Regions of reliability in the evaluation of multivariate probabilistic forecasts
+  \emph{Regions of reliability in the evaluation of multivariate probabilistic forecasts}
   É. Marcotte et al. (2023)
   \url{https://arxiv.org/abs/2304.09836}
 \end{reference}
@@ -2129,7 +2144,7 @@ Instead, plot the cummulative differences between (Bernoulli) responses and (sor
 the slope (between any two points) is the average calibration error for that region.
 
 \begin{reference}
-  Calibration and bias  in algorithms, data and models
+  \emph{Calibration and bias  in algorithms, data and models}
   (ICML 2025)
   \url{https://icml.cc/virtual/2025/50075}
 \end{reference}
@@ -2141,7 +2156,7 @@ The former drops first: you can use it to decide when to stop,
 and then simply re-calibrate the model.
 
 \begin{reference}
-  Rethinking early stopping: refine, then calibrate
+  \emph{Rethinking early stopping: refine, then calibrate}
   E. Berta et al. (2025)
   \url{https://arxiv.org/abs/2501.19195}
 \end{reference}
@@ -2153,13 +2168,13 @@ or, more recently, with LLMs. Alternatively, we could use reinforcement learning
 but, to allow for more exploration, it should be risk-seeking reinforcement learning.
 
 \begin{reference}
-  Deep symbolic regression:  recovering mathematical expressions from data  via risk-seeking policy gradients
+  \emph{Deep symbolic regression:  recovering mathematical expressions from data  via risk-seeking policy gradients}
   B.K. Petersen et al. (2019)
   \url{https://arxiv.org/abs/1912.04871}
 \end{reference}
 
 \begin{reference}
-  Deep symbolic regression for physics  guided by unit constraints:
+  \emph{Deep symbolic regression for physics  guided by unit constraints:}
   towards  the automated discovery of physical laws
   W. Tenach et al. (2023)
   \url{https://arxiv.org/abs/2303.03192}
@@ -2176,7 +2191,7 @@ is that it does not require a normalized density
 you can use it to fit unnormalized densities.
 
 \begin{reference}
-  Estimation of non-normalized  statistical models by score matching
+  \emph{Estimation of non-normalized  statistical models by score matching}
   A. Hyvärinen (2005)
   \url{https://jmlr.org/papers/v6/hyvarinen05a.html}
 \end{reference}
@@ -2191,7 +2206,7 @@ for which we can require non-negative and/or sparse coefficients.
 check the authors' code instead, it has a few improvements.)
 
 \begin{reference}
-  Nonnegative CCA  for audiovisual source separation
+  \emph{Nonnegative CCA  for audiovisual source separation}
   C. Sigg et al. (2014)
   \url{http://web4.cs.ucl.ac.uk/staff/d.barber/workshops/amac/sigg.pdf}
   \url{https://github.com/chrsigg/nscancor}
@@ -2200,13 +2215,13 @@ check the authors' code instead, it has a few improvements.)
 \subsection{Graphs}
 
 When your graph is too large, you may want to shrink it,
-by reducing the number of nodes (coarsening, i.e., merging nodes)
-or the number of edges (sparsification).
+by reducing the number of nodes (\d{coarsening}, i.e., merging nodes)
+or the number of edges (\d{sparsification}).
 For instance, taking the union of random spanning trees
 is a simple sparsification method.
 
 \begin{reference}
-  Spectral sparsification of graphs:  theory and algorithms
+  \emph{Spectral sparsification of graphs:  theory and algorithms}
   J. Baston et al. (2009)
   \url{http://cs-www.cs.yale.edu/homes/spielman/PAPERS/CACMsparse.pdf}
 \end{reference}
@@ -2215,10 +2230,10 @@ is a simple sparsification method.
 
 When we want a parsimonious parametrization of a large matrix,
 we often used a low-rank approximation, $A'B$.
-The FastFood parametrization approximates Gaussian matrices.
+The \d{FastFood} parametrization approximates Gaussian matrices.
 
 \begin{reference}
-  Fastfood -- approximating kernel expansions in loglinear time
+  \emph{Fastfood -- approximating kernel expansions in loglinear time}
   Q. Le et al. (2013)
   \url{https://arxiv.org/abs/1408.3060}
 \end{reference}
@@ -2227,14 +2242,14 @@ The FastFood parametrization approximates Gaussian matrices.
 
 Optimal transport and the Wasserstein distance are easy to compute in dimension one,
 but much mode expensive in higher dimensions.
-The sliced Wasserstein distance projects the data on (fixed, but random)
+The \d{sliced Wasserstein distance} projects the data on (fixed, but random)
 1-dimensional subspaces and averages the Wasserstein distances on those spaces.
 But lines are not the only 1-dimensional objects: it is also straightforward to
 compute optimal transport on trees
 e.g., built from unions on lines,
 
 \begin{reference}
-  Tree-sliced Wasserstein distance: a geometric perspective
+  \emph{Tree-sliced Wasserstein distance: a geometric perspective}
   V.H. Tran et al. (2024)
   \url{https://arxiv.org/abs/2406.13725}
 \end{reference}
@@ -2242,13 +2257,13 @@ e.g., built from unions on lines,
 or built using the data points as nodes.
 
 \begin{reference}
-  UltraTWD: optimizing ultrametric trees for tree-Wasserstein distance
+  \emph{UltraTWD: optimizing ultrametric trees for tree-Wasserstein distance}
   F. Yu et al. (2025)
   \url{https://openreview.net/forum?id=lvGmEDrIN9}
 \end{reference}
 
 \begin{reference}
-  Tree-sliced variants of Wasserstein distances
+  \emph{Tree-sliced variants of Wasserstein distances}
   T. Le et al. (2019)
   \url{https://arxiv.org/abs/1902.00342}
 \end{reference}

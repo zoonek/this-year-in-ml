@@ -19,7 +19,7 @@ Statistical tests answer the question "is there something noticeable in my data?
 More precisely, we start with a description of what we mean by "there is nothing noticeable":
 this is the null hypotheses, H₀ -- a set of probability distributions,
 for instance the set of all probability distributions on ℝ with mean zero.
-We then compute a quantity the test statistic,
+We then compute a quantity, the test statistic,
 which has a known distribution(*)
 if the data comes from one of the distributions in H₀.
 If the test statistic is above its 1-α quantile, for a predefined value of α
@@ -71,7 +71,7 @@ Those adjustments can be improved if you have the list of p-values (Holm-Bonferr
 sort the p-values (from smallest to largest),
 and adjust them as
 pₖ ← (N-k+1)pₖ
-(more previsely, pₖ ← Max{ (N-ℓ+1)p_ℓ, ℓ≤k };
+(more precisely, pₖ ← Max{ (N-ℓ+1)p_ℓ, ℓ≤k };
 the Holm-Šidák adjustment is similar).
 
 For FDR, this is trickier:
@@ -254,8 +254,8 @@ Foundational tabular data models have started to appear, in particular TabPFN
 
 Comparing those models can be problematic: each paper tends to use different benchmarks,
 the largest models may have seen some of the test data,
-and sythnetic data may present artefacts or (when based on resampling)
-may be general enough.
+and synthetic data may present artefacts or (when based on resampling)
+may not be general enough.
 
   TabArena: a living benchmark for machine learning on tabular data
   N. Erickson et al. (2025)
@@ -484,7 +484,7 @@ There are many variants of this idea.
   https://arxiv.org/abs/0910.2145
 
   Sirus: Interpretable random forests via rule extraction
-  C. B\'enard et al. (2020)
+  C. Bénard et al. (2020)
   https://arxiv.org/abs/2004.14841
 
   RIPE: Rule induction partitioning estimator: design of an interpretable prediction algorihm
@@ -1300,7 +1300,7 @@ but this is inefficient and error-prone.
   A. Jojic et al.
   https://arxiv.org/abs/2303.14310
 
-+ Causal discovery: interventional data
++ Interventional data
 
 If you have access to interventional data,
 causal discovery may be easier:
@@ -1340,8 +1340,8 @@ You may be able to get away with proxies for missing confounders, though.
 
 If in doubt, you can perform a sensitivity analysis, i.e.,
 answer the question
-``how strong should a missing confounder be to change the sign of
-E[Y|do(T=1)]?
+"how strong should a missing confounder be to change the sign of
+E[Y|do(T=1)]"?
 
   Sensitivity analyses  for unmeasured confounders
   L. D'Agostino McGowan (2022)
@@ -1431,7 +1431,7 @@ A naive way of doing so is to compute the correlation matrix between those varia
 and add an edge for all correlations above some threshold.
 But this tends to produce a dense graph:
 if variables A and B are correlated, and B and C are correlated, then
-A and C are correlated, even if they are idependent given C.
+A and C are correlated, even if they are independent given C.
 To address this problem and only keep "direct" correlations,
 we can use the partial correlation matrix instead, which tends to be sparser
 (up to sign, scale and diagonal, it is the inverse of the correlation matrix).
@@ -1530,7 +1530,7 @@ for instance, they can recover industry classifications.
   A. Gopal (2024)
   https://arxiv.org/abs/2408.01499
 
-You can also obtain such latent representations from text (news, 10K, etc.) or holding data.
+You can also obtain such latent representations from text (news, 10K, etc.) or holdings data.
 
   Text-based network industries and endogenous product differentiation
   G. Hoberg and G. Phillips (2009)
