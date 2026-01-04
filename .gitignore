@@ -1,0 +1,9 @@
+auto/
+*~
+*.aux
+*.log
+*.out
+*.pdf
+*.bak
+*.toc
+PNG/
